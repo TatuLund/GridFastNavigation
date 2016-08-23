@@ -1,10 +1,10 @@
-# MyComponent Add-on for Vaadin 7
+# GridFastNavigation Add-on for Vaadin 7
 
-MyComponent is a UI component add-on for Vaadin 7.
-
-## Online demo
-
-Try the add-on demo at <url of the online demo>
+Do you like the Grid but would want it to appeal more to old Excel jockeys?
+Then this add-on is for you!
+GridFastNavigation is a compnent extension for Vaadin Grid, which uses the
+unbuffered editing mode and alters its keyboard controls to provide a faster
+editing experience.
 
 ## Download release
 
@@ -12,9 +12,9 @@ Official releases of this add-on are available at Vaadin Directory. For Maven in
 
 ## Building and running demo
 
-git clone <url of the MyComponent repository>
+git clone https://github.com/thinwire/GridFastNavigation.git
 mvn clean install
-cd demo
+cd GridFastNavigation-demo
 mvn jetty:run
 
 To see the demo, navigate to http://localhost:8080/
@@ -25,7 +25,6 @@ For further development of this add-on, the following tool-chain is recommended:
 - Eclipse IDE
 - m2e wtp plug-in (install it from Eclipse Marketplace)
 - Vaadin Eclipse plug-in (install it from Eclipse Marketplace)
-- JRebel Eclipse plug-in (install it from Eclipse Marketplace)
 - Chrome browser
 
 ### Importing project
@@ -52,14 +51,8 @@ Debugging client side code in the GridFastNavigation-demo project:
 ## Release notes
 
 ### Version 0.1-SNAPSHOT
-- ...
-- ...
 
-## Roadmap
-
-This component is developed as a hobby with no public roadmap or any guarantees of upcoming releases. That said, the following features are planned for upcoming releases:
-- ...
-- ...
+- Initial release. Expect dragons. :)
 
 ## Issue tracking
 
@@ -79,32 +72,4 @@ Contributions are welcome, but there are no guarantees that they are accepted as
 
 Add-on is distributed under Apache License 2.0. For license terms, see LICENSE.txt.
 
-MyComponent is written by <...>
-
-# Developer Guide
-
-## Getting started
-
-Here is a simple example on how to try out the add-on component:
-
-<...>
-
-For a more comprehensive example, see src/test/java/org/vaadin/template/demo/DemoUI.java
-
-## Features
-
-### Feature A
-
-<...>
-
-### Feature B
-
-<...>
-
-### Feature C
-
-<...>
-
-## API
-
-MyComponent JavaDoc is available online at <...>
+GridFastNavigation is written by Patrik Lindström and Johannes Tuikkala and maintained by the former
