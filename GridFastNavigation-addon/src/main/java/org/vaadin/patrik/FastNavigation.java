@@ -40,7 +40,7 @@ public class FastNavigation extends AbstractExtension {
                 listener.getClass(), "rowEdited", RowEditEvent.class));
     }
 
-    public FastNavigation(Grid g) {
+    public FastNavigation(final Grid g) {
         g.setEditorBuffered(false);
         g.setEditorEnabled(true);
 
