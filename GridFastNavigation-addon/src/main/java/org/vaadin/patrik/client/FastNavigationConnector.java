@@ -104,6 +104,9 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
             @Override
             public void onKeyDown(KeyDownEvent event) {
                 switch (event.getNativeEvent().getKeyCode()) {
+                case KeyboardEvent.KeyCode.F2:
+                    grid.getEditor().editRow(getFocusedRow());
+                    break;
                 case KeyboardEvent.KeyCode.UP:
                     moveUp();
                     break;
