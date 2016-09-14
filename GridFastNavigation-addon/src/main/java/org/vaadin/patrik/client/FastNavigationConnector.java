@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import org.vaadin.patrik.FastNavigation;
 import org.vaadin.patrik.shared.FastNavigationServerRPC;
+import org.vaadin.patrik.shared.FastNavigationState;
 
 import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.core.client.Scheduler;
@@ -380,6 +381,11 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
         Map<Column<?, Object>, Widget> editorColumnToWidgetMap = getEditorColumnToWidgetMap();
         Widget widget = editorColumnToWidgetMap.get(column);
         return widget;
+    }
+    
+    @Override
+    public FastNavigationState getState() {
+        return (FastNavigationState)super.getState();
     }
 
     // ========================================================================

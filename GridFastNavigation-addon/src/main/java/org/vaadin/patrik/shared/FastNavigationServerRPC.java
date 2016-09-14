@@ -4,4 +4,6 @@ import com.vaadin.shared.communication.ServerRpc;
 
 public interface FastNavigationServerRPC extends ServerRpc {
     void rowUpdated(int rowIndex);
+
+    void cellUpdated(int rowIndex, int colIndex);
 }
