@@ -1,19 +1,30 @@
 package org.vaadin.patrik;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.vaadin.patrik.events.CellEditEvent;
+import org.vaadin.patrik.events.FocusMoveEvent;
 import org.vaadin.patrik.events.RowEditEvent;
+import org.vaadin.patrik.events.RowFocusEvent;
 import org.vaadin.patrik.shared.FastNavigationServerRPC;
 import org.vaadin.patrik.shared.FastNavigationState;
 
 import com.vaadin.server.AbstractExtension;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.util.ReflectTools;
 
 @SuppressWarnings("serial")
 public class FastNavigation extends AbstractExtension {
 
+    //
+    // Event interfaces
+    //
+    
     public interface RowEditListener {
         public void rowEdited(RowEditEvent event);
     }
@@ -22,6 +33,28 @@ public class FastNavigation extends AbstractExtension {
         public void cellEdited(CellEditEvent event);
     }
     
+    public interface FocusMoveListener {
+        public void focusMoved(FocusMoveEvent event);
+    }
+    
+    public interface RowFocusListener {
+        public void rowFocused(RowFocusEvent event);
+    }
+
+    //
+    // Actual class stuff
+    //
+    
+    // Mirror state value here to avoid unnecessary comms
+    private boolean hasRowFocusListener = false;
+    
+    // Mirror state value here to avoid unnecessary comms
+    private boolean hasCellFocusListener = false;
+
+    // Information about previously seen focused row
+    private int lastFocusedRow = 0;
+    private int lastFocusedCol = 0;
+    
     public FastNavigation(final Grid g) {
         g.setEditorBuffered(false);
         g.setEditorEnabled(true);
@@ -29,13 +62,29 @@ public class FastNavigation extends AbstractExtension {
         registerRpc(new FastNavigationServerRPC() {
             @Override
             public void rowUpdated(int rowIndex) {
-                fireRowEditedEvent(g, rowIndex);
+                _fireEvent(new RowEditEvent(g,rowIndex));
             }
             
             @Override
-            public void cellUpdated(int rowIndex, int colIndex) {
-                fireCellEditedEvent(g, rowIndex, colIndex);
+            public void cellUpdated(int rowIndex, int colIndex, String oldData, String newData) {
+                _fireEvent(new CellEditEvent(g, rowIndex, colIndex, oldData, newData));
             }
+
+            @Override
+            public void focusUpdated(int rowIndex, int colIndex) {
+                
+                if(hasRowFocusListener) {
+                    _fireEvent(new RowFocusEvent(g,rowIndex));
+                }
+                
+                if(hasCellFocusListener) {
+                    _fireEvent(new FocusMoveEvent(g, rowIndex, colIndex, lastFocusedRow == rowIndex, lastFocusedCol == colIndex));
+                    lastFocusedRow = rowIndex;
+                    lastFocusedCol = colIndex;
+                }
+                
+            }
+            
         }, FastNavigationServerRPC.class);
 
         extend(g);
@@ -52,6 +101,7 @@ public class FastNavigation extends AbstractExtension {
     
     public void setTabCapture(boolean enable) {
         getState().tabCapture = enable;
+        markAsDirty();
     }
     
     public boolean isTabCaptureEnabled() {
@@ -64,46 +114,105 @@ public class FastNavigation extends AbstractExtension {
     
     public void addEditorOpenShortcut(int code) {
         getState().openShortcuts.add(code);
+        markAsDirty();
     }
     
     public void removeEditorOpenShortcut(int code) {
         getState().openShortcuts.remove(code);
+        markAsDirty();
     }
     
     public void clearEditorOpenShortcuts() {
         getState().openShortcuts.clear();
+        markAsDirty();
+    }
+    
+    //
+    // Editor close/cancel extra shortcuts
+    //
+    
+    public void addEditorCloseShortcut(int code) {
+        getState().closeShortcuts.add(code);
+        markAsDirty();        
+    }
+    
+    public void removeEditorCloseShortcut(int code) {
+        getState().closeShortcuts.remove(code);
+        markAsDirty();        
+    }
+    
+    public void clearEditorCloseShortcut(int code) {
+        getState().closeShortcuts.clear();
+        markAsDirty();        
     }
     
     //
     // Selection events
     //
     
-    // TODO 
+    public void setSelectFocusedRow(boolean enabled) {
+        getState().selectRowOnFocus = enabled;
+        markAsDirty();
+    }
+    
+    public boolean isSelectFocusedRowEnabled() {
+        return getState().selectRowOnFocus;
+    }
     
     //
     // Event listeners
-    //   
+    //
+    
+    private final Map<Class<?>, Class<?>> eventToListenerMap = new HashMap<Class<?>,Class<?>>();
+    private final Map<Class<?>, Method> listenerToFunctionMap = new HashMap<Class<?>,Method>();
+    
+    // XXX: who designed this API?
+    private <L> void _addListener(Class<? extends Component.Event> eventClass, L listener, String functionName) {
+        Method dispatchMethod = ReflectTools.findMethod(listener.getClass(), functionName, eventClass);
+        eventToListenerMap.put(eventClass, listener.getClass());
+        listenerToFunctionMap.put(listener.getClass(), dispatchMethod);
+        addListener(eventClass,listener,dispatchMethod);
+    }
+    
+    // XXX: this is probably the hardest way to fire an event..
+    @SuppressWarnings("unchecked")
+    private <E> void _fireEvent(E event) {
+        Class<?> listenerClass = eventToListenerMap.get(event.getClass());        
+        Collection<Object> listeners = (Collection<Object>)getListeners(listenerClass);
+        Method dispatchMethod = listenerToFunctionMap.get(listenerClass);
+        
+        for(Object listener : listeners) {
+            try {
+                dispatchMethod.invoke(listener, event);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     
     public void addRowEditListener(RowEditListener listener) {
-        addListener(RowEditEvent.class, listener, ReflectTools.findMethod(
-                listener.getClass(), "rowEdited", RowEditEvent.class));
+        _addListener(RowEditEvent.class, listener, "rowEdited");
     }
     
     public void addCellEditListener(CellEditListener listener) {
-        addListener(CellEditEvent.class, listener, ReflectTools.findMethod(
-                listener.getClass(), "cellEdited", CellEditEvent.class));        
+        _addListener(CellEditEvent.class, listener, "cellEdited");
     }
     
-    private void fireCellEditedEvent(Grid grid, Integer rowIndex, Integer cellIndex) {
-        
+    public void addFocusMoveListener(FocusMoveListener listener) {
+        _addListener(FocusMoveEvent.class, listener, "focusMoved");
+        getState().hasFocusListener = true;
+        getState().hasCellFocusListener = true;
+        hasCellFocusListener = true;
     }
     
-    @SuppressWarnings("unchecked")
-    private void fireRowEditedEvent(Grid grid, Integer rowIndex) {
-        Collection<RowEditListener> listeners = (Collection<RowEditListener>) getListeners(
-                RowEditEvent.class);
-        for (RowEditListener listener : listeners) {
-            listener.rowEdited(new RowEditEvent(grid, rowIndex));
-        }
+    public void addRowFocusListener(RowFocusListener listener) {
+        _addListener(RowFocusEvent.class, listener, "rowFocused");
+        getState().hasFocusListener = true;
+        getState().hasRowFocusListener = true;
+        hasRowFocusListener = true;
     }
 }

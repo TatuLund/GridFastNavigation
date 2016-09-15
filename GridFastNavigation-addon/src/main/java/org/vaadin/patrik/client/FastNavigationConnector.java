@@ -41,24 +41,24 @@ import elemental.events.KeyboardEvent;
 @SuppressWarnings("serial")
 public class FastNavigationConnector extends AbstractExtensionConnector {
 
-    private final Logger logger = Logger.getLogger("FastNavigation");
+    private static final Logger logger = Logger.getLogger("FastNavigation");
     private static final Set<Integer> alphaNumSet = new HashSet<Integer>();
-    
+
     private Grid<Object> grid;
     private Grid.Editor<Object> editor;
     private SelectionModel<Object> gridSelectionModel;
     private FastNavigationServerRPC rpc;
     private EditorHandler handler;
     private List<Character> inputBuffer;
-    
+
     private boolean opening = false;
 
     static {
-        
+
         //
         // Store alphanumeric keycodes
         //
-        
+
         for (int i = KeyCodes.KEY_A; i <= KeyCodes.KEY_Z; i++) {
             alphaNumSet.add(i);
         }
@@ -69,7 +69,7 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
             alphaNumSet.add(i);
         }
     }
-    
+
     /**
      * Is keyCode alpha numeric key [0-9a-zA-Z]
      * 
@@ -79,7 +79,7 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
     private static boolean isAlphaNumericKey(int keyCode) {
         return alphaNumSet.contains(keyCode);
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     protected void extend(ServerConnector target) {
@@ -97,63 +97,88 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
         gridSelectionModel = grid.getSelectionModel();
 
         rpc = getRpcProxy(FastNavigationServerRPC.class);
-        logger.info("Enabled GridFastNavigation for " + grid);
     }
 
+    private void notifyFocusMoved(int row, int col, boolean rowChanged) {
+        if(!getState().hasFocusListener) return;
+        
+        FastNavigationState state = getState();
+        if((state.hasRowFocusListener && rowChanged) || state.hasCellFocusListener) {
+            getRPC().focusUpdated(row,col);
+        }
+    }
+    
+    private FastNavigationServerRPC getRPC() {
+        return getRpcProxy(FastNavigationServerRPC.class);
+    }
+    
     private KeyDownHandler createKeyDownHandler() {
         return new KeyDownHandler() {
             @Override
             public void onKeyDown(KeyDownEvent event) {
-                switch (event.getNativeEvent().getKeyCode()) {
-                case KeyboardEvent.KeyCode.F2:
-                    grid.getEditor().editRow(getFocusedRow());
-                    break;
+                int keycode = event.getNativeEvent().getKeyCode();
+                switch (keycode) {
                 case KeyboardEvent.KeyCode.UP:
                     moveUp();
                     break;
                 case KeyboardEvent.KeyCode.DOWN:
                     moveDown();
                     break;
+                default:
+                    if (getState().openShortcuts.contains(keycode)) {
+                        grid.getEditor().editRow(getFocusedRow());
+                    } else {
+                        if (alphaNumSet.contains(keycode)) {
+                            openEditor(keycode, event.isShiftKeyDown());
+                        }
+                    }
+                    break;
+
                 }
-                editImmediatelyIfAlphaNumKey(
-                        event.getNativeEvent().getKeyCode(),
-                        event.getNativeEvent().getShiftKey());
             }
         };
     }
 
-    private void editImmediatelyIfAlphaNumKey(final Integer typedKeyCode,
-            boolean shift) {
-        if (!opening && !grid.isEditorActive()
-                && isAlphaNumericKey(typedKeyCode)) {
-            opening = true;
-            inputBuffer.clear();
-            handler.setPosition(getFocusedRow(), getFocusedCol());
-            editor.editRow(getFocusedRow(), getFocusedCol());
-
-            AnimationScheduler.get().requestAnimationFrame(
-                    new AnimationScheduler.AnimationCallback() {
-                        @Override
-                        public void execute(double timestamp) {
-                            if (!isEditorReallyActive()) {
-                                AnimationScheduler.get()
-                                        .requestAnimationFrame(this);
-                            } else {
-                                handler.updateWidgetFromPosition();
-                                handler.focusCurrentInput();
-                                opening = false;
-                            }
-                        }
-                    });
+    private void openEditor(int typedKey, boolean shift) {
+        if (grid.isEditorActive()) {
+            return;
         }
+
         if (opening) {
-            char character = (char) typedKeyCode.intValue();
+            char character = (char) typedKey;
             if (!shift) {
                 inputBuffer.add(Character.toLowerCase(character));
             } else {
                 inputBuffer.add(character);
             }
+        } else {
+            opening = true;
+            inputBuffer.clear();
+            handler.setPosition(getFocusedRow(), getFocusedCol());
+            editor.editRow(getFocusedRow(), getFocusedCol());
+
+            AnimationScheduler.AnimationCallback cb = new AnimationScheduler.AnimationCallback() {
+                @Override
+                public void execute(double timestamp) {
+                    if (!isEditorReallyActive()) {
+                        
+                        //
+                        // Keep waiting for editor to become active
+                        //
+                        
+                        AnimationScheduler.get()
+                                .requestAnimationFrame(this);
+                    } else {
+                        handler.updateWidgetFromPosition();
+                        handler.focusCurrentInput();
+                        opening = false;
+                    }
+                }
+            };
+            AnimationScheduler.get().requestAnimationFrame(cb);
+                    
         }
+
     }
 
     /**
@@ -167,9 +192,11 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
 
         private int currentRowIndex = -1;
         private int currentColIndex = -1;
+        private String oldContent = null;
 
         private boolean somethingChanged = false;
 
+        
         private void setPosition(int row, int col) {
             currentRowIndex = row;
             currentColIndex = col;
@@ -180,6 +207,7 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
             int col = event.getCell().getColumnIndex();
             if (row != currentRowIndex || col != currentColIndex) {
                 setPosition(row, col);
+                getRpcProxy(FastNavigationServerRPC.class).focusUpdated(row, col);
                 updateWidgetFromPosition();
                 return true;
             }
@@ -196,12 +224,17 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
         }
 
         public void focusCurrentInput() {
-            focusInput(currentWidget);
+            focusInput();
         }
 
-        private void focusInput(Widget widget) {
+        private void focusInput() {
+            Widget widget = currentWidget;
+            
             if (widget instanceof VTextField) {
                 VTextField tf = (VTextField) widget;
+                
+                oldContent = tf.getText();
+                
                 tf.selectAll();
                 if (!inputBuffer.isEmpty()) {
                     StringBuilder sb = new StringBuilder();
@@ -224,8 +257,20 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
 
             if (widget instanceof VPopupCalendar) {
                 VPopupCalendar df = (VPopupCalendar) widget;
+                oldContent = df.text.getText();
                 df.text.selectAll();
+                
                 // TODO add change listener
+            }
+        }
+        
+        private void setWidgetContent(String content) {
+            Widget w = currentWidget;
+            if(w instanceof VTextField) {
+                ((VTextField)w).setText(content);
+            } else if(w instanceof VPopupCalendar) {
+                VPopupCalendar vp = (VPopupCalendar)w;
+                vp.text.setText(content);
             }
         }
 
@@ -233,7 +278,7 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
         protected boolean handleMoveEvent(EditorDomEvent<Object> event) {
             boolean result = super.handleMoveEvent(event);
             if (updatePosition(event)) {
-                focusInput(currentWidget);
+                focusInput();
             }
             return result;
         }
@@ -248,6 +293,8 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
 
                 result = super.handleCloseEvent(event);
             } else if (isThisEditorCancelEvent(event)) {
+                setWidgetContent(oldContent);   // XXX: this _should_ be unnecessary since we're explicitly canceling the editor
+                
                 currentRowIndex = -1;
                 currentColIndex = -1;
                 result = super.handleCloseEvent(event);
@@ -261,7 +308,19 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
 
         private boolean isThisEditorCancelEvent(EditorDomEvent<Object> event) {
             final Event e = event.getDomEvent();
-            return (isKeyPressEvent(e) && e.getKeyCode() == KEYCODE_CLOSE);
+            if(!isKeyPressEvent(e)) return false;
+            
+            int keyCode = e.getKeyCode();
+            boolean shouldClose = keyCode == KEYCODE_CLOSE;
+            if(!shouldClose) {
+                for(int key : getState().closeShortcuts) {
+                    if(key == keyCode) {
+                        return true;
+                    }
+                }
+            }
+            return shouldClose;
+            
         }
 
         /**
@@ -298,7 +357,7 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
             final Event e = event.getDomEvent();
             final int previousRowIndex = event.getRowIndex();
             if (isMousePressEvent(e)) {
-                
+
                 // Wait until the editor is moved before firing value change
                 Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                     @Override
@@ -334,7 +393,8 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
             int colIndex = event.getFocusedColumnIndex() + colDelta;
             int rowIndex = event.getRowIndex();
 
-            // Handle row change with horizontal move when column goes out of range.
+            // Handle row change with horizontal move when column goes out of
+            // range.
             if (colIndex >= columnCount
                     && rowIndex < event.getGrid().getDataSource().size() - 1) {
                 return true;
@@ -372,7 +432,7 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
             editor.editRow(row + 1);
         }
     }
-    
+
     private void fireRowChangeEvent(int rowIndex) {
         rpc.rowUpdated(rowIndex);
     }
@@ -382,10 +442,10 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
         Widget widget = editorColumnToWidgetMap.get(column);
         return widget;
     }
-    
+
     @Override
     public FastNavigationState getState() {
-        return (FastNavigationState)super.getState();
+        return (FastNavigationState) super.getState();
     }
 
     // ========================================================================

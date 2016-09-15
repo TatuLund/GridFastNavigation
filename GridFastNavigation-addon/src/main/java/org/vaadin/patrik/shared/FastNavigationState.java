@@ -1,16 +1,25 @@
 package org.vaadin.patrik.shared;
 
 import java.util.HashSet;
+import java.util.Set;
 
-import com.vaadin.shared.AbstractComponentState;
+import com.vaadin.shared.communication.SharedState;
 
 @SuppressWarnings("serial")
-public class FastNavigationState extends AbstractComponentState {
+public class FastNavigationState extends SharedState {
     
     public boolean tabCapture = false;
     
-    public boolean selectRowOnEdit = false;
+    public boolean selectRowOnFocus = false;
     
-    public HashSet<Integer> openShortcuts = new HashSet<Integer>();
+    public boolean hasFocusListener = false;
+    
+    public boolean hasRowFocusListener = false;
+    
+    public boolean hasCellFocusListener = false;
+    
+    public Set<Integer> openShortcuts = new HashSet<Integer>();
+    
+    public Set<Integer> closeShortcuts = new HashSet<Integer>();
 
 }

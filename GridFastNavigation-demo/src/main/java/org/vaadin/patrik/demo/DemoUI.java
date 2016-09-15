@@ -7,13 +7,15 @@ import java.util.Random;
 import javax.servlet.annotation.WebServlet;
 
 import org.vaadin.patrik.FastNavigation;
-import org.vaadin.patrik.FastNavigation.FastNavigationListener;
-import org.vaadin.patrik.FastNavigation.RowEditEvent;
+import org.vaadin.patrik.FastNavigation.RowEditListener;
+import org.vaadin.patrik.events.RowEditEvent;
 
+import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Container.Indexed;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Grid;
@@ -21,6 +23,7 @@ import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
+@Push
 @Theme("demo")
 @Title("GridFastNavigation Add-on Demo")
 @SuppressWarnings("serial")
@@ -54,7 +57,9 @@ public class DemoUI extends UI {
         grid.setSelectionMode(SelectionMode.NONE);
         FastNavigation nav = new FastNavigation(grid);
 
-        nav.addFastNaviagtionListener(new FastNavigationListener() {
+        
+        
+        nav.addRowEditListener(new RowEditListener() {
             @Override
             public void rowEdited(RowEditEvent event) {
                 int rowIndex = event.getRowIndex();
@@ -63,8 +68,14 @@ public class DemoUI extends UI {
                     Object itemId = ds.getIdByIndex(rowIndex);
                     printChangedRow(rowIndex, ds, itemId);
                 }
+                
             }
         });
+        
+        // Open with F2
+        nav.addEditorOpenShortcut(KeyCode.F2);
+        
+        System.out.println("enabled f2 again");
 
         grid.setSizeFull();
 
