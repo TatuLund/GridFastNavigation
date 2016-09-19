@@ -5,11 +5,14 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.vaadin.patrik.events.CellEditEvent;
+import org.vaadin.patrik.events.EditorOpenEvent;
 import org.vaadin.patrik.events.FocusMoveEvent;
 import org.vaadin.patrik.events.RowEditEvent;
 import org.vaadin.patrik.events.RowFocusEvent;
+import org.vaadin.patrik.shared.FastNavigationClientRPC;
 import org.vaadin.patrik.shared.FastNavigationServerRPC;
 import org.vaadin.patrik.shared.FastNavigationState;
 
@@ -20,6 +23,11 @@ import com.vaadin.util.ReflectTools;
 
 @SuppressWarnings("serial")
 public class FastNavigation extends AbstractExtension {
+    
+    private static Logger _logger = Logger.getLogger("FastNavigation");
+    private static Logger getLogger() {
+        return _logger;
+    }
 
     //
     // Event interfaces
@@ -41,6 +49,10 @@ public class FastNavigation extends AbstractExtension {
         public void rowFocused(RowFocusEvent event);
     }
 
+    public interface EditorOpenListener {
+        public void editorOpened(EditorOpenEvent event);
+    }
+    
     //
     // Actual class stuff
     //
@@ -72,7 +84,6 @@ public class FastNavigation extends AbstractExtension {
 
             @Override
             public void focusUpdated(int rowIndex, int colIndex) {
-                
                 if(hasRowFocusListener) {
                     _fireEvent(new RowFocusEvent(g,rowIndex));
                 }
@@ -82,12 +93,30 @@ public class FastNavigation extends AbstractExtension {
                     lastFocusedRow = rowIndex;
                     lastFocusedCol = colIndex;
                 }
+            }
+
+            @Override
+            public void editorOpened(int rowIndex, int colIndex) {
+                // NOTE: this method should only ever be called if we have editor open listeners
+                EditorOpenEvent ev = new EditorOpenEvent(g,rowIndex,colIndex); 
+                _fireEvent(ev);
+                getRPC().setDisabledColumns(ev.getDisabledColumns());
+                getRPC().unfreezeEditor();
                 
+            }
+
+            @Override
+            public void ping() {
+                getLogger().info("Received ping");
             }
             
         }, FastNavigationServerRPC.class);
 
         extend(g);
+    }
+    
+    private FastNavigationClientRPC getRPC() {
+        return getRpcProxy(FastNavigationClientRPC.class);
     }
     
     @Override
@@ -104,8 +133,28 @@ public class FastNavigation extends AbstractExtension {
         markAsDirty();
     }
     
-    public boolean isTabCaptureEnabled() {
+    public boolean getTabCapture() {
         return getState().tabCapture;
+    }
+    
+    public void setSelectTextOnEditorOpen(boolean enable) {
+        getState().selectTextOnEditorOpen = enable;
+    }
+    
+    public boolean getSelectTextOnEditorOpen() {
+        return getState().selectTextOnEditorOpen;
+    }
+    
+    //
+    // Editor opening
+    //
+    
+    public void setOpenEditorOnTyping(boolean enable) {
+        getState().openEditorOnType = enable;
+    }
+    
+    public boolean getOpenEditorOnTyping() {
+        return getState().openEditorOnType;
     }
     
     //
@@ -144,19 +193,6 @@ public class FastNavigation extends AbstractExtension {
     public void clearEditorCloseShortcut(int code) {
         getState().closeShortcuts.clear();
         markAsDirty();        
-    }
-    
-    //
-    // Selection events
-    //
-    
-    public void setSelectFocusedRow(boolean enabled) {
-        getState().selectRowOnFocus = enabled;
-        markAsDirty();
-    }
-    
-    public boolean isSelectFocusedRowEnabled() {
-        return getState().selectRowOnFocus;
     }
     
     //
@@ -214,5 +250,17 @@ public class FastNavigation extends AbstractExtension {
         getState().hasFocusListener = true;
         getState().hasRowFocusListener = true;
         hasRowFocusListener = true;
+    }
+    
+    /**
+     * Register editor open listener, which will let you control which columns should be editable
+     * on a row-by-row basis as the editor opens. Note, that adding this listener will cause the
+     * Grid to become disabled until the server has processed the event.
+     * 
+     * @param listener an EditorOpenListener instance
+     */
+    public void addEditorOpenListener(EditorOpenListener listener) {
+        _addListener(EditorOpenEvent.class, listener, "editorOpened");
+        getState().hasEditorOpenListener = true;
     }
 }

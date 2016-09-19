@@ -7,6 +7,8 @@ import com.vaadin.shared.communication.ClientRpc;
  */
 public interface FastNavigationClientRPC extends ClientRpc {
     
-    
+    void setDisabledColumns(int[] indices);
+ 
+    void unfreezeEditor();
     
 }

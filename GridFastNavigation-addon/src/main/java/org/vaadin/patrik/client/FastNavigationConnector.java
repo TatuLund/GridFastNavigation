@@ -8,11 +8,13 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.vaadin.patrik.FastNavigation;
+import org.vaadin.patrik.shared.FastNavigationClientRPC;
 import org.vaadin.patrik.shared.FastNavigationServerRPC;
 import org.vaadin.patrik.shared.FastNavigationState;
 
 import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -50,8 +52,10 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
     private FastNavigationServerRPC rpc;
     private EditorHandler handler;
     private List<Character> inputBuffer;
-
+    
+    private boolean freeze = false;
     private boolean opening = false;
+    private int[] disabledCols = new int[0];
 
     static {
 
@@ -96,6 +100,19 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
 
         gridSelectionModel = grid.getSelectionModel();
 
+        registerRpc(FastNavigationClientRPC.class, new FastNavigationClientRPC() {
+            
+            @Override
+            public void unfreezeEditor() {
+                freeze = false;
+            }
+            
+            @Override
+            public void setDisabledColumns(int[] indices) {
+                disabledCols = indices;
+            }
+        });
+        
         rpc = getRpcProxy(FastNavigationServerRPC.class);
     }
 
@@ -104,12 +121,8 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
         
         FastNavigationState state = getState();
         if((state.hasRowFocusListener && rowChanged) || state.hasCellFocusListener) {
-            getRPC().focusUpdated(row,col);
+            rpc.focusUpdated(row,col);
         }
-    }
-    
-    private FastNavigationServerRPC getRPC() {
-        return getRpcProxy(FastNavigationServerRPC.class);
     }
     
     private KeyDownHandler createKeyDownHandler() {
@@ -126,7 +139,7 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
                     break;
                 default:
                     if (getState().openShortcuts.contains(keycode)) {
-                        grid.getEditor().editRow(getFocusedRow());
+                        openEditor();
                     } else {
                         if (alphaNumSet.contains(keycode)) {
                             openEditor(keycode, event.isShiftKeyDown());
@@ -139,6 +152,70 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
         };
     }
 
+    AnimationScheduler.AnimationCallback editorOpenCallback = new AnimationScheduler.AnimationCallback() {
+        @Override
+        public void execute(double timestamp) {
+            if (!isEditorReallyActive() || freeze) {
+                
+                //
+                // Keep waiting for editor to become active
+                //
+                Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+                    @Override
+                    public boolean execute() {
+                        AnimationScheduler.get().requestAnimationFrame(editorOpenCallback);
+                        return true;
+                    }
+                }, 200); // XXX: five times per second should be fast enough to wake the server
+                
+                // Ping server and hope for a response
+                rpc.ping();
+            } else {
+                grid.setEnabled(true);
+                handler.updateWidgetFromPosition();
+                handler.focusCurrentInput();
+                opening = false;
+            }
+        }
+    };
+    
+    private void tryFreeze() {
+        if(getState().hasEditorOpenListener) {
+            freeze = true;
+            grid.setEnabled(false);
+        }
+    }
+    
+    private void openEditor() {
+        if (grid.isEditorActive()) {
+            return;
+        }
+
+        if (opening) {
+        } else {
+            tryFreeze();
+            opening = true;
+            inputBuffer.clear();
+            handler.setPosition(getFocusedRow(), getFocusedCol());
+            editor.editRow(getFocusedRow(), getFocusedCol());
+            
+            AnimationScheduler.get().requestAnimationFrame(editorOpenCallback);                            
+        }
+    }
+    
+    private void openEditor(int row) {
+        if (opening) {
+        } else {
+            tryFreeze();
+            opening = true;
+            inputBuffer.clear();
+            handler.setPosition(row, getFocusedCol());
+            editor.editRow(row, getFocusedCol());
+            
+            AnimationScheduler.get().requestAnimationFrame(editorOpenCallback);                            
+        }
+    }
+    
     private void openEditor(int typedKey, boolean shift) {
         if (grid.isEditorActive()) {
             return;
@@ -152,31 +229,12 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
                 inputBuffer.add(character);
             }
         } else {
+            tryFreeze();
             opening = true;
             inputBuffer.clear();
             handler.setPosition(getFocusedRow(), getFocusedCol());
             editor.editRow(getFocusedRow(), getFocusedCol());
-
-            AnimationScheduler.AnimationCallback cb = new AnimationScheduler.AnimationCallback() {
-                @Override
-                public void execute(double timestamp) {
-                    if (!isEditorReallyActive()) {
-                        
-                        //
-                        // Keep waiting for editor to become active
-                        //
-                        
-                        AnimationScheduler.get()
-                                .requestAnimationFrame(this);
-                    } else {
-                        handler.updateWidgetFromPosition();
-                        handler.focusCurrentInput();
-                        opening = false;
-                    }
-                }
-            };
-            AnimationScheduler.get().requestAnimationFrame(cb);
-                    
+            AnimationScheduler.get().requestAnimationFrame(editorOpenCallback);
         }
 
     }
@@ -193,9 +251,7 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
         private int currentRowIndex = -1;
         private int currentColIndex = -1;
         private String oldContent = null;
-
         private boolean somethingChanged = false;
-
         
         private void setPosition(int row, int col) {
             currentRowIndex = row;
@@ -232,10 +288,12 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
             
             if (widget instanceof VTextField) {
                 VTextField tf = (VTextField) widget;
-                
                 oldContent = tf.getText();
                 
-                tf.selectAll();
+                if(getState().selectTextOnEditorOpen) {
+                    tf.selectAll();
+                }
+                
                 if (!inputBuffer.isEmpty()) {
                     StringBuilder sb = new StringBuilder();
                     for (char i : inputBuffer) {
@@ -258,7 +316,9 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
             if (widget instanceof VPopupCalendar) {
                 VPopupCalendar df = (VPopupCalendar) widget;
                 oldContent = df.text.getText();
-                df.text.selectAll();
+                if(getState().selectTextOnEditorOpen) {
+                    df.text.selectAll();
+                }
                 
                 // TODO add change listener
             }
@@ -422,14 +482,14 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
     private void moveEditorUp() {
         int row = editor.getRow();
         if (row > 0) {
-            editor.editRow(row - 1);
+            openEditor(row - 1);
         }
     }
 
     private void moveEditorDown() {
         int row = editor.getRow();
         if (row < grid.getDataSource().size() - 1) {
-            editor.editRow(row + 1);
+            openEditor(row + 1);
         }
     }
 
@@ -478,4 +538,5 @@ public class FastNavigationConnector extends AbstractExtensionConnector {
         var ordinal = state.@com.vaadin.client.widgets.Grid.Editor.State::ordinal()();
         return ordinal == 3;
     }-*/;
+    
 }

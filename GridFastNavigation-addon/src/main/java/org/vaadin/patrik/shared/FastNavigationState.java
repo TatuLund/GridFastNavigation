@@ -10,13 +10,17 @@ public class FastNavigationState extends SharedState {
     
     public boolean tabCapture = false;
     
-    public boolean selectRowOnFocus = false;
+    public boolean openEditorOnType = true;
+    
+    public boolean selectTextOnEditorOpen = true;
     
     public boolean hasFocusListener = false;
     
     public boolean hasRowFocusListener = false;
     
     public boolean hasCellFocusListener = false;
+    
+    public boolean hasEditorOpenListener = false;
     
     public Set<Integer> openShortcuts = new HashSet<Integer>();
     
