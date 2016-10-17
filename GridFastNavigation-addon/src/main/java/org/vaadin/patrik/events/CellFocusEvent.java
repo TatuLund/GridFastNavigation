@@ -3,14 +3,14 @@ package org.vaadin.patrik.events;
 import com.vaadin.ui.Component;
 
 @SuppressWarnings("serial")
-public class FocusMoveEvent extends Component.Event {
+public class CellFocusEvent extends Component.Event {
 
     private int row;
     private int col;
     private boolean rowChanged;
     private boolean colChanged;
     
-    public FocusMoveEvent(Component source, int row, int col, boolean rowChanged, boolean colChanged) {
+    public CellFocusEvent(Component source, int row, int col, boolean rowChanged, boolean colChanged) {
         super(source);
         this.row = row;
         this.col = col;

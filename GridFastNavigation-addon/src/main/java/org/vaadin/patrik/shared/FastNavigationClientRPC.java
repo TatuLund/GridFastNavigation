@@ -1,5 +1,7 @@
 package org.vaadin.patrik.shared;
 
+import java.util.List;
+
 import com.vaadin.shared.communication.ClientRpc;
 
 /**
@@ -7,7 +9,7 @@ import com.vaadin.shared.communication.ClientRpc;
  */
 public interface FastNavigationClientRPC extends ClientRpc {
     
-    void setDisabledColumns(int[] indices);
+    void setDisabledColumns(List<Integer> indices);
  
     void unfreezeEditor();
     

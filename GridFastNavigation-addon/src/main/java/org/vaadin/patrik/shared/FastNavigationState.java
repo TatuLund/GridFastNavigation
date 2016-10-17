@@ -20,7 +20,15 @@ public class FastNavigationState extends SharedState {
     
     public boolean hasCellFocusListener = false;
     
+    public boolean hasRowEditListener = false;
+    
+    public boolean hasCellEditListener = false;
+    
     public boolean hasEditorOpenListener = false;
+    
+    public boolean hasEditorMoveListener = false;
+    
+    public boolean hasEditorCloseListener = false;
     
     public Set<Integer> openShortcuts = new HashSet<Integer>();
     
