@@ -23,8 +23,6 @@ import com.vaadin.shared.ui.Connect;
 @Connect(FastNavigation.class)
 public class GridFastNavigationConnector extends AbstractExtensionConnector {
 
-    private static final Logger logger = Logger.getLogger("GridFastNavigation");
-
     private Grid<Object> grid;
     private EditorStateManager editorManager;
     private FocusTracker focusTracker;
@@ -43,15 +41,11 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     @Override
                     public void setDisabledColumns(List<Integer> indices) {
                         editorManager.setDisabledColumns(indices);
-                        // TODO: change to INFO
-                        logger.warning("Set disabled columns to " + indices);
                     }
 
                     @Override
                     public void unfreezeEditor() {
                         editorManager.externalUnlock();
-                        // TODO: change to INFO
-                        logger.warning("Unlocking editor via RPC");
                     }
                 });
 
@@ -61,25 +55,6 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     Widget editorWidget, String keybuf, int row, int col) {
                 editorManager.clearDisabledColumns();
                 rpc.editorOpened(row, col);
-                // TODO: change to info
-                logger.warning("Sent editor open RPC");
-            }
-
-            @Override
-            public void editorMoved(Grid<Object> grid, Editor<Object> editor,
-                    int oldRow, int newRow, int oldCol, int newCol) {
-                if (newRow != oldRow) {
-                    editorManager.clearDisabledColumns();
-                    rpc.editorOpened(newRow, newCol);
-                    // TODO: change to info
-                    logger.warning(
-                            "Editor moved to new row, sent editor open event via RPC");
-                } else {
-                    editorManager.clearDisabledColumns();
-                    rpc.editorMoved(newRow, newCol, oldRow, oldCol);
-                    // TODO: change to info
-                    logger.warning("Notified of editor move via RPC");
-                }
             }
 
             @Override
@@ -87,16 +62,13 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     int row, int col, boolean cancel) {
                 editorManager.clearDisabledColumns();
                 rpc.editorClosed(row, col, cancel);
-                // TODO: change to info
-                logger.warning("Sent editor closed message via RPC");
             }
 
             @Override
             public void dataChanged(Grid<Object> grid, Editor<Object> editor,
                     Widget widget, String oldContent, String newContent,
                     int row, int col) {
-                // TODO: actually send message via RPC...
-                logger.warning("Sent data changed message via RPC");
+                rpc.cellUpdated(row, col, oldContent, newContent);
             }
         });
         
@@ -108,11 +80,19 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
             }
         });
 
+        updateCloseShortcuts();
+        updateOpenShortcuts();
         updateFocusTracking();
     }
 
+    @OnStateChange("allowArrowRowChange")
+    void updateArrowKeyBehavior() {
+        editorManager.setAllowRowChangeWithArrow(getState().allowArrowRowChange);
+    }
+    
+    @OnStateChange("allowTabRowChange")
     void updateEditorTabBehavior() {
-        /// TODO: implement
+        editorManager.setAllowTabRowChange(getState().allowTabRowChange);
     }
 
     @OnStateChange("openEditorOnType")
@@ -125,6 +105,10 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         editorManager.setWaitForExternalUnlock(getState().hasFocusListener);
     }
 
+    void updateSelectAll() {
+        editorManager.setSelectTextOnFocus(getState().selectTextOnEditorOpen);
+    }
+    
     @OnStateChange("openShortcuts")
     void updateOpenShortcuts() {
         editorManager.clearOpenShortcuts();
@@ -143,13 +127,10 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
 
     @OnStateChange({"hasFocusListener", "hasCellFocusListener", "hasRowFocusListener" })
     void updateFocusTracking() {
-        logger.warning("Focus tracking state changed");
         FastNavigationState state = getState();
         if (state.hasFocusListener || state.hasCellFocusListener || state.hasRowFocusListener) {
-            logger.warning("Focus tracking is enabled");
             focusTracker.start();
         } else {
-            logger.warning("Focus tracking is disabled");
             focusTracker.stop();
         }
     }

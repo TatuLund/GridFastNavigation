@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import org.vaadin.patrik.events.CellEditEvent;
 import org.vaadin.patrik.events.CellFocusEvent;
 import org.vaadin.patrik.events.EditorCloseEvent;
-import org.vaadin.patrik.events.EditorMoveEvent;
 import org.vaadin.patrik.events.EditorOpenEvent;
 import org.vaadin.patrik.events.EventListenerList;
 import org.vaadin.patrik.events.Listener;
@@ -63,10 +62,6 @@ public class FastNavigation extends AbstractExtension {
     
     private final EventListenerList<EditorCloseListener, EditorCloseEvent> editorCloseListeners = new EventListenerList<EditorCloseListener, EditorCloseEvent>();
 
-    public interface EditorMoveListener extends Listener<EditorMoveEvent> {
-    }
-    
-    private final EventListenerList<EditorMoveListener, EditorMoveEvent> editorMoveListeners = new EventListenerList<EditorMoveListener, EditorMoveEvent>();
 
     //
     // Actual class stuff
@@ -137,11 +132,6 @@ public class FastNavigation extends AbstractExtension {
             }
 
             @Override
-            public void editorMoved(int rowIndex, int colIndex, int lastRow, int lastCol) {
-                editorMoveListeners.dispatch(new EditorMoveEvent(g, rowIndex, colIndex, lastRow, lastCol));
-            }
-
-            @Override
             public void editorClosed(int rowIndex, int colIndex,
                     boolean wasCancelled) {
                 editorCloseListeners.dispatch(new EditorCloseEvent(g, rowIndex, colIndex, wasCancelled));
@@ -165,13 +155,12 @@ public class FastNavigation extends AbstractExtension {
     // Tab capture
     //
 
-    public void setTabCapture(boolean enable) {
-        getState().tabCapture = enable;
-        markAsDirty();
+    public void setAllowTabToChangeRow(boolean enable) {
+        getState().allowTabRowChange = enable;
     }
-
-    public boolean getTabCapture() {
-        return getState().tabCapture;
+    
+    public boolean getAllowTabToChangeRow(boolean enable) {
+        return getState().allowTabRowChange;
     }
 
     public void setSelectTextOnEditorOpen(boolean enable) {
@@ -267,12 +256,6 @@ public class FastNavigation extends AbstractExtension {
         editorOpenListeners.addListener(listener);
         
         getState().hasEditorOpenListener = true;
-    }
-    
-    public void addEditorMoveListener(EditorMoveListener listener) {
-        editorMoveListeners.addListener(listener);
-        
-        getState().hasEditorMoveListener = true;
     }
     
     public void addEditorCloseListener(EditorCloseListener listener) {

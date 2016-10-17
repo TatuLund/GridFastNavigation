@@ -7,16 +7,14 @@ import java.util.Random;
 import javax.servlet.annotation.WebServlet;
 
 import org.vaadin.patrik.FastNavigation;
-import org.vaadin.patrik.FastNavigation.EditorOpenListener;
 import org.vaadin.patrik.FastNavigation.CellFocusListener;
 import org.vaadin.patrik.FastNavigation.EditorCloseListener;
-import org.vaadin.patrik.FastNavigation.EditorMoveListener;
+import org.vaadin.patrik.FastNavigation.EditorOpenListener;
 import org.vaadin.patrik.FastNavigation.RowEditListener;
 import org.vaadin.patrik.FastNavigation.RowFocusListener;
-import org.vaadin.patrik.events.EditorOpenEvent;
 import org.vaadin.patrik.events.CellFocusEvent;
 import org.vaadin.patrik.events.EditorCloseEvent;
-import org.vaadin.patrik.events.EditorMoveEvent;
+import org.vaadin.patrik.events.EditorOpenEvent;
 import org.vaadin.patrik.events.RowEditEvent;
 import org.vaadin.patrik.events.RowFocusEvent;
 
@@ -25,7 +23,6 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Container.Indexed;
-import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.VaadinRequest;
@@ -152,20 +149,6 @@ public class DemoUI extends UI {
             }
         });
         writeOutput("Added editor open listener; we disable column (row % 8).");
-        
-        // Listening to movement of editor
-        nav.addEditorMoveListener(new EditorMoveListener() {
-            @Override
-            public void onEvent(EditorMoveEvent event) {
-                if(event.wasRowChanged()) {
-                    writeOutput("Editor moved from row " + event.getPreviousRow() + " to " + event.getRow());
-                }
-                if(event.wasColumnChanged()) {
-                    writeOutput("Editor moved from column " + event.getPreviousColumn() + " to " + event.getColumn());
-                }
-            }
-        });
-        writeOutput("Added editor move listener");
         
         // Listening to closing of editor
         nav.addEditorCloseListener(new EditorCloseListener() {

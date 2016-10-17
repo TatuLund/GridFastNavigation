@@ -10,6 +10,8 @@ public final class Keys {
     
     private static final Set<Integer> rowChangeKeys;
     
+    private static final Set<Integer> colChangeKeys;
+    
     static {
         alphaNumSet = new HashSet<Integer>();
         
@@ -28,6 +30,16 @@ public final class Keys {
         rowChangeKeys.add(KeyCodes.KEY_MAC_ENTER);
         rowChangeKeys.add(KeyCodes.KEY_UP);
         rowChangeKeys.add(KeyCodes.KEY_DOWN);
+        
+        colChangeKeys = new HashSet<Integer>();
+        colChangeKeys.add(KeyCodes.KEY_TAB);
+    }
+    
+    public static boolean isUpDownArrowKey(int keycode) {
+        if(keycode == KeyCodes.KEY_UP || keycode == KeyCodes.KEY_DOWN) {
+            return true;
+        }
+        return false;
     }
     
     /**
@@ -42,5 +54,9 @@ public final class Keys {
      */
     public static boolean isRowChangeKey(int keyCode) {
         return rowChangeKeys.contains(keyCode);
+    }
+    
+    public static boolean isColumnChangeKey(int keyCode) {
+        return colChangeKeys.contains(keyCode);
     }
 }

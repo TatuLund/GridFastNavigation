@@ -8,11 +8,13 @@ import com.vaadin.shared.communication.SharedState;
 @SuppressWarnings("serial")
 public class FastNavigationState extends SharedState {
     
-    public boolean tabCapture = false;
-    
     public boolean openEditorOnType = true;
     
     public boolean selectTextOnEditorOpen = true;
+
+    public boolean allowTabRowChange = true;
+    
+    public boolean allowArrowRowChange = true;
     
     public boolean hasFocusListener = false;
     

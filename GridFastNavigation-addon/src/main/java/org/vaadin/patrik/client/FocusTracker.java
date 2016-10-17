@@ -36,8 +36,10 @@ public class FocusTracker {
     }
 
     public void start() {
-        run = true;
-        updateLoop.execute(0);
+        if(!run) {
+            run = true;
+            updateLoop.execute(0);
+        }
     }
 
     public void stop() {
@@ -69,6 +71,9 @@ public class FocusTracker {
     private AnimationCallback updateLoop = new AnimationCallback() {
         @Override
         public void execute(double timestamp) {
+            
+            // TODO: do not update position or notify of moved focus if focus is in header/footer!
+            
             int row = GridViolators.getFocusedRow(grid);
             int col = GridViolators.getFocusedCol(grid);
 

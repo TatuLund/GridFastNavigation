@@ -17,8 +17,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -32,23 +30,19 @@ import com.vaadin.client.widgets.Grid.Column;
 import com.vaadin.client.widgets.Grid.Editor;
 import com.vaadin.client.widgets.Grid.EditorDomEvent;
 
-import elemental.events.KeyboardEvent;
-
 public class EditorStateManager {
 
     private static final Logger logger = Logger.getLogger("EditorStateManager");
 
     //
-    //
+    // Editor listener callback interface
+    // Used for communicating de-noised events back to the Connector/RPC layer
     //
 
     public interface EditorListener {
 
         void editorOpened(Grid<Object> grid, Editor<Object> editor,
                 Widget editorWidget, String keybuf, int row, int col);
-
-        void editorMoved(Grid<Object> grid, Editor<Object> editor, int oldRow,
-                int newRow, int oldCol, int newCol);
 
         void editorClosed(Grid<Object> grid, Editor<Object> editor, int row,
                 int col, boolean cancel);
@@ -58,9 +52,196 @@ public class EditorStateManager {
                 int col);
 
     }
+    
+    //
+    // Custom editor open/close/move behavior
+    //
+    
+    private class CustomEditorHandler extends DefaultEditorEventHandler<Object> {
+        
+        //
+        // Editor event handler - this receives an unfiltered event stream from the browser and
+        // needs to identify the type of incoming event - handleOpenEvent gets _all_ events, for
+        // example, and needs to return 'true' when it's actually been offered a valid open event.
+        // It then also needs to handle that event.
+        //
+
+        @Override
+        protected boolean handleOpenEvent(EditorDomEvent<Object> event) {
+            int key = event.getDomEvent().getKeyCode();
+            boolean shift = event.getDomEvent().getShiftKey();
+            boolean open = false;
+            
+            if (isOpenEvent(event)) {
+                open = true;
+            } else if(isKeyPressEvent(event)) {
+                if(openShortcuts.contains(key)) {
+                    open = true;
+                } else if(openEditorOnType) {
+                    if(Keys.isAlphaNumericKey(key)) {
+                        open = true;
+                        queueKey(key, shift);
+                    }
+                }
+            }
+            
+            if(open) {
+                final EventCellReference<?> cell = event.getCell();
+                event.getDomEvent().preventDefault();
+                openEditor(cell.getRowIndex(), cell.getColumnIndexDOM()); // TODO: IndexDOM or Index?
+            }
+            
+            return open;
+        }
+        
+        @Override
+        protected boolean handleMoveEvent(EditorDomEvent<Object> event) {
+
+            //
+            // Adapted from original Grid source
+            //
+            
+            Event e = event.getDomEvent();
+            final EventCellReference<Object> cell = event.getCell();
+            
+            if (e.getTypeInt() == Event.ONCLICK) {
+                openEditor(cell.getRowIndex(), cell.getColumnIndexDOM());
+                return true;
+            }
+            
+            if (e.getTypeInt() == Event.ONKEYDOWN) {
+
+                boolean move = false;
+                
+                final int columnCount = event.getGrid().getVisibleColumns().size();
+                final int rowCount = event.getGrid().getDataSource().size();
+                
+                boolean shift = e.getShiftKey();
+                int key = e.getKeyCode();
+                int currentCol = getFocusedCol();
+                int currentRow = getFocusedRow();
+                
+                int targetCol = currentCol;
+                int targetRow = currentRow;
+                
+                if(Keys.isColumnChangeKey(key)) {
+                    int colDelta = shift ? -1 : 1;
+                    
+                    // Remember to skip disabled columns
+                    do {
+                        targetCol += colDelta;
+                    } while(disabledColumns.contains(targetCol));
+                    
+                    // Test if we need to move up
+                    if(targetCol < 0) {
+                        if(allowTabRowChange) {
+                            targetCol = columnCount - 1;
+                            targetRow--;
+                        } else {
+                            targetCol = tabWrapping ? columnCount - 1 : 0;
+                        }
+                    }
+                    
+                    // Test if we need to move down
+                    if(targetCol >= columnCount) {
+                        if(allowTabRowChange) {
+                            targetCol = 0;
+                            targetRow++;
+                        } else {
+                            targetCol = tabWrapping ? 0 : columnCount - 1;
+                        }
+                    }
+                    
+                    move = true;
+                }
+                
+                if(Keys.isRowChangeKey(key)) {
+                    int rowDelta = shift ? -1 : 1;
+                    
+                    if(Keys.isUpDownArrowKey(key)) {
+                        rowDelta = 0;
+                        if(allowArrowRowChange) {
+                            if(key == KeyCodes.KEY_UP) {
+                                rowDelta = -1;
+                            } else if(key == KeyCodes.KEY_DOWN) {
+                                rowDelta = 1;
+                            }
+                        }
+                    }
+                    
+                    targetRow += rowDelta;
+                    
+                    // Clamp row number, assume we landed in a safe, non-disabled column
+                    if(targetRow < 0) targetRow = 0;
+                    if(targetRow >= rowCount) targetRow = rowCount - 1;
+                        
+                    move = true;
+                }
+
+                if(move) {
+                    event.getDomEvent().preventDefault();
+                    
+                    if(currentCol != targetCol || currentRow != targetRow) {
+                        openEditor(targetRow, targetCol);
+                    }
+                }
+                
+                return move;
+            }
+
+            return false;        
+        }
+
+        @Override
+        protected boolean handleCloseEvent(EditorDomEvent<Object> event) {
+            boolean close = false;
+            if (isCloseEvent(event)) {
+                close = true;
+            } else if(isKeyPressEvent(event)) {
+                int key = event.getDomEvent().getKeyCode();
+                if(closeShortcuts.contains(key)) {
+                    close = true;
+                }
+            }
+            
+            if(close) {
+                event.getDomEvent().preventDefault();
+                closeEditor(false);
+            }
+            
+            return close;
+        }
+        
+        //
+        // Helper(s) for identifying different types of events
+        //
+
+        private boolean isKeyPressEvent(EditorDomEvent<Object> event) {
+            return event.getDomEvent().getTypeInt() == Event.ONKEYDOWN;
+        }
+
+        //
+        // Value change trigger required for situations where the standard field
+        // validation routines would not necessarily kick in until we try to save
+        // the row. This is a hack, and should be considered as such.
+        //
+        // TODO: use it :E
+        //
+        
+        private void triggerValueChange(EditorDomEvent<Object> event) {
+            Widget editorWidget = event.getEditorWidget();
+            if (editorWidget != null) {
+                Element focusedElement = WidgetUtil.getFocusedElement();
+                if (editorWidget.getElement().isOrHasChild(focusedElement)) {
+                    focusedElement.blur();
+                    focusedElement.focus();
+                }
+            }
+        }
+    }
 
     //
-    //
+    // EditorStateManager
     //
 
     private Set<EditorListener> editorListeners = new LinkedHashSet<EditorListener>();
@@ -73,61 +254,29 @@ public class EditorStateManager {
     private List<Character> keybuf = new ArrayList<Character>();
     private Set<Integer> openShortcuts = new LinkedHashSet<Integer>();
     private Set<Integer> closeShortcuts = new LinkedHashSet<Integer>();
-
     private Set<Integer> disabledColumns = new HashSet<Integer>();
 
     private boolean shouldWaitForExternal = false;
     private boolean waitingForExternal = false;
     private boolean waitingForEditorOpen = false;
 
-    private boolean waitingForEditorClosed = false;
     private boolean wasEditorCanceled = false;
     
     private boolean openEditorOnType = true;
-    private boolean tabCapture = false;
+    private boolean allowTabRowChange = true;
+    private boolean allowArrowRowChange = true;
+    private boolean selectTextOnFocus = true;
+    private boolean tabWrapping = true;
     
     @SuppressWarnings("unchecked")
     public EditorStateManager(Grid<?> g) {
         
         grid = ((Grid<Object>) g);
         editor = grid.getEditor();
+        editor.setEventHandler(new CustomEditorHandler());
         
-        // Add editor state tracker
-        editorTracker = new EditorTracker(editor);
-        editorTracker.addListener(new Listener() {
-            @Override
-            public void editorOpened(int row, int col) {
-                notifyEditorOpened(getCurrentEditorWidget(), flushKeys(), row, col);
-            }
-
-            @Override
-            public void editorClosed(int row, int col) {
-                notifyEditorClosed(row, col, wasEditorCanceled);
-            }
-
-            @Override
-            public void editorMoved(int row, int col, int oldrow, int oldcol) {
-                notifyEditorMoved(row, col, oldrow, oldcol);
-            }
-        });
-        
-        // Add Grid navigation handling hook
-        grid.addDomHandler(new KeyDownHandler() {
-            @Override
-            public void onKeyDown(KeyDownEvent event) {
-                int keycode = event.getNativeEvent().getKeyCode();
-                switch (keycode) {
-                case KeyboardEvent.KeyCode.UP:
-                    moveEditorUp();
-                    break;
-                case KeyboardEvent.KeyCode.DOWN:
-                    moveEditorDown();
-                    break;
-                }
-            }
-        }, KeyDownEvent.getType());
-
-        // Create super modality curtain
+        // Create modality curtain
+        // TODO: make this minimally obtrusive - constant movement is likely to cause flicker
         curtain = Document.get().createDivElement();
         curtain.getStyle().setBackgroundColor("#777");
         curtain.getStyle().setOpacity(0.5);
@@ -150,17 +299,47 @@ public class EditorStateManager {
             }
         });
         
+        // Add editor state tracker
+        editorTracker = new EditorTracker(editor);
+        editorTracker.addListener(new Listener() {
+            @Override
+            public void editorOpened(int row, int col) {
+                notifyEditorOpened(getCurrentEditorWidget(), flushKeys(), row, col);
+            }
+
+            @Override
+            public void editorClosed(int row, int col) {
+                notifyEditorClosed(row, col, wasEditorCanceled);
+            }
+
+            @Override
+            public void editorMoved(int row, int col, int oldrow, int oldcol) {
+                // Only notify of row changes
+                if(row != oldrow) {
+                    notifyEditorClosed(oldrow,oldcol,false);
+                    notifyEditorOpened(getCurrentEditorWidget(), flushKeys(), row, col);
+                }
+            }
+        });
+        editorTracker.start();
+ 
+        //
         // Actively run the unlock routine
-        ///////////////////////////////////////////////////////////////
+        // This code is supposed to place the event-swallowing curtain of doom
+        // on top of the Grid to prevent people from entering data into fields
+        // while the server could still be busy figuring out if they should be
+        // allowed to do so.
+        //
+        
         final AnimationCallback locker = new AnimationCallback() {
             @Override
             public void execute(double timestamp) {
-                
-                /*
-                if(isBusy()) {
-                    lock();
-                } else {
-                    unlock();
+                if(grid.isEditorActive()) {
+                    if(isBusy()) {
+                        lock();
+                    } else {
+                        unlock();
+                    }
                 }
                 
                 if(waitingForEditorOpen) {
@@ -168,24 +347,17 @@ public class EditorStateManager {
 
                     if(open) {
                         waitingForEditorOpen = false;
+                        if(selectTextOnFocus) {
+                            EditorWidgets.selectAll(getCurrentEditorWidget());
+                        }
+                        EditorWidgets.focus(getCurrentEditorWidget());
                     }
                 }
-                
-                if(waitingForEditorClosed) {
-                    boolean closed = GridViolators.isEditorReallyClosed(editor);
-                    
-                    if(closed) {
-                        waitingForEditorClosed = false;
-                    }
-                }
-                */
                 
                 AnimationScheduler.get().requestAnimationFrame(this);
             }
         };
         AnimationScheduler.get().requestAnimationFrame(locker);
-        
-        editorTracker.start();
     }
 
     private void waitForEditorOpen() {
@@ -195,193 +367,7 @@ public class EditorStateManager {
         }
     }
 
-    private void waitForEditorClosed() {
-        waitingForEditorClosed = true;
-    }
-
-    @SuppressWarnings("unused")
-    private class EditorHandler extends DefaultEditorEventHandler<Object> {
-
-        @Override
-        protected boolean handleOpenEvent(EditorDomEvent<Object> event) {
-            int key = event.getDomEvent().getKeyCode();
-            boolean shift = event.getDomEvent().getShiftKey();
-            if (isOpenEvent(event) || isKeyPressEvent(event)) {
-                
-                if(!openShortcuts.contains(key) || !openEditorOnType && Keys.isAlphaNumericKey(key)) {
-                    return false;
-                }
-                
-                if(openEditorOnType && Keys.isAlphaNumericKey(key)) {
-                    queueKey(key, shift);
-                }
-                
-                final EventCellReference<?> cell = event.getCell();
-                event.getDomEvent().preventDefault();
-
-                editRow(event, cell.getRowIndex(), cell.getColumnIndexDOM());
-
-                return true;
-            }
-            return false;
-        }
-        
-        @Override
-        protected boolean handleMoveEvent(EditorDomEvent<Object> event) {
-            
-            //
-            // NOTE: copied verbatim from DefaultEditorEventHandler
-            // We take full responsibility of moving or not moving the editor
-            // based on disabled columns.
-            //
-            
-            Event e = event.getDomEvent();
-            final EventCellReference<Object> cell = event.getCell();
-
-            // TODO: Move on touch events
-            if (e.getTypeInt() == Event.ONCLICK) {
-
-                editRow(event, cell.getRowIndex(), cell.getColumnIndexDOM());
-
-                return true;
-            }
-
-            else if (e.getTypeInt() == Event.ONKEYDOWN) {
-
-                int rowDelta = 0;
-                int colDelta = 0;
-
-                if (e.getKeyCode() == KEYCODE_MOVE_VERTICAL) {
-                    rowDelta = (e.getShiftKey() ? -1 : +1);
-                } else if (e.getKeyCode() == KEYCODE_MOVE_HORIZONTAL) {
-                    colDelta = (e.getShiftKey() ? -1 : +1);
-                    // Prevent tab out of Grid Editor
-                    event.getDomEvent().preventDefault();
-                }
-
-                final boolean changed = rowDelta != 0 || colDelta != 0;
-
-                if (changed) {
-
-                    int columnCount = event.getGrid().getVisibleColumns().size();
-
-                    int colIndex = event.getFocusedColumnIndex() + colDelta;
-                    int rowIndex = event.getRowIndex() + rowDelta;
-
-                    // Skip disabled columns
-                    while(disabledColumns.contains(colIndex)) {
-                        colIndex += colDelta;
-                    }
-                    
-                    // Handle tab movement logic
-                    // TODO: have tab wrap around on the same row
-                    if(colIndex >= columnCount) {
-                        rowIndex++;
-                        colIndex = 0;
-                    } else if(colIndex < 0) {
-                        rowIndex--;
-                        colIndex = columnCount - 1;
-                    }
-                    
-                    int sz = event.getGrid().getDataSource().size();
-                    if(rowIndex < 0) rowIndex = 0;
-                    if(rowIndex >= sz) rowIndex = sz - 1;
-
-                    editRow(event, rowIndex, colIndex);
-                }
-
-                return changed;
-            }
-
-            return false;
-        }
-
-        @Override
-        protected boolean handleCloseEvent(EditorDomEvent<Object> event) {
-            if (isCloseEvent(event)) {
-                event.getEditor().cancel();
-                FocusUtil.setFocus(event.getGrid(), true);
-                return true;
-            }
-            return false;
-        }
-
-        private boolean isCancelEvent(EditorDomEvent<Object> event) {
-            if (isKeyPressEvent(event)) {
-                for (int k : closeShortcuts) {
-                    if (event.getDomEvent().getKeyCode() == k) {
-                        wasEditorCanceled = true;
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        private boolean isRowChangeEvent(EditorDomEvent<Object> event) {
-            boolean result = false;
-
-            // Check if row was changed with keyboard
-            if (true) {
-                final Event e = event.getDomEvent();
-                result = isKeyPressEvent(event) && 
-                         (wasRowChangedWithTab(event) || 
-                         Keys.isRowChangeKey(event.getDomEvent().getKeyCode()));
-            }
-
-            // Check if row was changed with mouse
-            if (result == false) {
-
-            }
-
-            return result;
-        }
-
-        private boolean wasRowChangedWithTab(EditorDomEvent<Object> event) {
-            if (event.getDomEvent().getKeyCode() == KeyCodes.KEY_TAB) {
-
-                boolean shift = event.getDomEvent().getShiftKey();
-                int colDelta = (shift ? -1 : +1);
-                int columnCount = event.getGrid().getVisibleColumns().size();
-                int colIndex = event.getFocusedColumnIndex() + colDelta;
-                int rowIndex = event.getRowIndex();
-
-                // Skip disabled columns
-                while (disabledColumns.contains(colIndex)) {
-                    colIndex += colDelta;
-                }
-
-                // Handle row change with horizontal move when column goes out
-                // of range.
-                if ((colIndex >= columnCount
-                        && rowIndex < event.getGrid().getDataSource().size()
-                                - 1)
-                        || (colIndex < 0 && rowIndex > 0)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private boolean isKeyPressEvent(EditorDomEvent<Object> event) {
-            return event.getDomEvent().getTypeInt() == Event.ONKEYDOWN;
-        }
-
-        private boolean isMousePressEvent(EditorDomEvent<Object> event) {
-            return event.getDomEvent().getTypeInt() == Event.ONMOUSEDOWN;
-        }
-
-        private void triggerValueChange(EditorDomEvent<Object> event) {
-            Widget editorWidget = event.getEditorWidget();
-            if (editorWidget != null) {
-                Element focusedElement = WidgetUtil.getFocusedElement();
-                if (editorWidget.getElement().isOrHasChild(focusedElement)) {
-                    focusedElement.blur();
-                    focusedElement.focus();
-                }
-            }
-        }
-    }
+   
 
     //
     // Shortcuts
@@ -418,19 +404,13 @@ public class EditorStateManager {
         }
     }
 
-    private void notifyEditorMoved(int row, int col, int oldRow,
-            int oldCol) {
-        for (EditorListener l : editorListeners) {
-            l.editorMoved(grid, editor, oldRow, row, oldCol, col);
-        }
-    }
-
     private void notifyEditorClosed(int row, int col, boolean cancel) {
         for (EditorListener l : editorListeners) {
             l.editorClosed(grid, editor, row, col, cancel);
         }
     }
 
+    // TODO: send notifications of changed data!
     private void notifyDataChanged(String oldContent, String newContent,
             int row, int col) {
         for (EditorListener l : editorListeners) {
@@ -451,6 +431,8 @@ public class EditorStateManager {
         shouldWaitForExternal = enable;
     }
 
+    // Set internal wait for external state to false. This releases the lock on
+    // the grid.
     public void externalUnlock() {
         waitingForExternal = false;
     }
@@ -465,7 +447,7 @@ public class EditorStateManager {
 
     public void addDisabledColumn(int col) {
         disabledColumns.add(col);
-        if(editorTracker.isEditorOpen()) {
+        if(grid.isEditorActive()) {
             EditorWidgets.disable(getEditorWidgetForColumn(col));
         }
     }
@@ -474,68 +456,63 @@ public class EditorStateManager {
         disabledColumns.clear();
     }
 
-    //
-    // Request editor open/close
-    //
-
+    // If set to true, text is selected when editor is opened
+    public void setSelectTextOnFocus(boolean enable) {
+        selectTextOnFocus = enable;
+    }
+    
+    // If set to true, you can use the arrow keys to move the editor up and down
+    public void setAllowRowChangeWithArrow(boolean enable) {
+        allowArrowRowChange = enable;
+    }
+    
+    // If set to true, tabbing outside the edge of the current row will wrap the
+    // focus around and switch to the next/previous row. If false, tabbing will
+    // wrap around the current row.
+    public void setAllowTabRowChange(boolean enable) {
+        allowTabRowChange = enable;
+    }
+    
+    // If set to true (default), tabbing past the end of the row will wrap back
+    // to the first item in the row. If false, tabbing forward when at the last
+    // cell or back when at the first cell has no effect.
+    // This only has an effect if allowTabRowChange is false.
+    public void setTabWrapping(boolean enable) {
+        tabWrapping = enable;
+    }
+    
+    // If set to true (default), focusing a Grid cell and then pressing an alpha-
+    // numeric key will open the editor. If false, the editor must be activated
+    // by double clicking or pressing ENTER or a custom editor opening shortcut key
     public void setOpenEditorByTyping(boolean enable) {
         openEditorOnType = enable;
     }
 
-    public void openEditor() {
-        openEditor(getFocusedRow(), getFocusedCol());
-    }
-
+    // Request opening the editor. This function should be used internally instead
+    // of the direct editor.editRow() calls.
     public void openEditor(int row, int col) {
-        if (isBusy())
-            return;
-
-        boolean moved = false;
-        int oldRow = getFocusedRow();
-        int oldCol = getFocusedCol();
-
-        // Try to open editor again
-        if (grid.isEditorActive()) {
-            editor.save();
-            moved = true;
+        if(grid.isEditorActive()) {
+            editor.editRow(row,col);
+            if(selectTextOnFocus) {
+                EditorWidgets.selectAll(getCurrentEditorWidget());
+            }
+        } else {
+            editor.editRow(row,col);
+            waitForEditorOpen();
         }
-
-        // Request editor to open itself
-        editor.editRow(row, col);
-
-        if (moved) {
-            notifyEditorMoved(oldRow, row, oldCol, col);
-        }
-
-        // Lock editor UI and wait for the timer to release it
-        waitForEditorOpen();
     }
 
+    // Request closing the editor. This function should be used internally instead
+    // of the direct editor.save() or editor.cancel() calls.
     public void closeEditor(boolean cancel) {
         if (cancel) {
             editor.cancel();
         } else {
             editor.save();
         }
-        waitForEditorClosed();
-    }
-
-    public void moveEditorUp() {
-        if (grid.isEditorActive()) {
-            int row = editor.getRow();
-            if (row > 0) {
-                openEditor(row - 1, getFocusedCol());
-            }
-        }
-    }
-
-    public void moveEditorDown() {
-        if (grid.isEditorActive()) {
-            int row = editor.getRow();
-            if (row < grid.getDataSource().size() - 1) {
-                openEditor(row + 1, getFocusedCol());
-            }
-        }
+        
+        notifyEditorClosed(getFocusedRow(), getFocusedCol(), cancel);
+        FocusUtil.setFocus(grid, true);
     }
 
     //
@@ -544,7 +521,7 @@ public class EditorStateManager {
 
     public boolean isBusy() {
         boolean busy = (shouldWaitForExternal && waitingForExternal)
-                || waitingForEditorOpen || waitingForEditorClosed;
+                || waitingForEditorOpen;
         if(busy) {
             logger.warning(
                     "We're busy: waiting for open=" + 
@@ -552,20 +529,18 @@ public class EditorStateManager {
                     ", should wait for external=" + 
                     shouldWaitForExternal + 
                     ", waiting for external=" +
-                    waitingForExternal +
-                    ", waiting for closed=" +
-                    waitingForEditorClosed);
+                    waitingForExternal);
         }
         return busy;
     }
 
+    // Apply the input-blocking curtain
     private void lock() {
-        logger.warning("Locking grid");
         grid.getElement().appendChild(curtain);
     }
 
+    // Remove the input-blocking curtain
     private void unlock() {
-        logger.warning("Unlocking grid");
         try {
             grid.getElement().removeChild(curtain);
         } catch (Exception ignore) {

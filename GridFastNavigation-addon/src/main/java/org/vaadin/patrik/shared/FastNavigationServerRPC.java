@@ -16,8 +16,6 @@ public interface FastNavigationServerRPC extends ServerRpc {
     
     void editorOpened(int rowIndex, int colIndex);
     
-    void editorMoved(int rowIndex, int colIndex, int lastRow, int lastCol);
-    
     void editorClosed(int rowIndex, int colIndex, boolean wasCancelled);
     
     void ping();

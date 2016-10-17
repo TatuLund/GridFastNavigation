@@ -22,6 +22,8 @@ public class EditorWidgets {
         
         void setValue(T widget, String value);
         
+        void focus(T widget);
+        
         void enable(T widget);
         
         void disable(T widget);
@@ -66,15 +68,22 @@ public class EditorWidgets {
             public void setValue(VTextField widget, String value) {
                 widget.setValue(value);
             }
+            
+            public void focus(VTextField widget) {
+                widget.getElement().blur();
+                widget.getElement().focus();
+            }
 
             @Override
             public void enable(VTextField widget) {
                 widget.setEnabled(true);
+                widget.setReadOnly(false);
             }
 
             @Override
             public void disable(VTextField widget) {
                 widget.setEnabled(false);
+                widget.setReadOnly(true);
             }
         });
         
@@ -93,16 +102,28 @@ public class EditorWidgets {
             public void setValue(VPopupCalendar widget, String value) {
                 widget.text.setValue(value);
             }
+            
+            @Override
+            public void focus(VPopupCalendar widget) {
+                // Only perform blur/focus refocusing if calendar popup is not visible
+                if(!widget.calendar.isAttached()) {
+                    widget.getElement().blur();
+                    widget.getElement().focus();
+                }
+            }
 
             @Override
             public void enable(VPopupCalendar widget) {
                 widget.setEnabled(true);
+                widget.setReadonly(false);
             }
 
             @Override
             public void disable(VPopupCalendar widget) {
                 widget.setEnabled(false);
+                widget.setReadonly(true);
             }
+
         });
         
         // TODO: support more widget types!
@@ -145,6 +166,14 @@ public class EditorWidgets {
             ((WidgetHandler<T>)handler).setValue(widget, value);
             triggerValueChange(widget);
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <T extends Widget> void focus(T widget) {
+        WidgetHandler<?> handler = getHandler(widget.getClass());
+        if(handler != null) {
+            ((WidgetHandler<T>)handler).focus(widget);
+        }        
     }
     
     @SuppressWarnings("unchecked")
