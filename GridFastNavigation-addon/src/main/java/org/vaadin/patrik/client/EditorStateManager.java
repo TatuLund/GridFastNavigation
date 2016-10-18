@@ -54,6 +54,25 @@ public class EditorStateManager {
     }
     
     //
+    // Class for keeping track of the state of a single editor widget
+    // TODO: figure out what to do for fields that fail validation
+    //
+    
+    class EditorWidgetState {
+        Widget w;
+        String value;
+        
+        EditorWidgetState() {
+            w = getCurrentEditorWidget();
+            value = EditorWidgets.getValue(w);
+        }
+        
+        void restore() {
+            EditorWidgets.setValue(w, value);
+        }
+    }
+    
+    //
     // Custom editor open/close/move behavior
     //
     
@@ -160,7 +179,7 @@ public class EditorStateManager {
                     
                     if(Keys.isUpDownArrowKey(key)) {
                         rowDelta = 0;
-                        if(allowArrowRowChange) {
+                        if(allowArrowRowChange && EditorWidgets.isUpDownNavAllowed(getCurrentEditorWidget())) {
                             if(key == KeyCodes.KEY_UP) {
                                 rowDelta = -1;
                             } else if(key == KeyCodes.KEY_DOWN) {
@@ -182,6 +201,7 @@ public class EditorStateManager {
                     event.getDomEvent().preventDefault();
                     
                     if(currentCol != targetCol || currentRow != targetRow) {
+                        triggerValueChange(event);
                         openEditor(targetRow, targetCol);
                     }
                 }
@@ -194,6 +214,12 @@ public class EditorStateManager {
 
         @Override
         protected boolean handleCloseEvent(EditorDomEvent<Object> event) {
+            
+            //
+            // This is actually the explicit _CANCEL_ of the editor. 
+            // TODO: We might actually want to add additional explicit _SAVE_ shortcuts
+            //
+            
             boolean close = false;
             if (isCloseEvent(event)) {
                 close = true;
@@ -206,7 +232,7 @@ public class EditorStateManager {
             
             if(close) {
                 event.getDomEvent().preventDefault();
-                closeEditor(false);
+                closeEditor(true);
             }
             
             return close;
@@ -225,9 +251,6 @@ public class EditorStateManager {
         // validation routines would not necessarily kick in until we try to save
         // the row. This is a hack, and should be considered as such.
         //
-        // TODO: use it :E
-        //
-        
         private void triggerValueChange(EditorDomEvent<Object> event) {
             Widget editorWidget = event.getEditorWidget();
             if (editorWidget != null) {
@@ -251,6 +274,8 @@ public class EditorStateManager {
     private Grid.Editor<Object> editor;
     private EditorTracker editorTracker;
 
+    private EditorWidgetState currentWidgetState;
+    
     private List<Character> keybuf = new ArrayList<Character>();
     private Set<Integer> openShortcuts = new LinkedHashSet<Integer>();
     private Set<Integer> closeShortcuts = new LinkedHashSet<Integer>();
@@ -291,20 +316,35 @@ public class EditorStateManager {
         DOM.setEventListener(curtain, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                if (isBusy() && (event.getTypeInt() & Event.ONKEYDOWN) > 0) {
+                if ((event.getTypeInt() & Event.ONKEYDOWN) > 0) {
                     queueKey(event.getKeyCode(), event.getShiftKey());
                 }
                 event.stopPropagation();
                 event.preventDefault();
             }
         });
+
+        // TODO: fix listening for keyboard while locked
         
         // Add editor state tracker
         editorTracker = new EditorTracker(editor);
         editorTracker.addListener(new Listener() {
             @Override
             public void editorOpened(int row, int col) {
-                notifyEditorOpened(getCurrentEditorWidget(), flushKeys(), row, col);
+                String buf = flushKeys();
+                notifyEditorOpened(getCurrentEditorWidget(), buf, row, col);
+                applyEditorFocus();
+                
+                currentWidgetState = new EditorWidgetState();
+                
+                if(!buf.isEmpty()) {
+                    Widget w = getCurrentEditorWidget();
+                    if(selectTextOnFocus) {
+                        EditorWidgets.setValue(w, buf);
+                    } else {
+                        EditorWidgets.setValue(w, EditorWidgets.getValue(w) + buf);
+                    }
+                }
             }
 
             @Override
@@ -314,10 +354,15 @@ public class EditorStateManager {
 
             @Override
             public void editorMoved(int row, int col, int oldrow, int oldcol) {
+                // Reapply focus
+                applyEditorFocus();
+                
+                currentWidgetState = new EditorWidgetState();
+                
                 // Only notify of row changes
                 if(row != oldrow) {
                     notifyEditorClosed(oldrow,oldcol,false);
-                    notifyEditorOpened(getCurrentEditorWidget(), flushKeys(), row, col);
+                    notifyEditorOpened(getCurrentEditorWidget(), "", row, col);
                 }
             }
         });
@@ -332,25 +377,28 @@ public class EditorStateManager {
         //
         
         final AnimationCallback locker = new AnimationCallback() {
+            
+            private boolean wasOpen = false;
+            
             @Override
             public void execute(double timestamp) {
                 if(grid.isEditorActive()) {
                     if(isBusy()) {
                         lock();
+                        wasOpen = false;
                     } else {
                         unlock();
+                        if(!wasOpen) {
+                            applyEditorOpenState();
+                        }
+                        wasOpen = true;
                     }
                 }
                 
                 if(waitingForEditorOpen) {
                     boolean open = GridViolators.isEditorReallyActive(editor);
-
                     if(open) {
                         waitingForEditorOpen = false;
-                        if(selectTextOnFocus) {
-                            EditorWidgets.selectAll(getCurrentEditorWidget());
-                        }
-                        EditorWidgets.focus(getCurrentEditorWidget());
                     }
                 }
                 
@@ -367,7 +415,30 @@ public class EditorStateManager {
         }
     }
 
-   
+    private void applyEditorOpenState() {
+        final AnimationCallback fn = new AnimationCallback() {
+            @Override
+            public void execute(double timestamp) {
+                for(int i = 0, l = grid.getDataSource().size(); i < l; ++i) {
+                    EditorWidgets.enable(getEditorWidgetForColumn(i));
+                }
+                for (int column : disabledColumns) {
+                    EditorWidgets.disable(getEditorWidgetForColumn(column));
+                }
+                
+                applyEditorFocus();
+            }
+        };
+        AnimationScheduler.get().requestAnimationFrame(fn);
+    }
+    
+    private void applyEditorFocus() {
+        if(selectTextOnFocus) {
+            EditorWidgets.selectAll(getCurrentEditorWidget());
+        }
+
+        EditorWidgets.focus(getCurrentEditorWidget());
+    }
 
     //
     // Shortcuts
@@ -441,14 +512,9 @@ public class EditorStateManager {
         disabledColumns.clear();
         for (int col : cols) {
             disabledColumns.add(col);
-            EditorWidgets.disable(getEditorWidgetForColumn(col));
         }
-    }
-
-    public void addDisabledColumn(int col) {
-        disabledColumns.add(col);
         if(grid.isEditorActive()) {
-            EditorWidgets.disable(getEditorWidgetForColumn(col));
+            applyEditorOpenState();
         }
     }
 
@@ -492,10 +558,7 @@ public class EditorStateManager {
     // of the direct editor.editRow() calls.
     public void openEditor(int row, int col) {
         if(grid.isEditorActive()) {
-            editor.editRow(row,col);
-            if(selectTextOnFocus) {
-                EditorWidgets.selectAll(getCurrentEditorWidget());
-            }
+            editor.editRow(row,col);            
         } else {
             editor.editRow(row,col);
             waitForEditorOpen();
@@ -505,13 +568,21 @@ public class EditorStateManager {
     // Request closing the editor. This function should be used internally instead
     // of the direct editor.save() or editor.cancel() calls.
     public void closeEditor(boolean cancel) {
+        
+        int row = getFocusedRow();
+        int col = getFocusedCol();
+        
         if (cancel) {
+            if(currentWidgetState != null) {
+                currentWidgetState.restore();
+            }
             editor.cancel();
         } else {
             editor.save();
         }
-        
-        notifyEditorClosed(getFocusedRow(), getFocusedCol(), cancel);
+
+        currentWidgetState = null;
+        notifyEditorClosed(row, col, cancel);
         FocusUtil.setFocus(grid, true);
     }
 
@@ -555,8 +626,11 @@ public class EditorStateManager {
     private void queueKey(int sym, boolean shift) {
         if (Keys.isAlphaNumericKey(sym)) {
             char keychar = (char) sym;
-            if (shift)
+            if (shift) {
                 keychar = Character.toUpperCase(keychar);
+            } else { 
+                keychar = Character.toLowerCase(keychar);
+            }
             keybuf.add(keychar);
         }
     }

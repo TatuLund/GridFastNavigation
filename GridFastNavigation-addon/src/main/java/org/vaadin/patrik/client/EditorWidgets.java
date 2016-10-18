@@ -28,6 +28,7 @@ public class EditorWidgets {
         
         void disable(T widget);
         
+        boolean isUpDownNavAllowed(T widget);
     }
     
     private static final Map<Class<?>, WidgetHandler<?>> widgetHandlers;
@@ -56,7 +57,9 @@ public class EditorWidgets {
         registerHandler(VTextField.class, new WidgetHandler<VTextField>() {
             @Override
             public void selectAll(VTextField widget) {
-                widget.selectAll();
+                if(widget.isEnabled()) {
+                    widget.selectAll();
+                }
             }
 
             @Override
@@ -70,8 +73,10 @@ public class EditorWidgets {
             }
             
             public void focus(VTextField widget) {
-                widget.getElement().blur();
-                widget.getElement().focus();
+                if(widget.isReadOnly()) {
+                    widget.getElement().blur();
+                    widget.getElement().focus();
+                }
             }
 
             @Override
@@ -85,12 +90,19 @@ public class EditorWidgets {
                 widget.setEnabled(false);
                 widget.setReadOnly(true);
             }
+
+            @Override
+            public boolean isUpDownNavAllowed(VTextField widget) {
+                return true;
+            }
         });
         
         registerHandler(VPopupCalendar.class, new WidgetHandler<VPopupCalendar>() {
             @Override
             public void selectAll(VPopupCalendar widget) {
-                widget.text.selectAll();
+                if(widget.isEnabled()) {
+                    widget.text.selectAll();
+                }
             }
 
             @Override
@@ -106,7 +118,7 @@ public class EditorWidgets {
             @Override
             public void focus(VPopupCalendar widget) {
                 // Only perform blur/focus refocusing if calendar popup is not visible
-                if(!widget.calendar.isAttached()) {
+                if(widget.isEnabled() && !widget.calendar.isAttached()) {
                     widget.getElement().blur();
                     widget.getElement().focus();
                 }
@@ -122,6 +134,11 @@ public class EditorWidgets {
             public void disable(VPopupCalendar widget) {
                 widget.setEnabled(false);
                 widget.setReadonly(true);
+            }
+
+            @Override
+            public boolean isUpDownNavAllowed(VPopupCalendar widget) {
+                return false;
             }
 
         });
@@ -190,5 +207,14 @@ public class EditorWidgets {
         if(handler != null) {
             ((WidgetHandler<T>)handler).disable(widget);
         }   
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <T extends Widget> boolean isUpDownNavAllowed(T widget) {
+        WidgetHandler<?> handler = getHandler(widget.getClass());
+        if(handler != null) {
+            return ((WidgetHandler<T>)handler).isUpDownNavAllowed(widget);
+        }
+        return true;
     }
 }

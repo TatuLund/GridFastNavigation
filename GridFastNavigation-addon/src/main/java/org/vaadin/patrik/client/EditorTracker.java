@@ -140,7 +140,6 @@ public class EditorTracker {
                 wasOpen = true;
                 wasClosed = false;
             } else if (!wasClosed && closed) {
-                //notifyEditorClosed();
                 wasClosed = true;
                 wasOpen = false;
             } else if (wasOpen && open) {
