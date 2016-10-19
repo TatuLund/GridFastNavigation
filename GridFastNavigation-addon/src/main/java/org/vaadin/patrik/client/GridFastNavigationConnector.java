@@ -104,6 +104,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         editorManager.setWaitForExternalUnlock(getState().hasFocusListener);
     }
 
+    @OnStateChange("selectTextOnEditorOpen")
     void updateSelectAll() {
         editorManager.setSelectTextOnFocus(getState().selectTextOnEditorOpen);
     }
