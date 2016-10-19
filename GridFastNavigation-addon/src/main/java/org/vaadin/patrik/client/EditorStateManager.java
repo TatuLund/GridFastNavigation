@@ -6,17 +6,18 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
-import org.vaadin.patrik.client.EditorTracker.Listener;
+import org.vaadin.patrik.client.SpinLock.Callback;
+import org.vaadin.patrik.client.SpinLock.LockFunction;
 
-import com.google.gwt.animation.client.AnimationScheduler;
-import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -31,8 +32,6 @@ import com.vaadin.client.widgets.Grid.Editor;
 import com.vaadin.client.widgets.Grid.EditorDomEvent;
 
 public class EditorStateManager {
-
-    private static final Logger logger = Logger.getLogger("EditorStateManager");
 
     //
     // Editor listener callback interface
@@ -52,36 +51,7 @@ public class EditorStateManager {
                 int col);
 
     }
-    
-    //
-    // Class for keeping track of the state of a single editor widget
-    // TODO: figure out what to do for fields that fail validation
-    //
-    
-    class EditorWidgetState {
-        Widget w;
-        String value;
-        
-        EditorWidgetState() {
-            w = getCurrentEditorWidget();
-            try {
-                value = EditorWidgets.getValue(w);
-            } catch(Exception ignore) {
-                value = null;
-            }
-        }
-        
-        void restore() {
-            if(value != null) {
-                try {
-                    EditorWidgets.setValue(w, value);
-                } catch(Exception ignore) {
-                    
-                }
-            }
-        }
-    }
-    
+
     //
     // Custom editor open/close/move behavior
     //
@@ -289,9 +259,6 @@ public class EditorStateManager {
     private Element curtain;
     private Grid<Object> grid;
     private Grid.Editor<Object> editor;
-    private EditorTracker editorTracker;
-    
-    private EditorWidgetState currentWidgetState;
     
     private List<Character> keybuf = new ArrayList<Character>();
     private Set<Integer> openShortcuts = new LinkedHashSet<Integer>();
@@ -320,8 +287,9 @@ public class EditorStateManager {
         // Create modality curtain
         // TODO: make this minimally obtrusive - constant movement is likely to cause flicker
         curtain = Document.get().createDivElement();
+        curtain.setClassName("v-grid-editor-curtain");
         curtain.getStyle().setBackgroundColor("#777");
-        curtain.getStyle().setOpacity(0.5);
+        curtain.getStyle().setOpacity(0);
         curtain.getStyle().setWidth(100, Unit.PCT);
         curtain.getStyle().setHeight(100, Unit.PCT);
         curtain.getStyle().setPosition(Position.ABSOLUTE);
@@ -341,98 +309,20 @@ public class EditorStateManager {
             }
         });
 
-        // TODO: fix listening for keyboard while locked
-        
-        // Add editor state tracker
-        editorTracker = new EditorTracker(editor);
-        editorTracker.addListener(new Listener() {
+        grid.addDomHandler(new KeyDownHandler() {
             @Override
-            public void editorMoved(int row, int col, int oldrow, int oldcol) {
-                // Reapply focus
-                applyEditorFocus();
-                currentWidgetState = new EditorWidgetState();
-            }
-        });
-        editorTracker.start();
- 
-        //
-        // Actively run the unlock routine
-        // This code is supposed to place the event-swallowing curtain of doom
-        // on top of the Grid to prevent people from entering data into fields
-        // while the server could still be busy figuring out if they should be
-        // allowed to do so.
-        //
-        
-        final AnimationCallback locker = new AnimationCallback() {
-            
-            // Apply the input-blocking curtain
-            private void lock() {
-                grid.getElement().appendChild(curtain);
-            }
-
-            // Remove the input-blocking curtain
-            private void unlock() {
-                try {
-                    grid.getElement().removeChild(curtain);
-                } catch (Exception ignore) {
-                    /* ignored */
-                }
-            }
-            
-            private boolean wasOpen = false;
-
-            @Override
-            public void execute(double timestamp) {
-
-                //
-                // XXX: re-think this entire logic, it's the first-year-of-CS type of horrible
-                //
-                
-                boolean opened = wasOpen;
-                
-                if(grid.isEditorActive()) {
-                    if(isBusy()) {
-                        lock();
-                        wasOpen = false;
-                    } else {
-                        unlock();
-                        if(!wasOpen) {
-                            applyEditorOpenState();
-                        }
-                        wasOpen = true;
-                    }
-                } else {
-                    wasOpen = false;
-                }
-                
-                if(waitingForEditorOpen) {
-                    boolean open = GridViolators.isEditorReallyActive(editor);
-                    if(open) {
-                        waitingForEditorOpen = false;
-                    }
-                }
-                
-                // XXX: the naming of these vars is illogical - they actually mean their opposites :<
-                if(opened == false && wasOpen == true) {
-                    // We've just been unlocked!
-                    applyEditorFocus();
+            public void onKeyDown(KeyDownEvent event) {
+                if(isBusy()) {
+                    NativeEvent e = event.getNativeEvent();
+                    queueKey(e.getKeyCode(), e.getShiftKey());
                     
-                    currentWidgetState = new EditorWidgetState();
-                    String buf = flushKeys();
-                    if(!buf.isEmpty()) {
-                        Widget w = getCurrentEditorWidget();
-                        if(selectTextOnFocus) {
-                            EditorWidgets.setValue(w, buf);
-                        } else {
-                            EditorWidgets.setValue(w, EditorWidgets.getValue(w) + buf);
-                        }
-                    }
+                    event.stopPropagation();
+                    event.preventDefault();
                 }
-                
-                AnimationScheduler.get().requestAnimationFrame(this);
             }
-        };
-        AnimationScheduler.get().requestAnimationFrame(locker);
+        }, KeyDownEvent.getType());
+        
+        // TODO: fix listening for keyboard while locked
     }
     
     private boolean isBusy() {
@@ -441,63 +331,95 @@ public class EditorStateManager {
         return busy;
     }
 
-    private void waitForEditorOpen() {
-        waitingForEditorOpen = true;
+    // Apply the input-blocking curtain
+    private void lock() {
+        grid.getElement().appendChild(curtain);
     }
 
-    private void applyEditorOpenState() {
-        final AnimationCallback fn = new AnimationCallback() {
-            @Override
-            public void execute(double timestamp) {
-                
-                if(!GridViolators.isEditorReallyActive(editor)) {
-                    AnimationScheduler.get().requestAnimationFrame(this);
-                    return;
-                }
-                
-                for(int i = 0, l = grid.getDataSource().size(); i < l; ++i) {
-                    try {
-                        EditorWidgets.enable(getEditorWidgetForColumn(i));
-                    } catch(Exception ingore) {
-                    }
-                }
-                for (int column : disabledColumns) {
-                    try {
-                        EditorWidgets.disable(getEditorWidgetForColumn(column));
-                    } catch(Exception ingore) {
-                    }
-                }
-                
-                applyEditorFocus();
-            }
-        };
-        AnimationScheduler.get().requestAnimationFrame(fn);
+    // Remove the input-blocking curtain
+    private void unlock() {
+        try {
+            grid.getElement().removeChild(curtain);
+        } catch (Exception ignore) {
+            /* ignored */
+        }
     }
     
-    private void applyEditorFocus() {
-        final AnimationCallback fn = new AnimationCallback() {
+    //
+    // Spinlocks
+    //
+    
+    private void waitForEditorOpen() {
+        SpinLock.lock(new LockFunction() {
             @Override
-            public void execute(double timestamp) {
-                if(!GridViolators.isEditorReallyActive(editor)) {
-                    AnimationScheduler.get().requestAnimationFrame(this);
-                    return;
-                }
-                
-                if(selectTextOnFocus) {
-                    try {
-                        EditorWidgets.selectAll(getCurrentEditorWidget());
-                    } catch(Exception ingore) {
-                    }
-                }
-                try {
-                    EditorWidgets.focus(getCurrentEditorWidget());
-                } catch(Exception ingore) {
-                }
-                
+            public boolean execute() {
+                return (useExternalLocking && externalLocks.isLocked()) || !GridViolators.isEditorReallyActive(editor);
             }
-        };
-        AnimationScheduler.get().requestAnimationFrame(fn);
+        }, new Callback() {
+            
+            @Override
+            public void complete() {
+            
+                unlock();
+                
+                // Reset all editor widgets to enabled
+                for(int i = 0, l = grid.getVisibleColumns().size(); i < l; ++i) {
+                    EditorWidgets.enable(getEditorWidgetForColumn(i));
+                }
+                
+                Widget editorWidget = getCurrentEditorWidget();
+
+                // Handle possible value reset of editor widget
+                String buf = flushKeys();
+                if(!buf.trim().isEmpty()) {
+                    if(selectTextOnFocus) {
+                        EditorWidgets.setValue(editorWidget, buf);
+                    } else {
+                        EditorWidgets.setValue(editorWidget, EditorWidgets.getValue(editorWidget) + buf);
+                    }
+                    
+                } else {
+                    // Select text if desired
+                    if(selectTextOnFocus) {
+                        EditorWidgets.selectAll(editorWidget);
+                    }
+                    
+                }
+                
+                // Then disable the ones that should be disabled
+                for (int column : disabledColumns) {
+                    EditorWidgets.disable(getEditorWidgetForColumn(column));
+                }
+                
+                // Make sure editor widget is in focus
+                EditorWidgets.focus(editorWidget);
+            }
+        });
+        lock();
     }
+
+    private void waitForEditorReady() {
+        SpinLock.lock(new LockFunction() {
+            @Override
+            public boolean execute() {
+                return !GridViolators.isEditorReallyActive(editor);
+            }
+        }, new Callback() {
+            @Override
+            public void complete() {
+                
+                unlock();
+                
+                Widget editorWidget = getCurrentEditorWidget();
+                if(selectTextOnFocus) {
+                    EditorWidgets.selectAll(editorWidget);
+                }
+                EditorWidgets.focus(editorWidget);
+            }
+        });
+        lock();
+    }
+    
 
     //
     // Shortcuts
@@ -574,7 +496,40 @@ public class EditorStateManager {
     }
 
     public void setDisabledColumns(List<Integer> cols) {
-        // Clear all disabled columns
+        
+        // Reset disabled column state
+        clearDisabledColumns();
+        
+        // Add specified extra disabled columns
+        for (int col : cols) {
+            disabledColumns.add(col);
+        }
+        
+        if(!GridViolators.isEditorReallyClosed(editor)) {
+            SpinLock.lock(new LockFunction() {
+                @Override
+                public boolean execute() {
+                    return !GridViolators.isEditorReallyActive(editor);
+                }
+            }, new Callback() {
+                @Override
+                public void complete() {
+                    // Reset all editor widgets to enabled
+                    for(int i = 0, l = grid.getVisibleColumns().size(); i < l; ++i) {
+                        EditorWidgets.enable(getEditorWidgetForColumn(i));
+                    }
+                    
+                    // Then disable the ones that should be disabled
+                    for (int column : disabledColumns) {
+                        EditorWidgets.disable(getEditorWidgetForColumn(column));
+                    }
+                }
+            });
+        }
+    }
+    
+    public void clearDisabledColumns() {
+     // Clear all disabled columns
         disabledColumns.clear();
         
         // Add currently non-editable columns
@@ -585,20 +540,6 @@ public class EditorStateManager {
             }
             ++i;
         }
-        
-        // Add specified extra disabled columns
-        for (int col : cols) {
-            disabledColumns.add(col);
-        }
-        
-        // Apply state if editor is already open
-        if(grid.isEditorActive()) {
-            applyEditorOpenState();
-        }
-    }
-
-    public void clearDisabledColumns() {
-        disabledColumns.clear();
     }
 
     // If set to true, text is selected when editor is opened
@@ -636,41 +577,37 @@ public class EditorStateManager {
     // Request opening the editor. This function should be used internally instead
     // of the direct editor.editRow() calls.
     public void openEditor(int row, int col) {
-        if(grid.isEditorActive()) {
-            
-            int oldRow = getFocusedRow();
-            editor.editRow(row,col);
-            
-            if(oldRow != row) {
-                notifyEditorClosed(oldRow, col, false);
-                notifyEditorOpened(row,col);
-                waitForEditorOpen();
-            }
-            
-        } else {
+        if(GridViolators.isEditorReallyClosed(editor)) {
             editor.editRow(row,col);
             notifyEditorOpened(row,col);
             waitForEditorOpen();
+        } else {
+            int oldRow = getFocusedRow();
+
+            if(oldRow != row) {
+                notifyEditorClosed(oldRow, col, false);
+                editor.editRow(row,col);
+                notifyEditorOpened(row,col);
+                waitForEditorOpen();
+            } else {
+                editor.editRow(row,col);
+                waitForEditorReady();
+            }
         }
     }
 
     // Request closing the editor. This function should be used internally instead
     // of the direct editor.save() or editor.cancel() calls.
     public void closeEditor(boolean cancel) {
-        
         int row = getFocusedRow();
         int col = getFocusedCol();
         
         if (cancel) {
-            if(currentWidgetState != null) {
-                currentWidgetState.restore();
-            }
             editor.cancel();
         } else {
             editor.save();
         }
 
-        currentWidgetState = null;
         notifyEditorClosed(row, col, cancel);
         FocusUtil.setFocus(grid, true);
     }
