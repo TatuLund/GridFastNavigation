@@ -53,21 +53,27 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
             public void editorOpened(Grid<Object> grid, Editor<Object> editor,
                     int row, int col, int lockId) {
                 editorManager.clearDisabledColumns();
-                rpc.editorOpened(row, col, lockId);
+                if(getState().hasEditorOpenListener) {
+                    rpc.editorOpened(row, col, lockId);
+                }
             }
 
             @Override
             public void editorClosed(Grid<Object> grid, Editor<Object> editor,
                     int row, int col, boolean cancel) {
                 editorManager.clearDisabledColumns();
-                rpc.editorClosed(row, col, cancel);
+                if(getState().hasEditorCloseListener) {
+                    rpc.editorClosed(row, col, cancel);
+                }
             }
 
             @Override
             public void dataChanged(Grid<Object> grid, Editor<Object> editor,
                     Widget widget, String oldContent, String newContent,
                     int row, int col) {
-                rpc.cellUpdated(row, col, oldContent, newContent);
+                if(getState().hasCellEditListener) {
+                    rpc.cellUpdated(row, col, oldContent, newContent);
+                }
             }
         });
         
@@ -75,7 +81,9 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
             @Override
             public void focusMoved(int currentRow, int currentCol, int lastRow,
                     int lastCol) {
-                rpc.focusUpdated(currentRow, currentCol);
+                if(getState().hasCellFocusListener) {
+                    rpc.focusUpdated(currentRow, currentCol);
+                }
             }
         });
 
