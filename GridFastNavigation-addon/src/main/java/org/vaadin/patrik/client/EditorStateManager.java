@@ -64,11 +64,21 @@ public class EditorStateManager {
         
         EditorWidgetState() {
             w = getCurrentEditorWidget();
-            value = EditorWidgets.getValue(w);
+            try {
+                value = EditorWidgets.getValue(w);
+            } catch(Exception ignore) {
+                value = null;
+            }
         }
         
         void restore() {
-            EditorWidgets.setValue(w, value);
+            if(value != null) {
+                try {
+                    EditorWidgets.setValue(w, value);
+                } catch(Exception ignore) {
+                    
+                }
+            }
         }
     }
     
@@ -87,6 +97,9 @@ public class EditorStateManager {
 
         @Override
         protected boolean handleOpenEvent(EditorDomEvent<Object> event) {
+            
+            if(isBusy()) return false;
+            
             int key = event.getDomEvent().getKeyCode();
             boolean shift = event.getDomEvent().getShiftKey();
             boolean open = false;
@@ -116,6 +129,8 @@ public class EditorStateManager {
         @Override
         protected boolean handleMoveEvent(EditorDomEvent<Object> event) {
 
+            if(isBusy()) return false;
+            
             //
             // Adapted from original Grid source
             //
@@ -214,6 +229,8 @@ public class EditorStateManager {
 
         @Override
         protected boolean handleCloseEvent(EditorDomEvent<Object> event) {
+            
+            if(isBusy()) return false;
             
             //
             // This is actually the explicit _CANCEL_ of the editor. 
@@ -348,21 +365,6 @@ public class EditorStateManager {
         
         final AnimationCallback locker = new AnimationCallback() {
             
-            private boolean isBusy() {
-                boolean busy = (useExternalLocking && externalLocks.isLocked())
-                        || waitingForEditorOpen;
-                if(busy) {
-                    logger.warning(
-                            "We're busy: waiting for open=" + 
-                            waitingForEditorOpen + 
-                            ", should wait for external=" + 
-                            useExternalLocking + 
-                            ", waiting for external=" +
-                            externalLocks.isLocked());
-                }
-                return busy;
-            }
-
             // Apply the input-blocking curtain
             private void lock() {
                 grid.getElement().appendChild(curtain);
@@ -432,6 +434,12 @@ public class EditorStateManager {
         };
         AnimationScheduler.get().requestAnimationFrame(locker);
     }
+    
+    private boolean isBusy() {
+        boolean busy = (useExternalLocking && externalLocks.isLocked())
+                || waitingForEditorOpen;
+        return busy;
+    }
 
     private void waitForEditorOpen() {
         waitingForEditorOpen = true;
@@ -441,11 +449,23 @@ public class EditorStateManager {
         final AnimationCallback fn = new AnimationCallback() {
             @Override
             public void execute(double timestamp) {
+                
+                if(!GridViolators.isEditorReallyActive(editor)) {
+                    AnimationScheduler.get().requestAnimationFrame(this);
+                    return;
+                }
+                
                 for(int i = 0, l = grid.getDataSource().size(); i < l; ++i) {
-                    EditorWidgets.enable(getEditorWidgetForColumn(i));
+                    try {
+                        EditorWidgets.enable(getEditorWidgetForColumn(i));
+                    } catch(Exception ingore) {
+                    }
                 }
                 for (int column : disabledColumns) {
-                    EditorWidgets.disable(getEditorWidgetForColumn(column));
+                    try {
+                        EditorWidgets.disable(getEditorWidgetForColumn(column));
+                    } catch(Exception ingore) {
+                    }
                 }
                 
                 applyEditorFocus();
@@ -455,11 +475,28 @@ public class EditorStateManager {
     }
     
     private void applyEditorFocus() {
-        if(selectTextOnFocus) {
-            EditorWidgets.selectAll(getCurrentEditorWidget());
-        }
-
-        EditorWidgets.focus(getCurrentEditorWidget());
+        final AnimationCallback fn = new AnimationCallback() {
+            @Override
+            public void execute(double timestamp) {
+                if(!GridViolators.isEditorReallyActive(editor)) {
+                    AnimationScheduler.get().requestAnimationFrame(this);
+                    return;
+                }
+                
+                if(selectTextOnFocus) {
+                    try {
+                        EditorWidgets.selectAll(getCurrentEditorWidget());
+                    } catch(Exception ingore) {
+                    }
+                }
+                try {
+                    EditorWidgets.focus(getCurrentEditorWidget());
+                } catch(Exception ingore) {
+                }
+                
+            }
+        };
+        AnimationScheduler.get().requestAnimationFrame(fn);
     }
 
     //
