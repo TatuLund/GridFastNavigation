@@ -159,7 +159,7 @@ public class FastNavigation extends AbstractExtension {
         getState().allowTabRowChange = enable;
     }
     
-    public boolean getAllowTabToChangeRow(boolean enable) {
+    public boolean getAllowTabToChangeRow() {
         return getState().allowTabRowChange;
     }
 
@@ -170,7 +170,15 @@ public class FastNavigation extends AbstractExtension {
     public boolean getSelectTextOnEditorOpen() {
         return getState().selectTextOnEditorOpen;
     }
-
+    
+    public void setAllowArrowToChangeRow(boolean enable) {
+        getState().allowArrowRowChange = enable;
+    }
+    
+    public boolean getAllowArrowToChangeRow() {
+        return getState().allowArrowRowChange;
+    }
+    
     //
     // Editor opening
     //
