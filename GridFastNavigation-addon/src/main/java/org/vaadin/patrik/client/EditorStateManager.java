@@ -42,7 +42,7 @@ public class EditorStateManager {
     public interface EditorListener {
 
         void editorOpened(Grid<Object> grid, Editor<Object> editor,
-                Widget editorWidget, String keybuf, int row, int col);
+                int row, int col, int lockId);
 
         void editorClosed(Grid<Object> grid, Editor<Object> editor, int row,
                 int col, boolean cancel);
@@ -273,7 +273,7 @@ public class EditorStateManager {
     private Grid<Object> grid;
     private Grid.Editor<Object> editor;
     private EditorTracker editorTracker;
-
+    
     private EditorWidgetState currentWidgetState;
     
     private List<Character> keybuf = new ArrayList<Character>();
@@ -281,11 +281,9 @@ public class EditorStateManager {
     private Set<Integer> closeShortcuts = new LinkedHashSet<Integer>();
     private Set<Integer> disabledColumns = new HashSet<Integer>();
 
-    private boolean shouldWaitForExternal = false;
-    private boolean waitingForExternal = false;
+    private RPCLock externalLocks;
     private boolean waitingForEditorOpen = false;
-
-    private boolean wasEditorCanceled = false;
+    private boolean useExternalLocking = false;
     
     private boolean openEditorOnType = true;
     private boolean allowTabRowChange = true;
@@ -299,6 +297,8 @@ public class EditorStateManager {
         grid = ((Grid<Object>) g);
         editor = grid.getEditor();
         editor.setEventHandler(new CustomEditorHandler());
+        
+        externalLocks = new RPCLock();
         
         // Create modality curtain
         // TODO: make this minimally obtrusive - constant movement is likely to cause flicker
@@ -330,40 +330,10 @@ public class EditorStateManager {
         editorTracker = new EditorTracker(editor);
         editorTracker.addListener(new Listener() {
             @Override
-            public void editorOpened(int row, int col) {
-                String buf = flushKeys();
-                notifyEditorOpened(getCurrentEditorWidget(), buf, row, col);
-                applyEditorFocus();
-                
-                currentWidgetState = new EditorWidgetState();
-                
-                if(!buf.isEmpty()) {
-                    Widget w = getCurrentEditorWidget();
-                    if(selectTextOnFocus) {
-                        EditorWidgets.setValue(w, buf);
-                    } else {
-                        EditorWidgets.setValue(w, EditorWidgets.getValue(w) + buf);
-                    }
-                }
-            }
-
-            @Override
-            public void editorClosed(int row, int col) {
-                notifyEditorClosed(row, col, wasEditorCanceled);
-            }
-
-            @Override
             public void editorMoved(int row, int col, int oldrow, int oldcol) {
                 // Reapply focus
                 applyEditorFocus();
-                
                 currentWidgetState = new EditorWidgetState();
-                
-                // Only notify of row changes
-                if(row != oldrow) {
-                    notifyEditorClosed(oldrow,oldcol,false);
-                    notifyEditorOpened(getCurrentEditorWidget(), "", row, col);
-                }
             }
         });
         editorTracker.start();
@@ -378,10 +348,46 @@ public class EditorStateManager {
         
         final AnimationCallback locker = new AnimationCallback() {
             
-            private boolean wasOpen = false;
+            private boolean isBusy() {
+                boolean busy = (useExternalLocking && externalLocks.isLocked())
+                        || waitingForEditorOpen;
+                if(busy) {
+                    logger.warning(
+                            "We're busy: waiting for open=" + 
+                            waitingForEditorOpen + 
+                            ", should wait for external=" + 
+                            useExternalLocking + 
+                            ", waiting for external=" +
+                            externalLocks.isLocked());
+                }
+                return busy;
+            }
+
+            // Apply the input-blocking curtain
+            private void lock() {
+                grid.getElement().appendChild(curtain);
+            }
+
+            // Remove the input-blocking curtain
+            private void unlock() {
+                try {
+                    grid.getElement().removeChild(curtain);
+                } catch (Exception ignore) {
+                    /* ignored */
+                }
+            }
             
+            private boolean wasOpen = false;
+
             @Override
             public void execute(double timestamp) {
+
+                //
+                // XXX: re-think this entire logic, it's the first-year-of-CS type of horrible
+                //
+                
+                boolean opened = wasOpen;
+                
                 if(grid.isEditorActive()) {
                     if(isBusy()) {
                         lock();
@@ -393,12 +399,31 @@ public class EditorStateManager {
                         }
                         wasOpen = true;
                     }
+                } else {
+                    wasOpen = false;
                 }
                 
                 if(waitingForEditorOpen) {
                     boolean open = GridViolators.isEditorReallyActive(editor);
                     if(open) {
                         waitingForEditorOpen = false;
+                    }
+                }
+                
+                // XXX: the naming of these vars is illogical - they actually mean their opposites :<
+                if(opened == false && wasOpen == true) {
+                    // We've just been unlocked!
+                    applyEditorFocus();
+                    
+                    currentWidgetState = new EditorWidgetState();
+                    String buf = flushKeys();
+                    if(!buf.isEmpty()) {
+                        Widget w = getCurrentEditorWidget();
+                        if(selectTextOnFocus) {
+                            EditorWidgets.setValue(w, buf);
+                        } else {
+                            EditorWidgets.setValue(w, EditorWidgets.getValue(w) + buf);
+                        }
                     }
                 }
                 
@@ -410,9 +435,6 @@ public class EditorStateManager {
 
     private void waitForEditorOpen() {
         waitingForEditorOpen = true;
-        if (shouldWaitForExternal) {
-            waitingForExternal = true;
-        }
     }
 
     private void applyEditorOpenState() {
@@ -468,10 +490,13 @@ public class EditorStateManager {
         editorListeners.add(listener);
     }
 
-    private void notifyEditorOpened(Widget editorWidget, String keybuf, int row,
-            int col) {
+    private void notifyEditorOpened(int row, int col) {
+        int lock = 0;
+        if(useExternalLocking) {
+            lock = externalLocks.requestLock();
+        }
         for (EditorListener l : editorListeners) {
-            l.editorOpened(grid, editor, editorWidget, keybuf, row, col);
+            l.editorOpened(grid, editor, row, col, lock);
         }
     }
 
@@ -482,13 +507,13 @@ public class EditorStateManager {
     }
 
     // TODO: send notifications of changed data!
-    private void notifyDataChanged(String oldContent, String newContent,
-            int row, int col) {
-        for (EditorListener l : editorListeners) {
-            l.dataChanged(grid, editor, getCurrentEditorWidget(), oldContent,
-                    newContent, row, col);
-        }
-    }
+//    private void notifyDataChanged(String oldContent, String newContent,
+//            int row, int col) {
+//        for (EditorListener l : editorListeners) {
+//            l.dataChanged(grid, editor, getCurrentEditorWidget(), oldContent,
+//                    newContent, row, col);
+//        }
+//    }
 
     //
     // State
@@ -499,20 +524,37 @@ public class EditorStateManager {
     }
 
     public void setWaitForExternalUnlock(boolean enable) {
-        shouldWaitForExternal = enable;
+        useExternalLocking = enable;
+        if(!enable) {
+            externalLocks.clearLocks();
+        }
     }
 
     // Set internal wait for external state to false. This releases the lock on
     // the grid.
-    public void externalUnlock() {
-        waitingForExternal = false;
+    public void externalUnlock(int lockId) {
+        externalLocks.releaseLock(lockId);
     }
 
     public void setDisabledColumns(List<Integer> cols) {
+        // Clear all disabled columns
         disabledColumns.clear();
+        
+        // Add currently non-editable columns
+        int i = 0;
+        for(Column<?, Object> c : grid.getVisibleColumns()) {
+            if(!c.isEditable()) {
+                disabledColumns.add(i);
+            }
+            ++i;
+        }
+        
+        // Add specified extra disabled columns
         for (int col : cols) {
             disabledColumns.add(col);
         }
+        
+        // Apply state if editor is already open
         if(grid.isEditorActive()) {
             applyEditorOpenState();
         }
@@ -558,9 +600,19 @@ public class EditorStateManager {
     // of the direct editor.editRow() calls.
     public void openEditor(int row, int col) {
         if(grid.isEditorActive()) {
-            editor.editRow(row,col);            
+            
+            int oldRow = getFocusedRow();
+            editor.editRow(row,col);
+            
+            if(oldRow != row) {
+                notifyEditorClosed(oldRow, col, false);
+                notifyEditorOpened(row,col);
+                waitForEditorOpen();
+            }
+            
         } else {
             editor.editRow(row,col);
+            notifyEditorOpened(row,col);
             waitForEditorOpen();
         }
     }
@@ -584,39 +636,6 @@ public class EditorStateManager {
         currentWidgetState = null;
         notifyEditorClosed(row, col, cancel);
         FocusUtil.setFocus(grid, true);
-    }
-
-    //
-    // Lock/Unlock/Busy
-    //
-
-    public boolean isBusy() {
-        boolean busy = (shouldWaitForExternal && waitingForExternal)
-                || waitingForEditorOpen;
-        if(busy) {
-            logger.warning(
-                    "We're busy: waiting for open=" + 
-                    waitingForEditorOpen + 
-                    ", should wait for external=" + 
-                    shouldWaitForExternal + 
-                    ", waiting for external=" +
-                    waitingForExternal);
-        }
-        return busy;
-    }
-
-    // Apply the input-blocking curtain
-    private void lock() {
-        grid.getElement().appendChild(curtain);
-    }
-
-    // Remove the input-blocking curtain
-    private void unlock() {
-        try {
-            grid.getElement().removeChild(curtain);
-        } catch (Exception ignore) {
-            /* ignored */
-        }
     }
 
     //

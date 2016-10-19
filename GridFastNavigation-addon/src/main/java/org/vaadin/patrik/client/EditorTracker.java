@@ -11,10 +11,6 @@ public class EditorTracker {
 
     interface Listener {
 
-        void editorOpened(int row, int col);
-
-        void editorClosed(int row, int col);
-
         void editorMoved(int row, int col, int oldrow, int oldcol);
 
     }
@@ -60,18 +56,6 @@ public class EditorTracker {
         listeners.clear();
     }
     
-    private void notifyEditorClosed() {
-        for (Listener l : listeners) {
-            l.editorClosed(currentRow, currentCol);
-        }
-    }
-
-    private void notifyEditorOpen() {
-        for (Listener l : listeners) {
-            l.editorOpened(currentRow, currentCol);
-        }
-    }
-
     private void notifyEditorMoved() {
         for (Listener l : listeners) {
             l.editorMoved(currentRow, currentCol, lastRow, lastCol);
@@ -136,7 +120,6 @@ public class EditorTracker {
 
             if (!wasOpen && open) {
                 updatePosition(row, col);
-                notifyEditorOpen();
                 wasOpen = true;
                 wasClosed = false;
             } else if (!wasClosed && closed) {

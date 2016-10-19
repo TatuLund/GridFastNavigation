@@ -11,6 +11,6 @@ public interface FastNavigationClientRPC extends ClientRpc {
     
     void setDisabledColumns(List<Integer> indices);
  
-    void unfreezeEditor();
+    void unlockEditor(int lockId);
     
 }

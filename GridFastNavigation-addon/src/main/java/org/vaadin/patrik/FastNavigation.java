@@ -112,7 +112,7 @@ public class FastNavigation extends AbstractExtension {
             }
 
             @Override
-            public void editorOpened(int rowIndex, int colIndex) {
+            public void editorOpened(int rowIndex, int colIndex, int lockId) {
                 EditorOpenEvent ev = new EditorOpenEvent(g, rowIndex, colIndex);
                 editorOpenListeners.dispatch(ev);
                 int[] disabled = ev.getDisabledColumns();
@@ -123,7 +123,7 @@ public class FastNavigation extends AbstractExtension {
                     }
                     getRPC().setDisabledColumns(disabledColumns);
                 }
-                getRPC().unfreezeEditor();
+                getRPC().unlockEditor(lockId);
             }
 
             @Override

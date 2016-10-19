@@ -1,7 +1,6 @@
 package org.vaadin.patrik.client;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.vaadin.patrik.FastNavigation;
 import org.vaadin.patrik.client.EditorStateManager.EditorListener;
@@ -27,7 +26,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
     private EditorStateManager editorManager;
     private FocusTracker focusTracker;
     private FastNavigationServerRPC rpc;
-
+    
     @Override
     @SuppressWarnings("unchecked")
     protected void extend(ServerConnector target) {
@@ -44,17 +43,17 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     }
 
                     @Override
-                    public void unfreezeEditor() {
-                        editorManager.externalUnlock();
+                    public void unlockEditor(int lockId) {
+                        editorManager.externalUnlock(lockId);
                     }
                 });
 
         editorManager.addListener(new EditorListener() {
             @Override
             public void editorOpened(Grid<Object> grid, Editor<Object> editor,
-                    Widget editorWidget, String keybuf, int row, int col) {
+                    int row, int col, int lockId) {
                 editorManager.clearDisabledColumns();
-                rpc.editorOpened(row, col);
+                rpc.editorOpened(row, col, lockId);
             }
 
             @Override

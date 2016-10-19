@@ -161,6 +161,8 @@ public class DemoUI extends UI {
     }
     
     private void initGrid(Grid grid) {
+        
+        // Add some columns
         grid.addColumn("col1", String.class);
         grid.addColumn("col2", String.class);
         for (int i = 0; i < 5; ++i) {
@@ -168,6 +170,9 @@ public class DemoUI extends UI {
         }
         grid.addColumn("col8", Date.class);
 
+        // Make column 2 read only to test statically read only columns
+        grid.getColumn("col2").setEditable(false);
+        
         Random rand = new Random();
         for (int i = 0; i < 100; ++i) {
             grid.addRow("string 1 " + i, "string 2 " + i, rand.nextInt(i + 10),
