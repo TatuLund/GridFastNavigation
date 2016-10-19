@@ -367,32 +367,73 @@ public class EditorStateManager {
                     EditorWidgets.enable(getEditorWidgetForColumn(i));
                 }
                 
+                // Then disable the ones that should be disabled
+                for (int column : disabledColumns) {
+                    EditorWidgets.disable(getEditorWidgetForColumn(column));
+                }
+                
                 Widget editorWidget = getCurrentEditorWidget();
 
-                // Handle possible value reset of editor widget
-                String buf = flushKeys();
-                if(!buf.trim().isEmpty()) {
-                    if(selectTextOnFocus) {
-                        EditorWidgets.setValue(editorWidget, buf);
+                // Check required to avoid overwriting disabled editors
+                int currentCol = getFocusedCol();
+                if(!disabledColumns.contains(currentCol)) {
+                
+                    // Handle possible value reset of editor widget
+                    String buf = flushKeys();
+                    if(!buf.trim().isEmpty()) {
+                        if(selectTextOnFocus) {
+                            EditorWidgets.setValue(editorWidget, buf);
+                        } else {
+                            EditorWidgets.setValue(editorWidget, EditorWidgets.getValue(editorWidget) + buf);
+                        }
+                        
                     } else {
-                        EditorWidgets.setValue(editorWidget, EditorWidgets.getValue(editorWidget) + buf);
+                        // Select text if desired
+                        if(selectTextOnFocus) {
+                            EditorWidgets.selectAll(editorWidget);
+                        }
                     }
                     
                 } else {
-                    // Select text if desired
+
+                    // Try to shunt focus to another widget 
+                    int origCol = currentCol;
+                    {
+                        
+                        // Try going right first
+                        while(disabledColumns.contains(++currentCol)) {}
+                        if(currentCol < grid.getVisibleColumns().size()) {
+                            // Move editor focus here
+                            editorWidget = getEditorWidgetForColumn(currentCol);
+                            openEditor(getFocusedRow(), currentCol);
+                            return;
+                        }
+                        
+                        // Reset currentCol
+                        currentCol = origCol;
+                        
+                        // Try going left instead
+                        while(disabledColumns.contains(--currentCol)) {}
+                        if(currentCol >= 0) {
+                            // Move editor focus here
+                            editorWidget = getEditorWidgetForColumn(currentCol);
+                            openEditor(getFocusedRow(), currentCol);
+                            return;
+                        }
+                        
+                        editorWidget = null;
+                    }
+                    
                     if(selectTextOnFocus) {
                         EditorWidgets.selectAll(editorWidget);
                     }
                     
                 }
                 
-                // Then disable the ones that should be disabled
-                for (int column : disabledColumns) {
-                    EditorWidgets.disable(getEditorWidgetForColumn(column));
-                }
-                
                 // Make sure editor widget is in focus
                 EditorWidgets.focus(editorWidget);
+                
+                // XXX: this function can _conceivably_ get stuck if there are _no_ editable columns 
             }
         });
         lock();
