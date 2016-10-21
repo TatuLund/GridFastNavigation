@@ -81,7 +81,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
             @Override
             public void focusMoved(int currentRow, int currentCol, int lastRow,
                     int lastCol) {
-                if(getState().hasCellFocusListener) {
+                if(getState().hasFocusListener) {
                     rpc.focusUpdated(currentRow, currentCol);
                 }
             }
