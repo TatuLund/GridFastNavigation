@@ -11,7 +11,7 @@ editing experience.
 
 ## Download release
 
-Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to http://vaadin.com/addon/GridFastNavigation
+Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to https://vaadin.com/directory/-/directory/addon/#!addon/gridfastnavigation-add-on
 
 ## Building and running demo
 
