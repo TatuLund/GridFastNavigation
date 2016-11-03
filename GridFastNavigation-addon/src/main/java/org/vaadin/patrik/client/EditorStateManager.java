@@ -175,11 +175,18 @@ public class EditorStateManager {
                     
                     targetRow += rowDelta;
                     
-                    // Clamp row number, assume we landed in a safe, non-disabled column
-                    if(targetRow < 0) targetRow = 0;
-                    if(targetRow >= rowCount) targetRow = rowCount - 1;
-                        
-                    move = true;
+                    // Close editor if we're moving outside bounds - fixes Dan Golob's issue
+                    // regarding single-column Grids, where close shortcuts will cancel changes.
+                    // TODO: re-think this functionality when save-and-close shortcuts are available.
+                    if(targetRow < 0) {
+                        closeEditor(false);
+                        targetRow = 0;
+                    } else  if(targetRow >= rowCount) {
+                        closeEditor(false);
+                        targetRow = rowCount - 1;
+                    } else {
+                        move = true;
+                    }
                 }
 
                 if(move) {
