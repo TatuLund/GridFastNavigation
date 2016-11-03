@@ -7,7 +7,7 @@ unbuffered editing mode and alters its keyboard controls to provide a faster
 editing experience.
 
 ## Online demo
-[Try it here](http://patrik.app.fi/GridFastNavigation-demo-0.1/)
+[Try it here](http://patrik.app.fi/GridFastNavigation-demo-0.2.0/)
 
 ## Download release
 
@@ -52,6 +52,21 @@ Debugging client side code in the GridFastNavigation-demo project:
   - You can access Java-sources and set breakpoints inside Chrome if you enable source maps from inspector settings.
  
 ## Release notes
+
+### Version 0.2.0
+
+- Complete rewrite and architectural redesign
+- Customizable open and close shortcuts
+- Server-side focus tracking events either on per-cell or per-row basis
+- Editor open/close events
+- Opening editor by typing can be enabled and disabled
+- Keyboard up/down arrow navigation can be enabled and disabled
+- DateFields now don't stop working after using up/down arrow navigation
+- Selecting text when opening editor can be enabled and disabled
+- Tab navigation now skips disabled columns
+- Additional columns can be disabled on a per-row basis using editor open event
+
+NOTE: server-side notification of changed data has been removed (for now), but can be emulated using editor open/close events, which are now sent per row.
 
 ### Version 0.1-SNAPSHOT
 
