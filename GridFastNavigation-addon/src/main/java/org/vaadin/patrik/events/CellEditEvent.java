@@ -11,11 +11,10 @@ public class CellEditEvent extends Component.Event {
     private String oldData;
     private String newData;
 
-    public CellEditEvent(Component source, Integer rowIndex, Integer colIndex, String oldData, String newData) {
+    public CellEditEvent(Component source, Integer rowIndex, Integer colIndex, String newData) {
         super(source);
         this.rowIndex = rowIndex;
         this.colIndex = colIndex;
-        this.oldData = oldData;
         this.newData = newData;
     }
     

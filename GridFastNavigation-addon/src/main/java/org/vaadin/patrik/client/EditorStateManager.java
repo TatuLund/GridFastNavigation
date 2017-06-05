@@ -22,6 +22,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.VConsole;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.FocusUtil;
 import com.vaadin.client.widget.grid.DefaultEditorEventHandler;
@@ -33,7 +34,11 @@ import com.vaadin.client.widgets.Grid.EditorDomEvent;
 
 public class EditorStateManager {
 
-    //
+
+	private String oldContent;
+	private String newContent;
+	
+	//
     // Editor listener callback interface
     // Used for communicating de-noised events back to the Connector/RPC layer
     //
@@ -47,7 +52,7 @@ public class EditorStateManager {
                 int col, boolean cancel);
 
         void dataChanged(Grid<Object> grid, Editor<Object> editor,
-                Widget widget, String oldContent, String newContent, int row,
+                Widget widget, String newContent, int row,
                 int col);
 
     }
@@ -495,25 +500,28 @@ public class EditorStateManager {
         if(useExternalLocking) {
             lock = externalLocks.requestLock();
         }
+    	VConsole.log("notifyEditorOpened");
         for (EditorListener l : editorListeners) {
             l.editorOpened(grid, editor, row, col, lock);
         }
     }
 
     private void notifyEditorClosed(int row, int col, boolean cancel) {
+    	VConsole.log("notifyEditorClosed");
         for (EditorListener l : editorListeners) {
             l.editorClosed(grid, editor, row, col, cancel);
         }
     }
 
     // TODO: send notifications of changed data!
-//    private void notifyDataChanged(String oldContent, String newContent,
-//            int row, int col) {
-//        for (EditorListener l : editorListeners) {
-//            l.dataChanged(grid, editor, getCurrentEditorWidget(), oldContent,
-//                    newContent, row, col);
-//        }
-//    }
+    private void notifyDataChanged(String newContent,
+            int row, int col) {
+    	VConsole.log("notifyDataChanged");
+        for (EditorListener l : editorListeners) {
+            l.dataChanged(grid, editor, getCurrentEditorWidget(),
+                    newContent, row, col);
+        }
+    }
 
     //
     // State
@@ -614,7 +622,12 @@ public class EditorStateManager {
     public void setOpenEditorByTyping(boolean enable) {
         openEditorOnType = enable;
     }
-
+    
+    public void saveOldContent() {
+        oldContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    	VConsole.log("data: "+oldContent);    	
+    }
+    
     // Request opening the editor. This function should be used internally instead
     // of the direct editor.editRow() calls.
     public void openEditor(int row, int col) {
@@ -622,11 +635,20 @@ public class EditorStateManager {
             editor.editRow(row,col);
             notifyEditorOpened(row,col);
             waitForEditorOpen();
+            oldContent = EditorWidgets.getValue(getCurrentEditorWidget());
+        	VConsole.log("data: "+oldContent+" "+newContent);
         } else {
             int oldRow = getFocusedRow();
 
             if(oldRow != row) {
+            	VConsole.log("notifyEditorClosed");
                 notifyEditorClosed(oldRow, col, false);
+                newContent = EditorWidgets.getValue(getCurrentEditorWidget());
+                if ((oldContent != null) && !oldContent.equals(newContent)) {
+                	VConsole.log("notifyDataChanged");
+                	VConsole.log("data: "+oldContent+" "+newContent);
+                	notifyDataChanged(newContent,oldRow,col);
+                }
                 editor.editRow(row,col);
                 notifyEditorOpened(row,col);
                 waitForEditorOpen();
@@ -643,10 +665,18 @@ public class EditorStateManager {
         int row = getFocusedRow();
         int col = getFocusedCol();
         
+    	VConsole.log("closeEditor");
         if (cancel) {
+        	VConsole.log("cancel");
             editor.cancel();
         } else {
+        	VConsole.log("save");
             editor.save();
+            if ((oldContent != null) && !oldContent.equals(newContent)) {
+            	VConsole.log("notifyDataChanged");
+            	VConsole.log("data: "+oldContent+" "+newContent);
+            	notifyDataChanged(newContent,row,col);
+            }
         }
 
         notifyEditorClosed(row, col, cancel);

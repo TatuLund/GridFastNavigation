@@ -89,10 +89,8 @@ public class FastNavigation extends AbstractExtension {
             }
 
             @Override
-            public void cellUpdated(int rowIndex, int colIndex, String oldData,
-                    String newData) {
-                cellEditListeners.dispatch(new CellEditEvent(g, rowIndex, colIndex, oldData,
-                        newData));
+            public void cellUpdated(int rowIndex, int colIndex, String newData) {
+                cellEditListeners.dispatch(new CellEditEvent(g, rowIndex, colIndex, newData));
             }
 
             @Override
@@ -229,10 +227,12 @@ public class FastNavigation extends AbstractExtension {
     
     public void addRowEditListener(RowEditListener listener) {
         rowEditListeners.addListener(listener);
+        getState().hasRowEditListener = true;
     }
 
     public void addCellEditListener(CellEditListener listener) {
         cellEditListeners.addListener(listener);
+        getState().hasCellEditListener = true;
     }
 
     public void addCellFocusListener(CellFocusListener listener) {
