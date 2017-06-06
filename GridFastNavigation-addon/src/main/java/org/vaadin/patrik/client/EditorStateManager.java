@@ -22,6 +22,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.VConsole;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.FocusUtil;
 import com.vaadin.client.widget.grid.DefaultEditorEventHandler;
@@ -33,7 +34,11 @@ import com.vaadin.client.widgets.Grid.EditorDomEvent;
 
 public class EditorStateManager {
 
-    //
+
+	private String oldContent;
+	private String newContent;
+	
+	//
     // Editor listener callback interface
     // Used for communicating de-noised events back to the Connector/RPC layer
     //
@@ -47,7 +52,7 @@ public class EditorStateManager {
                 int col, boolean cancel);
 
         void dataChanged(Grid<Object> grid, Editor<Object> editor,
-                Widget widget, String oldContent, String newContent, int row,
+                Widget widget, String newContent, int row,
                 int col);
 
     }
@@ -129,6 +134,7 @@ public class EditorStateManager {
                 int targetRow = currentRow;
                 
                 if(Keys.isColumnChangeKey(key)) {
+                	saveContent();
                     int colDelta = shift ? -1 : 1;
                     
                     // Remember to skip disabled columns
@@ -160,6 +166,7 @@ public class EditorStateManager {
                 }
                 
                 if(Keys.isRowChangeKey(key)) {
+                	saveContent();
                     int rowDelta = shift ? -1 : 1;
                     
                     if(Keys.isUpDownArrowKey(key)) {
@@ -189,6 +196,20 @@ public class EditorStateManager {
                     }
                 }
 
+                if(Keys.isHomeKey(key)) {
+                	saveContent();
+                	targetRow = 0;
+                	if (shift) targetCol = 0;
+                    move = true;
+                }
+                
+                if(Keys.isEndKey(key)) {
+                	saveContent();
+                	targetRow = rowCount-1;
+                	if (shift) targetCol = columnCount-1;
+                    move = true;
+                }
+                
                 if(move) {
                     event.getDomEvent().preventDefault();
                     
@@ -514,13 +535,13 @@ public class EditorStateManager {
     }
 
     // TODO: send notifications of changed data!
-//    private void notifyDataChanged(String oldContent, String newContent,
-//            int row, int col) {
-//        for (EditorListener l : editorListeners) {
-//            l.dataChanged(grid, editor, getCurrentEditorWidget(), oldContent,
-//                    newContent, row, col);
-//        }
-//    }
+    private void notifyDataChanged(String newContent,
+            int row, int col) {
+        for (EditorListener l : editorListeners) {
+            l.dataChanged(grid, editor, getCurrentEditorWidget(),
+                    newContent, row, col);
+        }
+    }
 
     //
     // State
@@ -621,6 +642,38 @@ public class EditorStateManager {
     public void setOpenEditorByTyping(boolean enable) {
         openEditorOnType = enable;
     }
+    
+    public void saveOldContent() {
+        oldContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    }
+
+    public void saveOldContent(int col) {
+        oldContent = EditorWidgets.getValue(getEditorWidgetForColumn(col));
+    }
+
+    public String getContent() {
+        return EditorWidgets.getValue(getCurrentEditorWidget());
+    }
+
+    public void saveContent() {
+        newContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    }
+    
+    public String getOldContent() {
+        return oldContent;
+    }
+
+    public void resetContent() {
+    	newContent = oldContent;
+    }
+    
+    public void notifyIfDataChanged(int row, int col) {
+    	if (isEditorOpen()) {
+    		if ((oldContent != null) && !oldContent.equals(newContent)) {
+    			notifyDataChanged(newContent,row,col);
+    		}
+    	}
+    }
 
     // Request opening the editor. This function should be used internally instead
     // of the direct editor.editRow() calls.
@@ -629,6 +682,7 @@ public class EditorStateManager {
             editor.editRow(row,col);
             notifyEditorOpened(row,col);
             waitForEditorOpen();
+            oldContent = EditorWidgets.getValue(getCurrentEditorWidget());
         } else {
             int oldRow = getFocusedRow();
 
@@ -651,9 +705,13 @@ public class EditorStateManager {
         int col = getFocusedCol();
         
         if (cancel) {
+        	EditorWidgets.setValue(getEditorWidgetForColumn(col), oldContent);
             editor.cancel();
         } else {
             editor.save();
+            if ((oldContent != null) && !oldContent.equals(newContent)) {
+            	notifyDataChanged(newContent,row,col);
+            }
         }
 
         notifyEditorClosed(row, col, cancel);
