@@ -134,6 +134,7 @@ public class EditorStateManager {
                 int targetRow = currentRow;
                 
                 if(Keys.isColumnChangeKey(key)) {
+                	saveContent();
                     int colDelta = shift ? -1 : 1;
                     
                     // Remember to skip disabled columns
@@ -165,6 +166,7 @@ public class EditorStateManager {
                 }
                 
                 if(Keys.isRowChangeKey(key)) {
+                	saveContent();
                     int rowDelta = shift ? -1 : 1;
                     
                     if(Keys.isUpDownArrowKey(key)) {
@@ -194,6 +196,20 @@ public class EditorStateManager {
                     }
                 }
 
+                if(Keys.isHomeKey(key)) {
+                	saveContent();
+                	targetRow = 0;
+                	if (shift) targetCol = 0;
+                    move = true;
+                }
+                
+                if(Keys.isEndKey(key)) {
+                	saveContent();
+                	targetRow = rowCount-1;
+                	if (shift) targetCol = columnCount-1;
+                    move = true;
+                }
+                
                 if(move) {
                     event.getDomEvent().preventDefault();
                     
@@ -507,14 +523,12 @@ public class EditorStateManager {
         if(useExternalLocking) {
             lock = externalLocks.requestLock();
         }
-    	VConsole.log("notifyEditorOpened");
         for (EditorListener l : editorListeners) {
             l.editorOpened(grid, editor, row, col, lock);
         }
     }
 
     private void notifyEditorClosed(int row, int col, boolean cancel) {
-    	VConsole.log("notifyEditorClosed");
         for (EditorListener l : editorListeners) {
             l.editorClosed(grid, editor, row, col, cancel);
         }
@@ -523,7 +537,6 @@ public class EditorStateManager {
     // TODO: send notifications of changed data!
     private void notifyDataChanged(String newContent,
             int row, int col) {
-    	VConsole.log("notifyDataChanged");
         for (EditorListener l : editorListeners) {
             l.dataChanged(grid, editor, getCurrentEditorWidget(),
                     newContent, row, col);
@@ -632,9 +645,36 @@ public class EditorStateManager {
     
     public void saveOldContent() {
         oldContent = EditorWidgets.getValue(getCurrentEditorWidget());
-    	VConsole.log("data: "+oldContent);    	
+    }
+
+    public void saveOldContent(int col) {
+        oldContent = EditorWidgets.getValue(getEditorWidgetForColumn(col));
+    }
+
+    public String getContent() {
+        return EditorWidgets.getValue(getCurrentEditorWidget());
+    }
+
+    public void saveContent() {
+        newContent = EditorWidgets.getValue(getCurrentEditorWidget());
     }
     
+    public String getOldContent() {
+        return oldContent;
+    }
+
+    public void resetContent() {
+    	newContent = oldContent;
+    }
+    
+    public void notifyIfDataChanged(int row, int col) {
+    	if (isEditorOpen()) {
+    		if ((oldContent != null) && !oldContent.equals(newContent)) {
+    			notifyDataChanged(newContent,row,col);
+    		}
+    	}
+    }
+
     // Request opening the editor. This function should be used internally instead
     // of the direct editor.editRow() calls.
     public void openEditor(int row, int col) {
@@ -643,19 +683,11 @@ public class EditorStateManager {
             notifyEditorOpened(row,col);
             waitForEditorOpen();
             oldContent = EditorWidgets.getValue(getCurrentEditorWidget());
-        	VConsole.log("data: "+oldContent+" "+newContent);
         } else {
             int oldRow = getFocusedRow();
 
             if(oldRow != row) {
-            	VConsole.log("notifyEditorClosed");
                 notifyEditorClosed(oldRow, col, false);
-                newContent = EditorWidgets.getValue(getCurrentEditorWidget());
-                if ((oldContent != null) && !oldContent.equals(newContent)) {
-                	VConsole.log("notifyDataChanged");
-                	VConsole.log("data: "+oldContent+" "+newContent);
-                	notifyDataChanged(newContent,oldRow,col);
-                }
                 editor.editRow(row,col);
                 notifyEditorOpened(row,col);
                 waitForEditorOpen();
@@ -672,16 +704,12 @@ public class EditorStateManager {
         int row = getFocusedRow();
         int col = getFocusedCol();
         
-    	VConsole.log("closeEditor");
         if (cancel) {
-        	VConsole.log("cancel");
+        	EditorWidgets.setValue(getEditorWidgetForColumn(col), oldContent);
             editor.cancel();
         } else {
-        	VConsole.log("save");
             editor.save();
             if ((oldContent != null) && !oldContent.equals(newContent)) {
-            	VConsole.log("notifyDataChanged");
-            	VConsole.log("data: "+oldContent+" "+newContent);
             	notifyDataChanged(newContent,row,col);
             }
         }

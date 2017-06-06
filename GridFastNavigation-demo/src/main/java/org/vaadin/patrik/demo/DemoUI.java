@@ -143,12 +143,10 @@ public class DemoUI extends UI {
             @Override
             public void onEvent(EditorOpenEvent event) {
                 int row = event.getRow();
-                int disabled = row % 8;
-                event.disableColumns(disabled);
-                writeOutput("Editor opened on row " + row + " at column " + event.getColumn() + "; disabled column index " + disabled);
+                writeOutput("Editor opened on row " + row + " at column " + event.getColumn());
             }
         });
-        writeOutput("Added editor open listener; we disable column (row % 8).");
+        writeOutput("Added editor open listener");
         
         // Listening to closing of editor
         nav.addEditorCloseListener(new EditorCloseListener() {

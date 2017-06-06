@@ -53,6 +53,15 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 0.3.0
+- Implemented the RowEditEvent and CellEditEvent logic
+- Fixed a bug: Pressing Esc should cancel edit and reset the value
+- Added Home/End key support: Home - first row, End - last row, Shift+Home - first column on first row, Shift+End last column on last row
+
+### Version 0.2.1:
+
+Moving editor outside the first or last row will cause the editor to save and close. This fixes a usability issue with single-row Grids. Future versions will have this behavior toggleable, once I introduce explicit save-and-close shortcuts.
+
 ### Version 0.2.0
 
 - Complete rewrite and architectural redesign
@@ -90,4 +99,5 @@ Contributions are welcome, but there are no guarantees that they are accepted as
 
 Add-on is distributed under Apache License 2.0. For license terms, see LICENSE.txt.
 
-GridFastNavigation is written by Patrik Lindström and Johannes Tuikkala and maintained by the former
+GridFastNavigation is written by Patrik Lindström, Tatu Lund and Johannes Tuikkala and maintained by the Tatu
+

@@ -12,7 +12,6 @@ import org.vaadin.patrik.shared.FastNavigationState;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ServerConnector;
-import com.vaadin.client.VConsole;
 import com.vaadin.client.annotations.OnStateChange;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.widgets.Grid;
@@ -49,7 +48,6 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     }
                 });
 
-    	VConsole.log("addEditorListener");
         editorManager.addListener(new EditorListener() {
             @Override
             public void editorOpened(Grid<Object> grid, Editor<Object> editor,
@@ -65,7 +63,6 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     int row, int col, boolean cancel) {
                 editorManager.clearDisabledColumns();
                 if(getState().hasEditorCloseListener) {
-                	VConsole.log("RPC: editorClosed");
                     rpc.editorClosed(row, col, cancel);
                 }
             }
@@ -75,11 +72,9 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     Widget widget, String newContent,
                     int row, int col) {
                 if(getState().hasCellEditListener) {
-                	VConsole.log("RPC: cellUpdated");
                     rpc.cellUpdated(row, col, newContent);
                 }
                 if(getState().hasRowEditListener) {
-                	VConsole.log("RPC: rowUpdated");
                     rpc.rowUpdated(row);
                 }
             }
@@ -89,9 +84,9 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
             @Override
             public void focusMoved(int currentRow, int currentCol, int lastRow,
                     int lastCol) {
-            	editorManager.saveOldContent();
+            	editorManager.notifyIfDataChanged(lastRow, lastCol);
+            	editorManager.saveOldContent(currentCol);
                 if(getState().hasFocusListener) {
-                	VConsole.log("RPC: focusUpdated");
                     rpc.focusUpdated(currentRow, currentCol);
                 }
             }
@@ -102,6 +97,10 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         updateFocusTracking();
     }
 
+    private int abs(int number) {
+    	return (number < 0) ? -number : number;
+    }
+    
     @OnStateChange("allowArrowRowChange")
     void updateArrowKeyBehavior() {
         editorManager.setAllowRowChangeWithArrow(getState().allowArrowRowChange);
