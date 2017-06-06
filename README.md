@@ -53,6 +53,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 0.4.0
+- Fixed to be compatible with 7.7.7 and newer. With older framework versions (7.6.0 to 7.7.6) you need to use 0.3.0
+
 ### Version 0.3.0
 - Implemented the RowEditEvent and CellEditEvent logic
 - Fixed a bug: Pressing Esc should cancel edit and reset the value

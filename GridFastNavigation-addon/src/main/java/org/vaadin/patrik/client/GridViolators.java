@@ -44,7 +44,7 @@ public class GridViolators {
     }-*/;        
     
     public static native final int getEditorColumn(Editor<?> editor) /*-{
-    	return editor.@com.vaadin.client.widgets.Grid.Editor::focusedColumnIndex;
-    }-*/;
-    
+	return editor.@com.vaadin.client.widgets.Grid.Editor::focusedColumnIndexDOM;
+}-*/;
+
 }
