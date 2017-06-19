@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.patrik</groupId>
 	<artifactId>GridFastNavigation</artifactId>
 	<packaging>jar</packaging>
-	<version>0.4.0</version>
+	<version>0.5.0</version>
 	<name>GridFastNavigation Add-on</name>
 
 	<properties>
@@ -25,20 +25,20 @@
 	</properties>
 
 	<organization>
-		<name>Patrik Lindström</name>
-		<url>https://github.com/thinwire/GridFastNavigation/</url>
+		<name>Tatu Lund</name>
+		<url>https://github.com/tatulund/GridFastNavigation/</url>
 	</organization>
     
 	<scm>
-		<url>git://github.com/thinwire/GridFastNavigation.git</url>
-		<connection>scm:git:git://github.com/thinwire/GridFastNavigation.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com:/thinwire/${ComponentClassName}.git</developerConnection>
+		<url>git://github.com/tatulund/GridFastNavigation.git</url>
+		<connection>scm:git:git://github.com/tatulund/GridFastNavigation.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com:/tatulund/${ComponentClassName}.git</developerConnection>
 		<tag>GridFastNavigation add-on for Vaadin</tag>
 	</scm>
 
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/thinwire/GridFastNavigation/issues</url>
+		<url>https://github.com/tatulund/GridFastNavigation/issues</url>
 	</issueManagement>
 
 	<licenses>

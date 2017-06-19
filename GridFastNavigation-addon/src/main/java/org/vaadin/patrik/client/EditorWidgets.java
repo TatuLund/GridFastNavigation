@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.ui.VCheckBox;
 import com.vaadin.client.ui.VPopupCalendar;
 import com.vaadin.client.ui.VTextField;
 
@@ -88,7 +89,52 @@ public class EditorWidgets {
             }
         });
 
-        registerHandler(VPopupCalendar.class,
+        registerHandler(VCheckBox.class, new WidgetHandler<VCheckBox>() {
+            @Override
+            public String getValue(VCheckBox widget) {
+            	String value = "";
+            	if (widget.getValue()) value = "true";
+            	else value = "false";
+                return value; 
+            }
+
+            @Override
+            public void setValue(VCheckBox widget, String valueText) {
+            	Boolean value = false;
+            	if ("true".equals(valueText)) value = true; 
+                widget.setValue(value);
+            }
+
+            public void focus(VCheckBox widget) {
+                if (widget.isEnabled()) {
+                    widget.getElement().blur();
+                    widget.getElement().focus();
+                }
+            }
+
+            @Override
+            public void enable(VCheckBox widget) {
+                widget.setEnabled(true);
+            }
+
+            @Override
+            public void disable(VCheckBox widget) {
+                widget.setEnabled(false);
+            }
+
+            @Override
+            public boolean isUpDownNavAllowed(VCheckBox widget) {
+                return true;
+            }
+
+			@Override
+			public void selectAll(VCheckBox widget) {
+				// TODO Auto-generated method stub
+				
+			}
+        });
+
+       registerHandler(VPopupCalendar.class,
                 new WidgetHandler<VPopupCalendar>() {
                     @Override
                     public void selectAll(VPopupCalendar widget) {

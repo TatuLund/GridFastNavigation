@@ -167,6 +167,7 @@ public class DemoUI extends UI {
             grid.addColumn("col" + (i + 3), Integer.class);
         }
         grid.addColumn("col8", Date.class);
+        grid.addColumn("col9", Boolean.class);
 
         // Make column 2 read only to test statically read only columns
         grid.getColumn("col2").setEditable(false);
@@ -175,7 +176,7 @@ public class DemoUI extends UI {
         for (int i = 0; i < 100; ++i) {
             grid.addRow("string 1 " + i, "string 2 " + i, rand.nextInt(i + 10),
                     rand.nextInt(i + 10), rand.nextInt(i + 10),
-                    rand.nextInt(i + 10), rand.nextInt(i + 10), new Date());
+                    rand.nextInt(i + 10), rand.nextInt(i + 10), new Date(), false);
         }
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setSizeFull();
