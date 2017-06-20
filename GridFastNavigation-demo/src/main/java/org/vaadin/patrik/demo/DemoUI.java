@@ -1,5 +1,6 @@
 package org.vaadin.patrik.demo;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Random;
@@ -27,6 +28,7 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Table;
@@ -167,8 +169,12 @@ public class DemoUI extends UI {
             grid.addColumn("col" + (i + 3), Integer.class);
         }
         grid.addColumn("col8", Date.class);
-        grid.addColumn("col9", Boolean.class);
-
+        grid.addColumn("col10", Boolean.class);
+        grid.addColumn("col11", String.class);
+        ComboBox comboBox = new ComboBox();
+        comboBox.addItems("Soft","Medium","Hard");
+        grid.getColumn("col11").setEditorField(comboBox);
+        
         // Make column 2 read only to test statically read only columns
         grid.getColumn("col2").setEditable(false);
         
@@ -176,7 +182,7 @@ public class DemoUI extends UI {
         for (int i = 0; i < 100; ++i) {
             grid.addRow("string 1 " + i, "string 2 " + i, rand.nextInt(i + 10),
                     rand.nextInt(i + 10), rand.nextInt(i + 10),
-                    rand.nextInt(i + 10), rand.nextInt(i + 10), new Date(), false);
+                    rand.nextInt(i + 10), rand.nextInt(i + 10), new Date(), false, "Medium");
         }
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setSizeFull();

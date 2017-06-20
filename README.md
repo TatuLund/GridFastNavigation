@@ -53,6 +53,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 0.5.1
+- Added support for ComboBox in the edit fields of the editor.
+- Updated the demo
+
 ### Version 0.5.0
 - Added support for CheckBox in the edit fields of the editor.
 - Updated the demo

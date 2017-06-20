@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ui.VCheckBox;
+import com.vaadin.client.ui.VFilterSelect;
 import com.vaadin.client.ui.VPopupCalendar;
 import com.vaadin.client.ui.VTextField;
 
@@ -86,6 +87,47 @@ public class EditorWidgets {
             @Override
             public boolean isUpDownNavAllowed(VTextField widget) {
                 return true;
+            }
+        });
+
+        registerHandler(VFilterSelect.class, new WidgetHandler<VFilterSelect>() {
+            @Override
+            public void selectAll(VFilterSelect widget) {
+
+            }
+
+            @Override
+            public String getValue(VFilterSelect widget) {
+                return widget.tb.getValue();
+            }
+
+            @Override
+            public void setValue(VFilterSelect widget, String value) {
+                widget.tb.setValue(value);
+            }
+
+            public void focus(VFilterSelect widget) {
+                if (widget.enabled) {
+                    widget.getElement().blur();
+                    widget.getElement().focus();
+                }
+            }
+
+            @Override
+            public void enable(VFilterSelect widget) {
+            	widget.enabled = true;
+                widget.setTextInputEnabled(true);
+            }
+
+            @Override
+            public void disable(VFilterSelect widget) {
+            	widget.enabled = false;
+                widget.setTextInputEnabled(false);
+            }
+
+            @Override
+            public boolean isUpDownNavAllowed(VFilterSelect widget) {
+                return false;
             }
         });
 
