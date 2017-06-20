@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.patrik</groupId>
 	<artifactId>GridFastNavigation-demo</artifactId>
 	<packaging>war</packaging>
-	<version>0.5.1</version>
+	<version>0.5.2</version>
 	<name>GridFastNavigation Add-on Demo</name>
 
 	<properties>

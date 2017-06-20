@@ -26,17 +26,28 @@ public final class Keys {
         }
         
         rowChangeKeys = new HashSet<Integer>();
-        rowChangeKeys.add(KeyCodes.KEY_ENTER);
-        rowChangeKeys.add(KeyCodes.KEY_MAC_ENTER);
         rowChangeKeys.add(KeyCodes.KEY_UP);
         rowChangeKeys.add(KeyCodes.KEY_DOWN);
+        rowChangeKeys.add(KeyCodes.KEY_PAGEUP);
+        rowChangeKeys.add(KeyCodes.KEY_PAGEDOWN);
         
         colChangeKeys = new HashSet<Integer>();
         colChangeKeys.add(KeyCodes.KEY_TAB);
+        
+    }
+    
+    public static void setEnterBehavior(boolean changeColumnByEnter) {
+    	if (changeColumnByEnter) {
+            colChangeKeys.add(KeyCodes.KEY_ENTER);
+            colChangeKeys.add(KeyCodes.KEY_MAC_ENTER);  		
+    	} else {
+            rowChangeKeys.add(KeyCodes.KEY_ENTER);
+            rowChangeKeys.add(KeyCodes.KEY_MAC_ENTER);    		
+    	}
     }
     
     public static boolean isUpDownArrowKey(int keycode) {
-        if(keycode == KeyCodes.KEY_UP || keycode == KeyCodes.KEY_DOWN) {
+        if(keycode == KeyCodes.KEY_UP || keycode == KeyCodes.KEY_DOWN || keycode == KeyCodes.KEY_PAGEUP || keycode == KeyCodes.KEY_PAGEDOWN) {
             return true;
         }
         return false;

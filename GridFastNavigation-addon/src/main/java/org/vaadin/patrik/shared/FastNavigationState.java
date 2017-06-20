@@ -32,6 +32,8 @@ public class FastNavigationState extends SharedState {
     
     public boolean hasEditorCloseListener = false;
     
+    public boolean changeColumnOnEnter = false;
+    
     public Set<Integer> openShortcuts = new HashSet<Integer>();
     
     public Set<Integer> closeShortcuts = new HashSet<Integer>();

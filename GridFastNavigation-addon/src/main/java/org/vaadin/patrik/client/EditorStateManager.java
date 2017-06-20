@@ -34,7 +34,6 @@ import com.vaadin.shared.Version;
 
 public class EditorStateManager {
 
-
 	private String oldContent;
 	private String newContent;
 	
@@ -124,6 +123,7 @@ public class EditorStateManager {
                 
                 final int columnCount = event.getGrid().getVisibleColumns().size();
                 final int rowCount = event.getGrid().getDataSource().size();
+                final int visibleRows = (int) event.getGrid().getHeightByRows();
                 
                 boolean shift = e.getShiftKey();
                 int key = e.getKeyCode();
@@ -167,15 +167,19 @@ public class EditorStateManager {
                 
                 if(Keys.isRowChangeKey(key)) {
                 	saveContent();
-                    int rowDelta = shift ? -1 : 1;
+                	int rowDelta = shift ? -1 : 1;
                     
                     if(Keys.isUpDownArrowKey(key)) {
                         rowDelta = 0;
                         if(allowArrowRowChange && EditorWidgets.isUpDownNavAllowed(getCurrentEditorWidget())) {
-                            if(key == KeyCodes.KEY_UP) {
+                            if (key == KeyCodes.KEY_UP) {
                                 rowDelta = -1;
-                            } else if(key == KeyCodes.KEY_DOWN) {
+                            } else if (key == KeyCodes.KEY_DOWN) {
                                 rowDelta = 1;
+                            } else if (key == KeyCodes.KEY_PAGEUP) {
+                            	rowDelta = -visibleRows;
+                            } else if (key == KeyCodes.KEY_PAGEDOWN) {
+                            	rowDelta = visibleRows;
                             }
                         }
                     }
@@ -304,8 +308,9 @@ public class EditorStateManager {
     private boolean tabWrapping = true;
     
     @SuppressWarnings("unchecked")
-    public EditorStateManager(Grid<?> g) {
+    public EditorStateManager(Grid<?> g, boolean changeColumnOnEnter) {
         
+    	Keys.setEnterBehavior(changeColumnOnEnter);
         grid = ((Grid<Object>) g);
         editor = grid.getEditor();
         editor.setEventHandler(new CustomEditorHandler());

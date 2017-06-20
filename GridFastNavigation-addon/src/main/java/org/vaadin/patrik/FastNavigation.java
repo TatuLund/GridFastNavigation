@@ -78,9 +78,18 @@ public class FastNavigation extends AbstractExtension {
     private int lastFocusedCol = 0;
 
     public FastNavigation(final Grid g) {
+    	setupFastNavigation(g,false);
+    }
+
+    public FastNavigation(final Grid g, boolean changeColumnOnEnter) {
+    	setupFastNavigation(g,changeColumnOnEnter);
+    }
+    
+    public void setupFastNavigation(final Grid g, boolean changeColumnOnEnter) {
+    	getState().changeColumnOnEnter = changeColumnOnEnter;
         g.setEditorBuffered(false);
         g.setEditorEnabled(true);
-
+        
         registerRpc(new FastNavigationServerRPC() {
 
             @Override
@@ -156,7 +165,7 @@ public class FastNavigation extends AbstractExtension {
     public void setAllowTabToChangeRow(boolean enable) {
         getState().allowTabRowChange = enable;
     }
-    
+      
     public boolean getAllowTabToChangeRow() {
         return getState().allowTabRowChange;
     }

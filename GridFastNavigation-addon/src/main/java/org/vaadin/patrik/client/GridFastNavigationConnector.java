@@ -32,7 +32,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
     protected void extend(ServerConnector target) {
         grid = (Grid<Object>) ((ComponentConnector) target).getWidget();
         rpc = getRpcProxy(FastNavigationServerRPC.class);
-        editorManager = new EditorStateManager(grid);
+        editorManager = new EditorStateManager(grid,getState().changeColumnOnEnter);
         focusTracker = new FocusTracker(grid);
 
         registerRpc(FastNavigationClientRPC.class,
