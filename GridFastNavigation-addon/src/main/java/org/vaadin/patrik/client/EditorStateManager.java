@@ -69,6 +69,11 @@ public class EditorStateManager {
         // It then also needs to handle that event.
         //
 
+    	private boolean isClickEvent(EditorDomEvent<Object> event) {
+    		final Event e = event.getDomEvent();
+    		return e.getTypeInt() == Event.ONCLICK;
+    	}
+        		
         @Override
         protected boolean handleOpenEvent(EditorDomEvent<Object> event) {
             
@@ -78,7 +83,7 @@ public class EditorStateManager {
             boolean shift = event.getDomEvent().getShiftKey();
             boolean open = false;
             
-            if (isOpenEvent(event)) {
+            if (isOpenEvent(event) || isClickEvent(event)) {
                 open = true;
             } else if(isKeyPressEvent(event)) {
                 if(openShortcuts.contains(key)) {

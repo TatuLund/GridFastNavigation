@@ -53,6 +53,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 0.5.3
+- Small fix. Editor is now opened with single click also.
+
 ### Version 0.5.2
 - Added support for pageup/down keys in edit mode.
 - Added possibility configure enter key to change column instead of row
