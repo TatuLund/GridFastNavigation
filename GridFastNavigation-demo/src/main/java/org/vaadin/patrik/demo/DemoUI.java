@@ -97,7 +97,8 @@ public class DemoUI extends UI {
     }
     
     private void initNavigation(final Grid grid) {
-        FastNavigation nav = new FastNavigation(grid,true);
+        FastNavigation nav = new FastNavigation(grid,false);
+        nav.setChangeColumnAfterLastRow(true);
         
         nav.addRowEditListener(new RowEditListener() {
             @Override

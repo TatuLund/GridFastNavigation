@@ -16,6 +16,8 @@ public class FastNavigationState extends SharedState {
     
     public boolean allowArrowRowChange = true;
     
+    public boolean changeColumnAfterLastRow = false;
+    
     public boolean hasFocusListener = false;
     
     public boolean hasRowFocusListener = false;

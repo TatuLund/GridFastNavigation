@@ -32,7 +32,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
     protected void extend(ServerConnector target) {
         grid = (Grid<Object>) ((ComponentConnector) target).getWidget();
         rpc = getRpcProxy(FastNavigationServerRPC.class);
-        editorManager = new EditorStateManager(grid,getState().changeColumnOnEnter);
+        editorManager = new EditorStateManager(grid,getState());
         focusTracker = new FocusTracker(grid);
 
         registerRpc(FastNavigationClientRPC.class,
@@ -99,6 +99,11 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
 
     private int abs(int number) {
     	return (number < 0) ? -number : number;
+    }
+    
+    @OnStateChange("changeColumnAfterLastRow")
+    void changeColumnAfterLastRow() {
+        editorManager.setChangeColumnAfterLastRow(getState().changeColumnAfterLastRow);
     }
     
     @OnStateChange("allowArrowRowChange")

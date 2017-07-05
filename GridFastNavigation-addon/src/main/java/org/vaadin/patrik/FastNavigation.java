@@ -77,15 +77,26 @@ public class FastNavigation extends AbstractExtension {
     private int lastFocusedRow = 0;
     private int lastFocusedCol = 0;
 
+    /**
+     * Default constructor. Enter key changes the row.
+     * 
+     * @param g
+     */
     public FastNavigation(final Grid g) {
     	setupFastNavigation(g,false);
     }
 
+    /**
+     * Alternative constructor to set enter key change column instead of a row.
+     * 
+     * @param g
+     * @param changeColumnOnEnter
+     */
     public FastNavigation(final Grid g, boolean changeColumnOnEnter) {
     	setupFastNavigation(g,changeColumnOnEnter);
     }
     
-    public void setupFastNavigation(final Grid g, boolean changeColumnOnEnter) {
+    private void setupFastNavigation(final Grid g, boolean changeColumnOnEnter) {
     	getState().changeColumnOnEnter = changeColumnOnEnter;
         g.setEditorBuffered(false);
         g.setEditorEnabled(true);
@@ -158,10 +169,32 @@ public class FastNavigation extends AbstractExtension {
         return (FastNavigationState) super.getState();
     }
 
+    /**
+     * If set to true (default = false), pressing enter on last row will change
+     * focus to first row and change column to next editable column. Not applicable
+     * if enter key is set to change column instead of row.
+     * 
+     * @param enable
+     */
+    public void setChangeColumnAfterLastRow(boolean enable) {
+        getState().changeColumnAfterLastRow = enable;
+    }
+
+    public boolean getChangeColumnAfterLastRow() {
+        return getState().changeColumnAfterLastRow;
+    }
+
     //
     // Tab capture
     //
 
+    /**
+     * If set to true, tabbing outside the edge of the current row will wrap the
+     * focus around and switch to the next/previous row. If false, tabbing will
+     * wrap around the current row.
+     * 
+     * @param enable
+     */
     public void setAllowTabToChangeRow(boolean enable) {
         getState().allowTabRowChange = enable;
     }
@@ -170,6 +203,11 @@ public class FastNavigation extends AbstractExtension {
         return getState().allowTabRowChange;
     }
 
+    /**
+     * If set to true, text is selected when editor is opened
+     * 
+     * @param enable
+     */
     public void setSelectTextOnEditorOpen(boolean enable) {
         getState().selectTextOnEditorOpen = enable;
     }
@@ -177,7 +215,12 @@ public class FastNavigation extends AbstractExtension {
     public boolean getSelectTextOnEditorOpen() {
         return getState().selectTextOnEditorOpen;
     }
-    
+
+    /**
+     * If set to true, you can use the arrow keys to move the editor up and down
+     * 
+     * @param enable
+     */
     public void setAllowArrowToChangeRow(boolean enable) {
         getState().allowArrowRowChange = enable;
     }
@@ -190,18 +233,27 @@ public class FastNavigation extends AbstractExtension {
     // Editor opening
     //
 
+    /**
+     * If set to true (default), focusing a Grid cell and then pressing an alpha-
+     * numeric key will open the editor. If false, the editor must be activated
+     * by double clicking or pressing ENTER or a custom editor opening shortcut key
+     * 
+     * @param enable
+     */
     public void setOpenEditorOnTyping(boolean enable) {
         getState().openEditorOnType = enable;
     }
+
 
     public boolean getOpenEditorOnTyping() {
         return getState().openEditorOnType;
     }
 
-    //
-    // Editor opening extra shortcuts
-    //
-
+    /**
+     * Editor opening extra shortcuts
+     * 
+     * @param code
+     */
     public void addEditorOpenShortcut(int code) {
         getState().openShortcuts.add(code);
     }
@@ -214,10 +266,11 @@ public class FastNavigation extends AbstractExtension {
         getState().openShortcuts.clear();
     }
 
-    //
-    // Editor close/cancel extra shortcuts
-    //
-
+    /**
+     * Editor close/cancel extra shortcuts
+     * 
+     * @param code
+     */
     public void addEditorCloseShortcut(int code) {
         getState().closeShortcuts.add(code);
     }
@@ -234,6 +287,13 @@ public class FastNavigation extends AbstractExtension {
     // Event listeners
     //
     
+    /**
+     * Register row edit listener, which is triggered when cell value is being 
+     * changed. Useful to hook e.g. database commit on edit.
+     * 
+     * @param listener
+     *            an RowEditListener instance
+     */
     public void addRowEditListener(RowEditListener listener) {
         rowEditListeners.addListener(listener);
         getState().hasRowEditListener = true;
@@ -244,6 +304,13 @@ public class FastNavigation extends AbstractExtension {
         getState().hasCellEditListener = true;
     }
 
+    /**
+     * Register cell focus listener, which is triggered when focus has 
+     * changed. 
+     * 
+     * @param listener
+     *            an CellFocusListener instance
+     */
     public void addCellFocusListener(CellFocusListener listener) {
         cellFocusListeners.addListener(listener);
         
@@ -252,6 +319,13 @@ public class FastNavigation extends AbstractExtension {
         hasCellFocusListener = true;
     }
 
+    /**
+     * Register row focus listener, which is triggered when row has 
+     * changed. 
+     * 
+     * @param listener
+     *            an RowFocusListener instance
+     */
     public void addRowFocusListener(RowFocusListener listener) {
         rowFocusListeners.addListener(listener);
         

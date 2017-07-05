@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.vaadin.patrik.client.SpinLock.Callback;
 import org.vaadin.patrik.client.SpinLock.LockFunction;
+import org.vaadin.patrik.shared.FastNavigationState;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -30,7 +31,6 @@ import com.vaadin.client.widgets.Grid;
 import com.vaadin.client.widgets.Grid.Column;
 import com.vaadin.client.widgets.Grid.Editor;
 import com.vaadin.client.widgets.Grid.EditorDomEvent;
-import com.vaadin.shared.Version;
 
 public class EditorStateManager {
 
@@ -62,7 +62,7 @@ public class EditorStateManager {
     
     private class CustomEditorHandler extends DefaultEditorEventHandler<Object> {
         
-        //
+		//
         // Editor event handler - this receives an unfiltered event stream from the browser and
         // needs to identify the type of incoming event - handleOpenEvent gets _all_ events, for
         // example, and needs to return 'true' when it's actually been offered a valid open event.
@@ -145,7 +145,7 @@ public class EditorStateManager {
                     // Remember to skip disabled columns
                     do {
                         targetCol += colDelta;
-                    } while(disabledColumns.contains(targetCol));
+                    } while (disabledColumns.contains(targetCol) && targetCol < columnCount);
                     
                     // Test if we need to move up
                     if(targetCol < 0) {
@@ -194,12 +194,26 @@ public class EditorStateManager {
                     // Close editor if we're moving outside bounds - fixes Dan Golob's issue
                     // regarding single-column Grids, where close shortcuts will cancel changes.
                     // TODO: re-think this functionality when save-and-close shortcuts are available.
-                    if(targetRow < 0) {
+                    if (targetRow < 0) {
                         closeEditor(false);
                         targetRow = 0;
-                    } else  if(targetRow >= rowCount) {
-                        closeEditor(false);
-                        targetRow = rowCount - 1;
+                    } else if (targetRow >= rowCount) {
+                    	if (changeColumnAfterLastRow) {
+                    		targetRow = 0;                    			
+                            // Remember to skip disabled columns
+                            do {
+                                targetCol++;
+                            } while (disabledColumns.contains(targetCol) && targetCol < columnCount);
+                            // If we were on last column do nothing
+                            if (targetCol >= columnCount) {
+                            	targetCol = columnCount-1;
+                            	targetRow = rowCount-1;
+                            }
+                            move = true;
+                    	} else {
+                    		closeEditor(false);
+                    		targetRow = rowCount - 1;
+                    	}
                     } else {
                         move = true;
                     }
@@ -219,10 +233,10 @@ public class EditorStateManager {
                     move = true;
                 }
                 
-                if(move) {
+                if (move) {
                     event.getDomEvent().preventDefault();
                     
-                    if(currentCol != targetCol || currentRow != targetRow) {
+                    if (currentCol != targetCol || currentRow != targetRow) {
                         triggerValueChange(event);
                         openEditor(targetRow, targetCol);
                     }
@@ -311,11 +325,12 @@ public class EditorStateManager {
     private boolean allowArrowRowChange = true;
     private boolean selectTextOnFocus = true;
     private boolean tabWrapping = true;
+    private boolean changeColumnAfterLastRow = false;
     
     @SuppressWarnings("unchecked")
-    public EditorStateManager(Grid<?> g, boolean changeColumnOnEnter) {
+    public EditorStateManager(Grid<?> g, FastNavigationState state) {
         
-    	Keys.setEnterBehavior(changeColumnOnEnter);
+    	Keys.setEnterBehavior(state.changeColumnOnEnter);
         grid = ((Grid<Object>) g);
         editor = grid.getEditor();
         editor.setEventHandler(new CustomEditorHandler());
@@ -644,6 +659,13 @@ public class EditorStateManager {
     // This only has an effect if allowTabRowChange is false.
     public void setTabWrapping(boolean enable) {
         tabWrapping = enable;
+    }
+
+    // If set to true (default = false), pressing enter on last row will change
+    // focus to first row and change column to next editable column. Not applicable
+    // if enter key is set to change column instead of row.
+    public void setChangeColumnAfterLastRow(boolean enable) {
+    	changeColumnAfterLastRow = enable;
     }
     
     // If set to true (default), focusing a Grid cell and then pressing an alpha-
