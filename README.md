@@ -56,7 +56,7 @@ Debugging client side code in the GridFastNavigation-demo project:
 ### Version 0.5.4
 - Added option to change column when enter key is pressed on last row (provided that enter key is in row change mode)
 - Added more java docs
-- Small bug fixes.
+- Small bug fix with potential index out of bounds issue
 
 ### Version 0.5.3
 - Small fix. Editor is now opened with single click also.
