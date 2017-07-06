@@ -118,6 +118,7 @@ public class EditorStateManager {
             final EventCellReference<Object> cell = event.getCell();
             
             if (e.getTypeInt() == Event.ONCLICK) {
+            	saveContent();
                 openEditor(cell.getRowIndex(), cell.getColumnIndexDOM());
                 return true;
             }
@@ -204,12 +205,14 @@ public class EditorStateManager {
                             do {
                                 targetCol++;
                             } while (disabledColumns.contains(targetCol) && targetCol < columnCount);
+                            move = true;
                             // If we were on last column do nothing
                             if (targetCol >= columnCount) {
                             	targetCol = columnCount-1;
                             	targetRow = rowCount-1;
+                        		closeEditor(false);
+                        		move = false;
                             }
-                            move = true;
                     	} else {
                     		closeEditor(false);
                     		targetRow = rowCount - 1;

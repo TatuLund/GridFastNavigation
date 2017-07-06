@@ -53,6 +53,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 0.5.5
+- Fixed minor issue: row edit event not triggered when in bottom right corner
+- Fixed issue with mouse navigation producing excess row edit events
+
 ### Version 0.5.4
 - Added option to change column when enter key is pressed on last row (provided that enter key is in row change mode)
 - Added more java docs
