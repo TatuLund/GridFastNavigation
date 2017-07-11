@@ -53,6 +53,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 0.5.6
+- Editor will be enabled also by delete key, and the existing value will be deleted.
+
 ### Version 0.5.5
 - Fixed minor issue: row edit event not triggered when in bottom right corner
 - Fixed issue with mouse navigation producing excess row edit events
