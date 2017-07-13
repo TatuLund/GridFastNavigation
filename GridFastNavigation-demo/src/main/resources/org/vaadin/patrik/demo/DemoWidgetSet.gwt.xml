@@ -3,4 +3,6 @@
 <module>
     <inherits name="com.vaadin.DefaultWidgetSet" />
     <inherits name="org.vaadin.patrik.GridFastNavigation" />
+
+    <inherits name="org.vaadin.patrik.GridFastNavigation" />
 </module>

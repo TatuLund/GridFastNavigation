@@ -221,7 +221,7 @@ public class EditorStateManager {
                         move = true;
                     }
                 }
-
+                
                 if(Keys.isHomeKey(key)) {
                 	saveContent();
                 	targetRow = 0;
@@ -238,6 +238,15 @@ public class EditorStateManager {
                 
                 if (move) {
                     event.getDomEvent().preventDefault();
+                    
+                    // If row count = 0 then we can end up with a -ve targetRow
+                    if (targetRow < 0)
+                    	targetRow = 0;
+
+                    // If col count = 0 then we can end up with a -ve targetRow
+                    if (targetCol < 0)
+                    	targetCol = 0;
+
                     
                     if (currentCol != targetCol || currentRow != targetRow) {
                         triggerValueChange(event);
