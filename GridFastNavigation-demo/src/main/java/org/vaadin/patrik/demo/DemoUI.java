@@ -211,7 +211,6 @@ public class DemoUI extends UI
 	private void initGrid(Grid<DemoColumns> grid)
 	{
 		TextField col1 = new TextField();
-		col1.setVal
 		TextField col2 = new TextField();
 		TextField col3 = new TextField();
 		TextField col4 = new TextField();
