@@ -1,5 +1,10 @@
 package org.vaadin.patrik.demo;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -25,21 +30,23 @@ import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Binder;
 import com.vaadin.data.Binder.Binding;
-import com.vaadin.data.converter.StringToBooleanConverter;
-import com.vaadin.data.converter.StringToDateConverter;
+import com.vaadin.data.converter.LocalDateTimeToDateConverter;
+import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.DateField;
+import com.vaadin.ui.DateTimeField;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
-
-
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.renderers.DateRenderer;
 
 @Push
 @Theme("demo")
@@ -216,9 +223,10 @@ public class DemoUI extends UI
 		TextField col4 = new TextField();
 		TextField col5 = new TextField();
 		TextField col6 = new TextField();
-		TextField col7 = new TextField();
-		TextField col8 = new TextField();
-		TextField col10 = new TextField();
+		DateTimeField col7 = new DateTimeField();
+		DateField col8 = new DateField();
+		//col8.setDateFormat("dd/MM/yy");
+		CheckBox col10 = new CheckBox();
 		ComboBox<String> col11 = new ComboBox<>();
 		String[] options =
 		{ "Soft", "Medium", "Hard" };
@@ -229,39 +237,66 @@ public class DemoUI extends UI
 
 		Binding<DemoColumns, String> col1Binding = binder.forField(col1).bind(DemoColumns::getCol1,
 				DemoColumns::setCol1);
-		grid.addColumn(DemoColumns::getCol1).setCaption("Col1").setWidth(100).setEditorBinding(col1Binding);
+		grid.addColumn(DemoColumns::getCol1).setCaption("Col1").setExpandRatio(1).setEditorBinding(col1Binding);
 
 		binder.forField(col2).bind(DemoColumns::getCol2, DemoColumns::setCol2);
-		grid.addColumn(DemoColumns::getCol2).setCaption("Col2").setWidth(100);
+		grid.addColumn(DemoColumns::getCol2).setCaption("Col2").setWidth(150);
 
 		Binding<DemoColumns, Integer> col3Binding = binder.forField(col3)
+				.withNullRepresentation("")
 				.withConverter(new StringToIntegerConverter("Must enter a number"))
 				.bind(DemoColumns::getCol3, DemoColumns::setCol3);
-		grid.addColumn(DemoColumns::getCol3).setCaption("Col3").setWidth(100).setEditorBinding(col3Binding);
+				
+		grid.addColumn(DemoColumns::getCol3).setCaption("Col3").setWidth(150).setEditorBinding(col3Binding);
 
-		Binding<DemoColumns, Integer> col4Binding = binder.forField(col4).withConverter(new StringToIntegerConverter("Must enter a number"))
+		Binding<DemoColumns, Integer> col4Binding = binder.forField(col4)
+				.withNullRepresentation("")
+				.withConverter(new StringToIntegerConverter("Must enter a number"))
 				.bind(DemoColumns::getCol4, DemoColumns::setCol4);
 		grid.addColumn(DemoColumns::getCol4).setCaption("Col4").setWidth(100).setEditorBinding(col4Binding);
 
-		Binding<DemoColumns, Integer> col5Binding = binder.forField(col5).withConverter(new StringToIntegerConverter("Must enter a number"))
+		Binding<DemoColumns, Integer> col5Binding = binder.forField(col5)
+				.withNullRepresentation("")
+				.withConverter(new StringToIntegerConverter("Must enter a number"))
 				.bind(DemoColumns::getCol5, DemoColumns::setCol5);
 		grid.addColumn(DemoColumns::getCol5).setCaption("Col5").setWidth(100).setEditorBinding(col5Binding);
 
-		Binding<DemoColumns, Integer> col6Binding = binder.forField(col6).withConverter(new StringToIntegerConverter("Must enter a number"))
+		Binding<DemoColumns, Integer> col6Binding = binder.forField(col6)
+				.withNullRepresentation("")
+				.withConverter(new StringToIntegerConverter("Must enter a number"))
 				.bind(DemoColumns::getCol6, DemoColumns::setCol6);
 		grid.addColumn(DemoColumns::getCol6).setCaption("Col6").setWidth(100).setEditorBinding(col6Binding);
 
-		Binding<DemoColumns, Integer> col7Binding = binder.forField(col7).withConverter(new StringToIntegerConverter("Must enter a number"))
+		
+		// Col 7 DateTime
+		// Need a zoneoffset for datetimefield
+		OffsetDateTime odt = OffsetDateTime.now ( ZoneId.systemDefault () );
+		ZoneOffset zoneOffset = odt.getOffset ();
+		
+		SimpleDateFormat dateTimeFormat = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, UI.getCurrent().getLocale());
+
+		
+		Binding<DemoColumns, Date> col7Binding = binder.forField(col7).withConverter(new LocalDateTimeToDateConverter(zoneOffset))
 				.bind(DemoColumns::getCol7, DemoColumns::setCol7);
-		grid.addColumn(DemoColumns::getCol7).setCaption("Col7").setWidth(100).setEditorBinding(col7Binding);
+		grid.addColumn(DemoColumns::getCol7).setCaption("Col7")
+			.setWidth(180).setEditorBinding(col7Binding)
+			.setRenderer(new DateRenderer(dateTimeFormat));
 
-		Binding<DemoColumns, Date> col8Binding = binder.forField(col8).withConverter(new StringToDateConverter()).bind(DemoColumns::getCol8,
+		
+		// col 8 Date
+		Binding<DemoColumns, Date> col8Binding = binder.forField(col8).withConverter(new LocalDateToDateConverter())
+				.bind(DemoColumns::getCol8,
 				DemoColumns::setCol8);
-		grid.addColumn(DemoColumns::getCol8).setCaption("Col8").setWidth(100).setEditorBinding(col8Binding);
+		
+		SimpleDateFormat dateFormat = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT, UI.getCurrent().getLocale());
+        
+		grid.addColumn(DemoColumns::getCol8).setCaption("Col8").setWidth(120).setEditorBinding(col8Binding)
+		.setRenderer(new DateRenderer(dateFormat));
 
-		Binding<DemoColumns, Boolean> col10Binding = binder.forField(col10).withConverter(new StringToBooleanConverter("Must enter true or false"))
+		Binding<DemoColumns, Boolean> col10Binding = binder.forField(col10)
+				//.withConverter(new StringToBooleanConverter("Must enter true or false"))
 				.bind(DemoColumns::getCol10, DemoColumns::setCol10);
-		grid.addColumn(DemoColumns::getCol10).setCaption("Col10").setWidth(100).setEditorBinding(col10Binding);
+		grid.addColumn(DemoColumns::getCol10).setCaption("Col10").setWidth(150).setEditorBinding(col10Binding);
 
 		Binding<DemoColumns, String> col11Binding = binder.forField(col11).bind(DemoColumns::getCol11, DemoColumns::setCol11);
 		grid.addColumn(DemoColumns::getCol11).setCaption("Col11").setWidth(150).setEditorBinding(col11Binding);

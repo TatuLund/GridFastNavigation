@@ -11,7 +11,7 @@ public class DemoColumns
 	private Integer col4;
 	private Integer col5;
 	private Integer col6;
-	private Integer col7;
+	private Date col7; // datetime
 	private Date col8;
 	private Boolean col10;
 	private String col11;
@@ -26,7 +26,7 @@ public class DemoColumns
         col4 = rand.nextInt(row + 10);
         col5 = rand.nextInt(row + 10);
         col6 = rand.nextInt(row + 10);
-        col7 = rand.nextInt(row + 10);
+        col7  = new Date();
         col8 = new Date();
         col10 = false;
         col11 = "Medium";
@@ -82,11 +82,11 @@ public class DemoColumns
 	{
 		this.col6 = col6;
 	}
-	public Integer getCol7()
+	public Date getCol7()
 	{
 		return col7;
 	}
-	public void setCol7(Integer col7)
+	public void setCol7(Date col7)
 	{
 		this.col7 = col7;
 	}
