@@ -6,8 +6,9 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ui.VCheckBox;
-import com.vaadin.client.ui.VFilterSelect;
+import com.vaadin.client.ui.VComboBox;
 import com.vaadin.client.ui.VPopupCalendar;
+import com.vaadin.client.ui.VPopupTimeCalendar;
 import com.vaadin.client.ui.VTextField;
 
 public class EditorWidgets {
@@ -90,23 +91,23 @@ public class EditorWidgets {
             }
         });
 
-        registerHandler(VFilterSelect.class, new WidgetHandler<VFilterSelect>() {
+        registerHandler(VComboBox.class, new WidgetHandler<VComboBox>() {
             @Override
-            public void selectAll(VFilterSelect widget) {
+            public void selectAll(VComboBox widget) {
 
             }
 
             @Override
-            public String getValue(VFilterSelect widget) {
+            public String getValue(VComboBox widget) {
                 return widget.tb.getValue();
             }
 
             @Override
-            public void setValue(VFilterSelect widget, String value) {
+            public void setValue(VComboBox widget, String value) {
                 widget.tb.setValue(value);
             }
 
-            public void focus(VFilterSelect widget) {
+            public void focus(VComboBox widget) {
                 if (widget.enabled) {
                     widget.getElement().blur();
                     widget.getElement().focus();
@@ -114,19 +115,19 @@ public class EditorWidgets {
             }
 
             @Override
-            public void enable(VFilterSelect widget) {
+            public void enable(VComboBox widget) {
             	widget.enabled = true;
-                widget.setTextInputEnabled(true);
+               // widget.setTextInputEnabled(true);
             }
 
             @Override
-            public void disable(VFilterSelect widget) {
+            public void disable(VComboBox widget) {
             	widget.enabled = false;
-                widget.setTextInputEnabled(false);
+               // widget.setTextInputEnabled(false);
             }
 
             @Override
-            public boolean isUpDownNavAllowed(VFilterSelect widget) {
+            public boolean isUpDownNavAllowed(VComboBox widget) {
                 return false;
             }
         });
@@ -224,6 +225,56 @@ public class EditorWidgets {
                     }
 
                 });
+       
+       registerHandler(VPopupTimeCalendar.class,
+               new WidgetHandler<VPopupTimeCalendar>() {
+                   @Override
+                   public void selectAll(VPopupTimeCalendar widget) {
+                       if (widget.isEnabled()) {
+                           widget.text.selectAll();
+                       }
+                   }
+
+                   @Override
+                   public String getValue(VPopupTimeCalendar widget) {
+                       return widget.text.getValue();
+                   }
+
+                   @Override
+                   public void setValue(VPopupTimeCalendar widget, String value) {
+                       widget.text.setValue(value);
+                   }
+
+                   @Override
+                   public void focus(VPopupTimeCalendar widget) {
+                       // Only perform blur/focus refocusing if calendar popup
+                       // is not visible
+                       if (widget.isEnabled()
+                               && !widget.calendar.isAttached()) {
+                           widget.getElement().blur();
+                           widget.getElement().focus();
+                       }
+                   }
+
+                   @Override
+                   public void enable(VPopupTimeCalendar widget) {
+                       widget.setEnabled(true);
+                       widget.setReadonly(false);
+                   }
+
+                   @Override
+                   public void disable(VPopupTimeCalendar widget) {
+                       widget.setEnabled(false);
+                       widget.setReadonly(true);
+                   }
+
+                   @Override
+                   public boolean isUpDownNavAllowed(VPopupTimeCalendar widget) {
+                       return false;
+                   }
+
+               });
+
 
         // TODO: support more widget types!
     }
