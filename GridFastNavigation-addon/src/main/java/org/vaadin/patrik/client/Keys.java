@@ -53,6 +53,13 @@ public final class Keys {
         return false;
     }
     
+    public static boolean isDelKey(int keycode) {
+    	if(keycode == KeyCodes.KEY_DELETE) {
+    		return true;
+    	}
+    	return false;
+    }
+
     public static boolean isHomeKey(int keycode) {
     	if(keycode == KeyCodes.KEY_HOME) {
     		return true;
