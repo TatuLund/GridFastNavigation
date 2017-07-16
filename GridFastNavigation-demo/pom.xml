@@ -5,34 +5,34 @@
 	<groupId>org.vaadin.patrik</groupId>
 	<artifactId>GridFastNavigation-demo</artifactId>
 	<packaging>war</packaging>
-	<version>0.5.6</version>
+	<version>2.0.0</version>
 	<name>GridFastNavigation Add-on Demo</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
-		<vaadin.version>7.7.8</vaadin.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<vaadin.version>8.0.6</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<jetty.plugin.version>9.2.3.v20140905</jetty.plugin.version>
 	</properties>
 
-    <organization>
-        <name>Tatu Lund</name>
-        <url>https://github.com/tatulund/GridFastNavigation/</url>
-    </organization>
-    
-    <scm>
-        <url>git://github.com/tatulund/GridFastNavigation.git</url>
-        <connection>scm:git:git://github.com/tatulund/GridFastNavigation.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:/tatulund/${ComponentClassName}.git</developerConnection>
-        <tag>GridFastNavigation add-on for Vaadin</tag>
-    </scm>
+	<organization>
+		<name>Tatu Lund</name>
+		<url>https://github.com/tatulund/GridFastNavigation/</url>
+	</organization>
 
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/tatulund/GridFastNavigation/issues</url>
-    </issueManagement>
+	<scm>
+		<url>git://github.com/tatulund/GridFastNavigation.git</url>
+		<connection>scm:git:git://github.com/tatulund/GridFastNavigation.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com:/tatulund/${ComponentClassName}.git</developerConnection>
+		<tag>GridFastNavigation add-on for Vaadin</tag>
+	</scm>
+
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/tatulund/GridFastNavigation/issues</url>
+	</issueManagement>
 
 	<licenses>
 		<license>
@@ -109,6 +109,7 @@
 			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -138,10 +139,10 @@
 			</plugin>
 
 			<plugin>
-		        <artifactId>maven-war-plugin</artifactId>
-		        <version>2.3</version>
-		        <configuration>
-		        	<packagingExcludes>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<packagingExcludes>
 						**/VAADIN/gwt-unitCache/**,
 						**/VAADIN/widgetsets/WEB-INF/**,
 						**/WEB-INF/classes/gwt-unitCache/**,
@@ -149,7 +150,7 @@
 						**/WEB-INF/classes/widgetsets/**
 					</packagingExcludes>
 					<failOnMissingWebXml>false</failOnMissingWebXml>
-		        </configuration>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -193,7 +194,7 @@
 			</plugin>
 
 		</plugins>
-	
+
 	</build>
 
 	<profiles>
@@ -203,7 +204,7 @@
 			<activation>
 				<activeByDefault>false</activeByDefault>
 			</activation>
-			
+
 			<repositories>
 				<repository>
 					<id>vaadin-prereleases</id>

@@ -82,7 +82,7 @@ public class FastNavigation extends AbstractExtension {
      * 
      * @param g
      */
-    public FastNavigation(final Grid g) {
+    public FastNavigation(final Grid<?> g) {
     	setupFastNavigation(g,false);
     }
 
@@ -92,14 +92,14 @@ public class FastNavigation extends AbstractExtension {
      * @param g
      * @param changeColumnOnEnter
      */
-    public FastNavigation(final Grid g, boolean changeColumnOnEnter) {
+    public FastNavigation(final Grid<?> g, boolean changeColumnOnEnter) {
     	setupFastNavigation(g,changeColumnOnEnter);
     }
     
-    private void setupFastNavigation(final Grid g, boolean changeColumnOnEnter) {
+    private void setupFastNavigation(final Grid<?> g, boolean changeColumnOnEnter) {
     	getState().changeColumnOnEnter = changeColumnOnEnter;
-        g.setEditorBuffered(false);
-        g.setEditorEnabled(true);
+        g.getEditor().setBuffered(false);
+        g.getEditor().setEnabled(true);
         
         registerRpc(new FastNavigationServerRPC() {
 
