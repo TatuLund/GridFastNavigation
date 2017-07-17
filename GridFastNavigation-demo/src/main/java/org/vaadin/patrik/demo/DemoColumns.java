@@ -5,6 +5,7 @@ import java.util.Random;
 
 public class DemoColumns
 {
+	private static int row = 0;
 	private String col1;
 	private String col2;
 	private Integer col3;
@@ -18,7 +19,7 @@ public class DemoColumns
 	
 	Random rand = new Random();
 	
-	DemoColumns(int row)
+	DemoColumns()
 	{
         col1 = "string 1 " + row;
         col2 = "string 2 " + row;
@@ -31,6 +32,7 @@ public class DemoColumns
         col10 = false;
         col11 = "Medium";
 
+        row++;
 	}
 	
 	
