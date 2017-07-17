@@ -35,8 +35,10 @@ import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
@@ -64,22 +66,22 @@ public class DemoUI extends UI
 	private static final int MAX_MESSAGES = 50;
 
 	List<ServerMessage> messageList;
-	Grid<ServerMessage> messageTable;
+	Grid<ServerMessage> messageGrid;
 	ListDataProvider<ServerMessage> messageData;
 
 	final List<DemoColumns> demoList;
 	final ListDataProvider<DemoColumns> demoData;
-	final Grid<DemoColumns> grid;
+	final Grid<DemoColumns> demoGrid;
 
 	public DemoUI()
 	{
 		demoList = new ArrayList<>();
 		demoData = new ListDataProvider<>(demoList);
 
-		grid = new Grid<DemoColumns>();
-		grid.setDataProvider(demoData);
-		grid.getEditor().setEnabled(true);
-		grid.getEditor().setBuffered(false);
+		demoGrid = new Grid<DemoColumns>();
+		demoGrid.setDataProvider(demoData);
+		demoGrid.getEditor().setEnabled(true);
+		demoGrid.getEditor().setBuffered(false);
 
 	}
 
@@ -88,16 +90,45 @@ public class DemoUI extends UI
 	{
 		final VerticalLayout layout = new VerticalLayout();
 
-		initMessageTable();
+		layout.setSizeFull();
+		initMessageGrid();
 
-		initGrid(grid);
-		initNavigation(grid);
+		initGrid(demoGrid);
+		initNavigation(demoGrid);
+
+		
+		Button clearButton = new Button("Clear");
+		clearButton.addClickListener(e ->  {
+			messageList.clear();
+			messageData.refreshAll();
+		});
+		
+		
+		Button addButton = new Button();
+		addButton.setIcon(VaadinIcons.PLUS_CIRCLE); // Add Row
+		addButton.addClickListener(e -> {
+			// its an unbuffered editor so canceling doesn't lose data just closes the
+			// editor.
+			demoGrid.getEditor().cancel();
+			demoList.add(new DemoColumns());
+			demoGrid.getDataProvider().refreshAll();
+		});
+		addButton.setDescription("Add a new row");
 
 		layout.setMargin(true);
 		layout.setSpacing(true);
-		layout.addComponent(grid);
-		layout.addComponent(messageTable);
+		layout.addComponent(demoGrid);
+		layout.addComponent(addButton);
+		layout.addComponent(messageGrid);
+		layout.addComponent(clearButton);
 		layout.setSizeFull();
+		layout.setExpandRatio(demoGrid, 10);
+		layout.setExpandRatio(addButton, 1);
+		layout.setExpandRatio(clearButton, 1);
+
+
+		layout.setExpandRatio(messageGrid, 6);
+
 		setContent(layout);
 	}
 
@@ -117,25 +148,25 @@ public class DemoUI extends UI
 				ServerMessage message = new ServerMessage(msg);
 				messageList.add(message);
 				messageData.refreshItem(message);
-				messageTable.scrollTo(messageList.size() - 1);
+				messageGrid.scrollTo(messageList.size() - 1);
 			}
 		});
 	}
 
-	private void initMessageTable()
+	private void initMessageGrid()
 	{
 
 		messageList = new ArrayList<>();
 		messageData = new ListDataProvider<ServerMessage>(messageList);
 
-		messageTable = new Grid<ServerMessage>("Server messages");
-		messageTable.setDataProvider(messageData);
+		messageGrid = new Grid<ServerMessage>("Server messages");
+		messageGrid.setDataProvider(messageData);
 		
 		
-		messageTable.addColumn(ServerMessage::getMessage).setCaption("Message").setExpandRatio(1);
+		messageGrid.addColumn(ServerMessage::getMessage).setCaption("Message").setExpandRatio(1);
 
 
-		messageTable.setSizeFull();
+		messageGrid.setSizeFull();
 		// messageTable.setImmediate(true);
 	}
 
@@ -239,7 +270,6 @@ public class DemoUI extends UI
 				DemoColumns::setCol1);
 		grid.addColumn(DemoColumns::getCol1).setCaption("Col1").setExpandRatio(1).setEditorBinding(col1Binding);
 
-		binder.forField(col2).bind(DemoColumns::getCol2, DemoColumns::setCol2);
 		grid.addColumn(DemoColumns::getCol2).setCaption("Col2").setWidth(150);
 
 		Binding<DemoColumns, Integer> col3Binding = binder.forField(col3)
@@ -301,10 +331,10 @@ public class DemoUI extends UI
 		Binding<DemoColumns, String> col11Binding = binder.forField(col11).bind(DemoColumns::getCol11, DemoColumns::setCol11);
 		grid.addColumn(DemoColumns::getCol11).setCaption("Col11").setWidth(150).setEditorBinding(col11Binding);
 
-		for (int i = 0; i < 100; ++i)
+		for (int i = 0; i < 5; ++i)
 		{
 
-			demoList.add(new DemoColumns(i));
+			demoList.add(new DemoColumns());
 		}
 		demoData.refreshAll();
 		grid.setSelectionMode(SelectionMode.NONE);
