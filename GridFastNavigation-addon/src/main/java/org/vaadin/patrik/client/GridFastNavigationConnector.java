@@ -97,10 +97,6 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         updateFocusTracking();
     }
 
-    private int abs(int number) {
-    	return (number < 0) ? -number : number;
-    }
-    
     @OnStateChange("changeColumnAfterLastRow")
     void changeColumnAfterLastRow() {
         editorManager.setChangeColumnAfterLastRow(getState().changeColumnAfterLastRow);
