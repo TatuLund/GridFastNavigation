@@ -9,13 +9,13 @@ public class DemoColumns
 	private String col1;
 	private String col2;
 	private Integer col3;
-	private Integer col4;
+	private Float col4;
 	private Integer col5;
 	private Integer col6;
 	private Date col7; // datetime
 	private Date col8;
-	private Boolean col10;
-	private String col11;
+	private Boolean col9;
+	private String col10;
 	
 	Random rand = new Random();
 	
@@ -24,13 +24,13 @@ public class DemoColumns
         col1 = "string 1 " + row;
         col2 = "string 2 " + row;
         col3 = rand.nextInt(row + 10);
-        col4 = rand.nextInt(row + 10);
+        col4 = (float)rand.nextInt(row + 10);
         col5 = rand.nextInt(row + 10);
         col6 = rand.nextInt(row + 10);
         col7  = new Date();
         col8 = new Date();
-        col10 = false;
-        col11 = "Medium";
+        col9 = false;
+        col10 = "Medium";
 
         row++;
 	}
@@ -60,11 +60,11 @@ public class DemoColumns
 	{
 		this.col3 = col3;
 	}
-	public Integer getCol4()
+	public Float getCol4()
 	{
 		return col4;
 	}
-	public void setCol4(Integer col4)
+	public void setCol4(Float col4)
 	{
 		this.col4 = col4;
 	}
@@ -100,21 +100,21 @@ public class DemoColumns
 	{
 		this.col8 = col8;
 	}
-	public Boolean getCol10()
+	public Boolean getCol9()
+	{
+		return col9;
+	}
+	public void setCol9(Boolean col9)
+	{
+		this.col9 = col9;
+	}
+	public String getCol10()
 	{
 		return col10;
 	}
-	public void setCol10(Boolean col10)
+	public void setCol10(String col10)
 	{
 		this.col10 = col10;
-	}
-	public String getCol11()
-	{
-		return col11;
-	}
-	public void setCol11(String col11)
-	{
-		this.col11 = col11;
 	}
 
 
@@ -122,7 +122,7 @@ public class DemoColumns
 	public String toString()
 	{
 		return "DemoColumns [col1=" + col1 + ", col2=" + col2 + ", col3=" + col3 + ", col4=" + col4 + ", col5=" + col5
-				+ ", col6=" + col6 + ", col7=" + col7 + ", col8=" + col8 + ", col10=" + col10 + ", col11=" + col11
+				+ ", col6=" + col6 + ", col7=" + col7 + ", col8=" + col8 + ", col10=" + col9 + ", col10=" + col10
 				+ ", rand=" + rand + "]";
 	}
 	
