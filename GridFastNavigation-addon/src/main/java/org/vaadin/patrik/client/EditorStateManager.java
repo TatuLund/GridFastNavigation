@@ -23,6 +23,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.VConsole;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.FocusUtil;
 import com.vaadin.client.widget.grid.DefaultEditorEventHandler;
@@ -104,6 +105,7 @@ public class EditorStateManager {
             if (open) {
                 final EventCellReference<?> cell = event.getCell();
                 event.getDomEvent().preventDefault();
+                VConsole.log("Row: "+cell.getRowIndex()+" column: "+cell.getColumnIndexDOM());
                 openEditor(cell.getRowIndex(), cell.getColumnIndexDOM()); // TODO: IndexDOM or Index?
             }
             
@@ -124,6 +126,7 @@ public class EditorStateManager {
             
             if (e.getTypeInt() == Event.ONCLICK) {
             	saveContent();
+                VConsole.log("Row: "+cell.getRowIndex()+" column: "+cell.getColumnIndexDOM());
                 openEditor(cell.getRowIndex(), cell.getColumnIndexDOM());
                 return true;
             }
@@ -201,6 +204,7 @@ public class EditorStateManager {
                     // regarding single-column Grids, where close shortcuts will cancel changes.
                     // TODO: re-think this functionality when save-and-close shortcuts are available.
                     if (targetRow < 0) {
+                    	VConsole.log("Going to header, closing editor");
                         closeEditor(false);
                         targetRow = 0;
                     } else if (targetRow >= rowCount) {
@@ -441,12 +445,16 @@ public class EditorStateManager {
                 if (!disabledColumns.contains(currentCol)) {
                 
                     // Handle possible value reset of editor widget
+                	saveOldContent();
                     String buf = flushKeys();
                     if(!buf.trim().isEmpty() && !deletePressed) {
                         if (selectTextOnFocus) {
+                        	VConsole.log("setValue: "+buf);
                             EditorWidgets.setValue(editorWidget, buf);
                         } else {
-                            EditorWidgets.setValue(editorWidget, EditorWidgets.getValue(editorWidget) + buf);
+                        	String value = EditorWidgets.getValue(editorWidget) + buf;
+                        	VConsole.log("setValue: "+value);
+                            EditorWidgets.setValue(editorWidget, value);
                         }
                         
                     } else {
@@ -693,11 +701,19 @@ public class EditorStateManager {
     }
     
     public void saveOldContent() {
-        oldContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    	if (isEditorOpen()) {
+    		String value = EditorWidgets.getValue(getCurrentEditorWidget());
+    		VConsole.log("oldContent: "+value);
+    		oldContent = value;
+    	}
     }
 
     public void saveOldContent(int col) {
-        oldContent = EditorWidgets.getValue(getEditorWidgetForColumn(col));
+    	if (isEditorOpen()) {
+    		String value = EditorWidgets.getValue(getEditorWidgetForColumn(col));
+    		VConsole.log("oldContent: "+value);
+    		oldContent = value;
+    	}
     }
 
     public String getContent() {
@@ -705,7 +721,11 @@ public class EditorStateManager {
     }
 
     public void saveContent() {
-        newContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    	if (isEditorOpen()) {
+    		String value = EditorWidgets.getValue(getCurrentEditorWidget());
+    		VConsole.log("newContent: "+value);
+    		newContent = value;
+    	}
     }
     
     public String getOldContent() {
@@ -714,11 +734,14 @@ public class EditorStateManager {
 
     public void resetContent() {
     	newContent = oldContent;
+    	VConsole.log("newContent: "+newContent);
     }
     
     public void notifyIfDataChanged(int row, int col) {
     	if (isEditorOpen()) {
+        	VConsole.log("Compare: "+oldContent+" with "+newContent);
     		if ((oldContent != null) && !oldContent.equals(newContent)) {
+            	VConsole.log("Compare: "+oldContent+" != "+newContent);
     			notifyDataChanged(newContent,row,col);
     		}
     	}
@@ -753,13 +776,16 @@ public class EditorStateManager {
         int col = getFocusedCol();
         
         if (cancel) {
-        	EditorWidgets.setValue(getEditorWidgetForColumn(col), oldContent);
+        	VConsole.log("Cancel pressed: replacing value with "+oldContent);
+        	EditorWidgets.setValue(getCurrentEditorWidget(), oldContent);
             editor.cancel();
         } else {
-            editor.save();
+        	VConsole.log("Compare: "+oldContent+" with "+newContent);
             if ((oldContent != null) && !oldContent.equals(newContent)) {
+            	VConsole.log("Compare: "+oldContent+" != "+newContent);
             	notifyDataChanged(newContent,row,col);
             }
+            editor.save();
         }
 
         notifyEditorClosed(row, col, cancel);
