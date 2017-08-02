@@ -249,7 +249,9 @@ public class DemoFastGrid extends Grid<DemoColumns>
 	{
 		// its an unbuffered editor so canceling doesn't lose data just closes the
 		// editor.
-		this.getEditor().cancel();
+		if (getEditor().isOpen()) {
+			getEditor().cancel();
+		}
 		demoList.add(new DemoColumns());
 		this.getDataProvider().refreshAll();
 	}
