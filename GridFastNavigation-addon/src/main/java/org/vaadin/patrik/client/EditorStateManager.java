@@ -438,7 +438,7 @@ public class EditorStateManager {
                 // Check required to avoid overwriting disabled editors
                 int currentCol = getFocusedCol();
                 if (!disabledColumns.contains(currentCol)) {
-                
+                	saveOldContent();
                     // Handle possible value reset of editor widget
                     String buf = flushKeys();
                     if(!buf.trim().isEmpty() && !deletePressed) {
@@ -692,11 +692,15 @@ public class EditorStateManager {
     }
     
     public void saveOldContent() {
-        oldContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    	if (isEditorOpen()) {
+    		oldContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    	}
     }
 
     public void saveOldContent(int col) {
-        oldContent = EditorWidgets.getValue(getEditorWidgetForColumn(col));
+    	if (isEditorOpen()) {
+    		oldContent = EditorWidgets.getValue(getEditorWidgetForColumn(col));
+    	}
     }
 
     public String getContent() {
@@ -704,7 +708,9 @@ public class EditorStateManager {
     }
 
     public void saveContent() {
-        newContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    	if (isEditorOpen()) {
+    		newContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    	}
     }
     
     public String getOldContent() {
