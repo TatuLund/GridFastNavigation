@@ -205,7 +205,7 @@ public class EditorStateManager {
                     // TODO: re-think this functionality when save-and-close shortcuts are available.
                     if (targetRow < 0) {
                     	VConsole.log("Going to header, closing editor");
-                        closeEditor(false);
+                    	saveEditor(event);
                         targetRow = 0;
                     } else if (targetRow >= rowCount) {
                     	if (changeColumnAfterLastRow) {
@@ -219,11 +219,11 @@ public class EditorStateManager {
                             if (targetCol >= columnCount) {
                             	targetCol = columnCount-1;
                             	targetRow = rowCount-1;
-                        		closeEditor(false);
+                            	saveEditor(event);
                         		move = false;
                             }
                     	} else {
-                    		closeEditor(false);
+                    	    saveEditor(event);
                     		targetRow = rowCount - 1;
                     	}
                     } else {
@@ -259,6 +259,14 @@ public class EditorStateManager {
             }
 
             return false;        
+        }
+
+        // This is a hack to work around the issue that unbuffered editor cannot
+        // be closed by calling save() since validation isn't executed and so
+        // neither success() nor failure() is called, resulting a timeout
+        private void saveEditor(EditorDomEvent<Object> event) {
+    	    triggerValueChange(event);
+    	    closeEditor(true);
         }
 
         @Override
