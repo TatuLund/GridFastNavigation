@@ -53,6 +53,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 0.5.7
+- Made opening by single click configurable
+- Bugfixes 
+
 ### Version 0.5.6
 - Editor will be enabled also by delete key, and the existing value will be deleted.
 

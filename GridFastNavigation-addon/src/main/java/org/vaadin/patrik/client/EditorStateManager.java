@@ -85,7 +85,7 @@ public class EditorStateManager {
             boolean open = false;
             deletePressed = false;
             
-            if (isOpenEvent(event) || isClickEvent(event)) {
+            if (isOpenEvent(event) || (openEditorWithSingleClick && isClickEvent(event))) {
                 open = true;
             } else if (isKeyPressEvent(event)) {
                 if (openShortcuts.contains(key)) {
@@ -329,6 +329,7 @@ public class EditorStateManager {
     private boolean useExternalLocking = false;
     
     private boolean openEditorOnType = true;
+    private boolean openEditorWithSingleClick = true;
     private boolean allowTabRowChange = true;
     private boolean allowArrowRowChange = true;
     private boolean selectTextOnFocus = true;
@@ -652,6 +653,10 @@ public class EditorStateManager {
         }
     }
 
+    public void setOpenEditorWithSingleClick(boolean enable) {
+    	openEditorWithSingleClick = enable;
+    }
+    
     // If set to true, text is selected when editor is opened
     public void setSelectTextOnFocus(boolean enable) {
         selectTextOnFocus = enable;

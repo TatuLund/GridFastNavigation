@@ -101,6 +101,11 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
     	return (number < 0) ? -number : number;
     }
     
+    @OnStateChange("openEditorWithSingleClick")
+    void openEditorWithSingleClick() {
+        editorManager.setOpenEditorWithSingleClick(getState().openEditorWithSingleClick);
+    }
+    
     @OnStateChange("changeColumnAfterLastRow")
     void changeColumnAfterLastRow() {
         editorManager.setChangeColumnAfterLastRow(getState().changeColumnAfterLastRow);
