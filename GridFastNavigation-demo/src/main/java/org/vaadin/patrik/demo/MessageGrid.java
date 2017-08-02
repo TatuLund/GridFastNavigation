@@ -46,7 +46,8 @@ public class MessageGrid extends Grid<ServerMessage> implements MessageLog
 				ServerMessage message = new ServerMessage(msg);
 				messageList.add(message);
 				messageData.refreshItem(message);
-				MessageGrid.this.scrollTo(messageList.size() - 1);
+				scrollTo(messageList.size() - 1);
+				System.out.println(messageList.size()-1);
 			}
 		});
 	}

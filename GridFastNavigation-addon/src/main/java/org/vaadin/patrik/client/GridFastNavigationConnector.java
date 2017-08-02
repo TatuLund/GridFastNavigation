@@ -99,6 +99,11 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         updateFocusTracking();
     }
 
+    @OnStateChange("openEditorWithSingleClick")
+    void openEditorWithSingleClick() {
+    	editorManager.setOpenEditorWithSingleClick(getState().openEditorWithSingleClick);
+    }
+    
     @OnStateChange("changeColumnAfterLastRow")
     void changeColumnAfterLastRow() {
         editorManager.setChangeColumnAfterLastRow(getState().changeColumnAfterLastRow);
