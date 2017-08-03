@@ -12,7 +12,6 @@ import org.vaadin.patrik.shared.FastNavigationState;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ServerConnector;
-import com.vaadin.client.VConsole;
 import com.vaadin.client.annotations.OnStateChange;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
 import com.vaadin.client.widgets.Grid;
@@ -85,7 +84,6 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
             @Override
             public void focusMoved(int currentRow, int currentCol, int lastRow,
                     int lastCol) {
-            	VConsole.log("Row: "+currentRow+" col: "+currentCol);;
             	editorManager.notifyIfDataChanged(lastRow, lastCol);
             	editorManager.saveOldContent(currentCol);
                 if(getState().hasFocusListener) {
