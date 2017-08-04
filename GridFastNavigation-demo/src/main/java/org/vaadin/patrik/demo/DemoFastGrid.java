@@ -30,7 +30,9 @@ import com.vaadin.data.converter.StringToFloatConverter;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ValueChangeMode;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
@@ -38,18 +40,18 @@ import com.vaadin.ui.DateTimeField;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.DateRenderer;
 
 public class DemoFastGrid extends Grid<DemoColumns>
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	final List<DemoColumns> demoList;
 	final ListDataProvider<DemoColumns> demoData;
-	
+
 	private MessageLog messageLog;
-	
-	
+
 	DemoFastGrid(MessageLog messageLog)
 	{
 		super("Fast Navigation Grid");
@@ -60,19 +62,18 @@ public class DemoFastGrid extends Grid<DemoColumns>
 		this.setDataProvider(demoData);
 		this.getEditor().setEnabled(true);
 		this.getEditor().setBuffered(false);
-		
+
 		initNavigation();
-		
+
 		bindColumnsToEditor();
 
 	}
-	
+
 	private void initNavigation()
 	{
 		FastNavigation nav = new FastNavigation(this, false);
 		nav.setChangeColumnAfterLastRow(true);
 
-		
 		nav.addRowEditListener(new RowEditListener()
 		{
 			@Override
@@ -86,6 +87,22 @@ public class DemoFastGrid extends Grid<DemoColumns>
 
 			}
 		});
+
+		Button btnAddPart = new Button("Add Part");
+		btnAddPart.setDescription("Add a new part");
+		btnAddPart.setIcon(VaadinIcons.PLUS_CIRCLE); // "Add Part");
+
+		btnAddPart.addClickListener(e -> {
+			addDemoRow();
+		});
+
+		this.addColumn(action -> "Delete", new ButtonRenderer<DemoColumns>(clickEvent -> {
+			if (this.getEditor().isOpen())
+				this.getEditor().cancel();
+
+			demoList.remove(clickEvent.getItem());
+			this.getDataProvider().refreshAll();
+		})).setCaption("Action").setWidth(100);
 
 		// Open with F2
 		nav.addEditorOpenShortcut(KeyCode.F2);
@@ -143,10 +160,23 @@ public class DemoFastGrid extends Grid<DemoColumns>
 		});
 		messageLog.writeOutput("Added editor close listener");
 	}
- 
-	
+
+	private void addDemoRow()
+	{
+		// its an unbuffered editor so canceling doesn't lose data just
+		// closes the
+		// editor.
+		if (this.getEditor().isOpen())
+			this.getEditor().cancel();
+
+		DemoColumns part = new DemoColumns();
+		demoList.add(part);
+		this.getDataProvider().refreshAll();
+	}
+
 	/**
-	 * We bind each column to a field (shared by all rows) so that we can edit each cell.
+	 * We bind each column to a field (shared by all rows) so that we can edit
+	 * each cell.
 	 */
 	private void bindColumnsToEditor()
 	{
@@ -164,9 +194,8 @@ public class DemoFastGrid extends Grid<DemoColumns>
 
 		col10.setDataProvider(new ListDataProvider<String>(Arrays.asList(options)));
 
-		
 		Binder<DemoColumns> binder = this.getEditor().getBinder();
-		
+
 		// Col1 simple string
 		Binding<DemoColumns, String> col1Binding = binder.forField(col1).bind(DemoColumns::getCol1,
 				DemoColumns::setCol1);
@@ -176,63 +205,59 @@ public class DemoFastGrid extends Grid<DemoColumns>
 		this.addColumn(DemoColumns::getCol2).setCaption("No Edits").setWidth(150);
 
 		// Col3 Integer
-		Binding<DemoColumns, Integer> col3Binding = binder.forField(col3)
-				.withNullRepresentation("")
+		Binding<DemoColumns, Integer> col3Binding = binder.forField(col3).withNullRepresentation("")
 				.withConverter(new StringToIntegerConverter("Must enter a number"))
 				.bind(DemoColumns::getCol3, DemoColumns::setCol3);
 		this.addColumn(DemoColumns::getCol3).setCaption("Integer").setWidth(150).setEditorBinding(col3Binding);
 
 		// Col4 Float
-		Binding<DemoColumns, Float> col4Binding = binder.forField(col4)
-				.withNullRepresentation("")
+		Binding<DemoColumns, Float> col4Binding = binder.forField(col4).withNullRepresentation("")
 				.withConverter(new StringToFloatConverter("Must enter a number"))
 				.bind(DemoColumns::getCol4, DemoColumns::setCol4);
 		this.addColumn(DemoColumns::getCol4).setCaption("Float").setWidth(100).setEditorBinding(col4Binding);
 
 		// Col 5 Integer
-		Binding<DemoColumns, Integer> col5Binding = binder.forField(col5)
-				.withNullRepresentation("")
+		Binding<DemoColumns, Integer> col5Binding = binder.forField(col5).withNullRepresentation("")
 				.withConverter(new StringToIntegerConverter("Must enter a number"))
 				.bind(DemoColumns::getCol5, DemoColumns::setCol5);
 		this.addColumn(DemoColumns::getCol5).setCaption("Integer (2)").setWidth(100).setEditorBinding(col5Binding);
 
 		// Col6 Integer(3)
-		Binding<DemoColumns, Integer> col6Binding = binder.forField(col6)
-				.withNullRepresentation("")
+		Binding<DemoColumns, Integer> col6Binding = binder.forField(col6).withNullRepresentation("")
 				.withConverter(new StringToIntegerConverter("Must enter a number"))
 				.bind(DemoColumns::getCol6, DemoColumns::setCol6);
 		this.addColumn(DemoColumns::getCol6).setCaption("Col6").setWidth(100).setEditorBinding(col6Binding);
 
-		
 		// Col 7 DateTime
 		// Need a zoneoffset for datetimefield
-		OffsetDateTime odt = OffsetDateTime.now ( ZoneId.systemDefault () );
-		ZoneOffset zoneOffset = odt.getOffset ();
-		
-		SimpleDateFormat dateTimeFormat = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, UI.getCurrent().getLocale());
-		Binding<DemoColumns, Date> col7Binding = binder.forField(col7).withConverter(new LocalDateTimeToDateConverter(zoneOffset))
-				.bind(DemoColumns::getCol7, DemoColumns::setCol7);
-		this.addColumn(DemoColumns::getCol7).setCaption("Date Time")
-			.setWidth(180).setEditorBinding(col7Binding)
-			.setRenderer(new DateRenderer(dateTimeFormat));
+		OffsetDateTime odt = OffsetDateTime.now(ZoneId.systemDefault());
+		ZoneOffset zoneOffset = odt.getOffset();
 
-		
+		SimpleDateFormat dateTimeFormat = (SimpleDateFormat) DateFormat.getDateTimeInstance(DateFormat.SHORT,
+				DateFormat.SHORT, UI.getCurrent().getLocale());
+		Binding<DemoColumns, Date> col7Binding = binder.forField(col7)
+				.withConverter(new LocalDateTimeToDateConverter(zoneOffset))
+				.bind(DemoColumns::getCol7, DemoColumns::setCol7);
+		this.addColumn(DemoColumns::getCol7).setCaption("Date Time").setWidth(180).setEditorBinding(col7Binding)
+				.setRenderer(new DateRenderer(dateTimeFormat));
+
 		// col 8 Date
 		Binding<DemoColumns, Date> col8Binding = binder.forField(col8).withConverter(new LocalDateToDateConverter())
-				.bind(DemoColumns::getCol8,
-				DemoColumns::setCol8);
-		
-		SimpleDateFormat dateFormat = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT, UI.getCurrent().getLocale());
+				.bind(DemoColumns::getCol8, DemoColumns::setCol8);
+
+		SimpleDateFormat dateFormat = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT,
+				UI.getCurrent().getLocale());
 		this.addColumn(DemoColumns::getCol8).setCaption("Date").setWidth(120).setEditorBinding(col8Binding)
-		.setRenderer(new DateRenderer(dateFormat));
+				.setRenderer(new DateRenderer(dateFormat));
 
 		// Col 9 Boolean
-		Binding<DemoColumns, Boolean> col10Binding = binder.forField(col9)
-				.bind(DemoColumns::getCol9, DemoColumns::setCol9);
+		Binding<DemoColumns, Boolean> col10Binding = binder.forField(col9).bind(DemoColumns::getCol9,
+				DemoColumns::setCol9);
 		this.addColumn(DemoColumns::getCol9).setCaption("Boolean").setWidth(150).setEditorBinding(col10Binding);
 
 		// Col 10 Combobox.
-		Binding<DemoColumns, String> col11Binding = binder.forField(col10).bind(DemoColumns::getCol10, DemoColumns::setCol10);
+		Binding<DemoColumns, String> col11Binding = binder.forField(col10).bind(DemoColumns::getCol10,
+				DemoColumns::setCol10);
 		this.addColumn(DemoColumns::getCol10).setCaption("Combobox").setWidth(150).setEditorBinding(col11Binding);
 
 		for (int i = 0; i < 5; ++i)
@@ -245,31 +270,35 @@ public class DemoFastGrid extends Grid<DemoColumns>
 		this.setSizeFull();
 	}
 
-	private TextField createTextField(ValueChangeMode valueChangeMode) {
+	private TextField createTextField(ValueChangeMode valueChangeMode)
+	{
 		TextField textField = new TextField();
 		textField.setValueChangeMode(valueChangeMode);
 		return textField;
 	}
 
-	// Add a blank row to the grid and tell the grid to refresh itself showing the new row.
+	// Add a blank row to the grid and tell the grid to refresh itself showing
+	// the new row.
 	public void addBlankRow()
 	{
-		// its an unbuffered editor so canceling doesn't lose data just closes the
+		// its an unbuffered editor so canceling doesn't lose data just closes
+		// the
 		// editor.
-		if (getEditor().isOpen()) {
+		if (getEditor().isOpen())
+		{
 			getEditor().cancel();
 		}
 		demoList.add(new DemoColumns());
 		this.getDataProvider().refreshAll();
 	}
-	
 
 	private void printChangedRow(int rowIndex)
 	{
-		DemoColumns rowData = demoList.get(rowIndex);
-		messageLog.writeOutput("Row " + rowIndex + " changed to: " + rowData);
+		if (demoList.size() >= rowIndex)
+		{
+			DemoColumns rowData = demoList.get(rowIndex);
+			messageLog.writeOutput("Row " + rowIndex + " changed to: " + rowData);
+		}
 	}
-
-
 
 }
