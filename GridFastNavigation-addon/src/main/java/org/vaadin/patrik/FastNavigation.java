@@ -170,6 +170,19 @@ public class FastNavigation extends AbstractExtension {
     }
 
     /**
+     * If set to true (default = true), editor opens with single mouse click.
+     * 
+     * @param enable
+     */
+    public void setOpenEditorWithSingleClick(boolean enable) {
+      	getState().openEditorWithSingleClick = enable;
+    }
+    
+    public boolean getOpenEditorWithSingleClick() {
+        return getState().openEditorWithSingleClick;
+    }
+
+    /**
      * If set to true (default = false), pressing enter on last row will change
      * focus to first row and change column to next editable column. Not applicable
      * if enter key is set to change column instead of row.

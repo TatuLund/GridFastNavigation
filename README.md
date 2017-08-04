@@ -53,64 +53,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
-### Version 0.5.6
-- Editor will be enabled also by delete key, and the existing value will be deleted.
-
-### Version 0.5.5
-- Fixed minor issue: row edit event not triggered when in bottom right corner
-- Fixed issue with mouse navigation producing excess row edit events
-
-### Version 0.5.4
-- Added option to change column when enter key is pressed on last row (provided that enter key is in row change mode)
-- Added more java docs
-- Small bug fix with potential index out of bounds issue
-
-### Version 0.5.3
-- Small fix. Editor is now opened with single click also.
-
-### Version 0.5.2
-- Added support for pageup/down keys in edit mode.
-- Added possibility configure enter key to change column instead of row
-- Updated the demo
-
-### Version 0.5.1
-- Added support for ComboBox in the edit fields of the editor.
-- Updated the demo
-
-### Version 0.5.0
-- Added support for CheckBox in the edit fields of the editor.
-- Updated the demo
-
-### Version 0.4.0
-- Fixed to be compatible with 7.7.7 and newer. With older framework versions (7.6.0 to 7.7.6) you need to use 0.3.0
-
-### Version 0.3.0
-- Implemented the RowEditEvent and CellEditEvent logic
-- Fixed a bug: Pressing Esc should cancel edit and reset the value
-- Added Home/End key support: Home - first row, End - last row, Shift+Home - first column on first row, Shift+End last column on last row
-
-### Version 0.2.1:
-
-Moving editor outside the first or last row will cause the editor to save and close. This fixes a usability issue with single-row Grids. Future versions will have this behavior toggleable, once I introduce explicit save-and-close shortcuts.
-
-### Version 0.2.0
-
-- Complete rewrite and architectural redesign
-- Customizable open and close shortcuts
-- Server-side focus tracking events either on per-cell or per-row basis
-- Editor open/close events
-- Opening editor by typing can be enabled and disabled
-- Keyboard up/down arrow navigation can be enabled and disabled
-- DateFields now don't stop working after using up/down arrow navigation
-- Selecting text when opening editor can be enabled and disabled
-- Tab navigation now skips disabled columns
-- Additional columns can be disabled on a per-row basis using editor open event
-
-NOTE: server-side notification of changed data has been removed (for now), but can be emulated using editor open/close events, which are now sent per row.
-
-### Version 0.1-SNAPSHOT
-
-- Initial release. Expect dragons. :)
+### Version 2.0.0
+- First version for Vaadin 8
+- Features on par with version 0.5.7
+- Demo updated 
 
 ## Issue tracking
 
@@ -130,5 +76,5 @@ Contributions are welcome, but there are no guarantees that they are accepted as
 
 Add-on is distributed under Apache License 2.0. For license terms, see LICENSE.txt.
 
-GridFastNavigation is written by Patrik Lindström, Tatu Lund and Johannes Tuikkala and maintained by the Tatu
+GridFastNavigation is written by Patrik Lindström, Tatu Lund and Johannes Tuikkala and maintained by the Tatu. Vaadin 8 migration initial work was contributed by Brett Sutton.
 

@@ -30,6 +30,7 @@ import com.vaadin.data.converter.StringToFloatConverter;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
@@ -149,11 +150,11 @@ public class DemoFastGrid extends Grid<DemoColumns>
 	 */
 	private void bindColumnsToEditor()
 	{
-		TextField col1 = new TextField();
-		TextField col3 = new TextField();
-		TextField col4 = new TextField();
-		TextField col5 = new TextField();
-		TextField col6 = new TextField();
+		TextField col1 = createTextField(ValueChangeMode.BLUR);
+		TextField col3 = createTextField(ValueChangeMode.BLUR);
+		TextField col4 = createTextField(ValueChangeMode.BLUR);
+		TextField col5 = createTextField(ValueChangeMode.BLUR);
+		TextField col6 = createTextField(ValueChangeMode.BLUR);
 		DateTimeField col7 = new DateTimeField();
 		DateField col8 = new DateField();
 		CheckBox col9 = new CheckBox();
@@ -244,12 +245,20 @@ public class DemoFastGrid extends Grid<DemoColumns>
 		this.setSizeFull();
 	}
 
+	private TextField createTextField(ValueChangeMode valueChangeMode) {
+		TextField textField = new TextField();
+		textField.setValueChangeMode(valueChangeMode);
+		return textField;
+	}
+
 	// Add a blank row to the grid and tell the grid to refresh itself showing the new row.
 	public void addBlankRow()
 	{
 		// its an unbuffered editor so canceling doesn't lose data just closes the
 		// editor.
-		this.getEditor().cancel();
+		if (getEditor().isOpen()) {
+			getEditor().cancel();
+		}
 		demoList.add(new DemoColumns());
 		this.getDataProvider().refreshAll();
 	}

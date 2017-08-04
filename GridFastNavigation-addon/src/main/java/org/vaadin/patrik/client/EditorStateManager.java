@@ -85,7 +85,7 @@ public class EditorStateManager {
             boolean open = false;
             deletePressed = false;
             
-            if (isOpenEvent(event) || isClickEvent(event)) {
+            if (isOpenEvent(event) || (openEditorWithSingleClick && isClickEvent(event))) {
                 open = true;
             } else if (isKeyPressEvent(event)) {
                 if (openShortcuts.contains(key)) {
@@ -201,7 +201,7 @@ public class EditorStateManager {
                     // regarding single-column Grids, where close shortcuts will cancel changes.
                     // TODO: re-think this functionality when save-and-close shortcuts are available.
                     if (targetRow < 0) {
-                        closeEditor(false);
+                    	saveEditor(event);
                         targetRow = 0;
                     } else if (targetRow >= rowCount) {
                     	if (changeColumnAfterLastRow) {
@@ -215,11 +215,11 @@ public class EditorStateManager {
                             if (targetCol >= columnCount) {
                             	targetCol = columnCount-1;
                             	targetRow = rowCount-1;
-                        		closeEditor(false);
+                            	saveEditor(event);
                         		move = false;
                             }
                     	} else {
-                    		closeEditor(false);
+                    	    saveEditor(event);
                     		targetRow = rowCount - 1;
                     	}
                     } else {
@@ -255,6 +255,14 @@ public class EditorStateManager {
             }
 
             return false;        
+        }
+
+        // This is a hack to work around the issue that unbuffered editor cannot
+        // be closed by calling save() since validation isn't executed and so
+        // neither success() nor failure() is called, resulting a timeout
+        private void saveEditor(EditorDomEvent<Object> event) {
+    	    triggerValueChange(event);
+    	    closeEditor(true);
         }
 
         @Override
@@ -330,6 +338,7 @@ public class EditorStateManager {
     private boolean useExternalLocking = false;
     
     private boolean openEditorOnType = true;
+    private boolean openEditorWithSingleClick = true;
     private boolean allowTabRowChange = true;
     private boolean allowArrowRowChange = true;
     private boolean selectTextOnFocus = true;
@@ -441,12 +450,14 @@ public class EditorStateManager {
                 if (!disabledColumns.contains(currentCol)) {
                 
                     // Handle possible value reset of editor widget
+                	saveOldContent();
                     String buf = flushKeys();
                     if(!buf.trim().isEmpty() && !deletePressed) {
                         if (selectTextOnFocus) {
                             EditorWidgets.setValue(editorWidget, buf);
                         } else {
-                            EditorWidgets.setValue(editorWidget, EditorWidgets.getValue(editorWidget) + buf);
+                        	String value = EditorWidgets.getValue(editorWidget) + buf;
+                            EditorWidgets.setValue(editorWidget, value);
                         }
                         
                     } else {
@@ -653,6 +664,10 @@ public class EditorStateManager {
         }
     }
 
+    public void setOpenEditorWithSingleClick(boolean enable) {
+    	openEditorWithSingleClick = enable;
+    }
+    
     // If set to true, text is selected when editor is opened
     public void setSelectTextOnFocus(boolean enable) {
         selectTextOnFocus = enable;
@@ -693,11 +708,17 @@ public class EditorStateManager {
     }
     
     public void saveOldContent() {
-        oldContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    	if (isEditorOpen()) {
+    		String value = EditorWidgets.getValue(getCurrentEditorWidget());
+    		oldContent = value;
+    	}
     }
 
     public void saveOldContent(int col) {
-        oldContent = EditorWidgets.getValue(getEditorWidgetForColumn(col));
+    	if (isEditorOpen()) {
+    		String value = EditorWidgets.getValue(getEditorWidgetForColumn(col));
+    		oldContent = value;
+    	}
     }
 
     public String getContent() {
@@ -705,7 +726,10 @@ public class EditorStateManager {
     }
 
     public void saveContent() {
-        newContent = EditorWidgets.getValue(getCurrentEditorWidget());
+    	if (isEditorOpen()) {
+    		String value = EditorWidgets.getValue(getCurrentEditorWidget());
+    		newContent = value;
+    	}
     }
     
     public String getOldContent() {
@@ -753,13 +777,13 @@ public class EditorStateManager {
         int col = getFocusedCol();
         
         if (cancel) {
-        	EditorWidgets.setValue(getEditorWidgetForColumn(col), oldContent);
+        	EditorWidgets.setValue(getCurrentEditorWidget(), oldContent);
             editor.cancel();
         } else {
-            editor.save();
             if ((oldContent != null) && !oldContent.equals(newContent)) {
             	notifyDataChanged(newContent,row,col);
             }
+            editor.save();
         }
 
         notifyEditorClosed(row, col, cancel);
