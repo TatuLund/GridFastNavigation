@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.vaadin.patrik.DeleteButtonRenderer;
 import org.vaadin.patrik.FastNavigation;
 import org.vaadin.patrik.FastNavigation.CellFocusListener;
 import org.vaadin.patrik.FastNavigation.EditorCloseListener;
@@ -96,7 +97,7 @@ public class DemoFastGrid extends Grid<DemoColumns>
 			addDemoRow();
 		});
 
-		this.addColumn(action -> "Delete", new ButtonRenderer<DemoColumns>(clickEvent -> {
+		this.addColumn(action -> "Delete", new DeleteButtonRenderer<DemoColumns>(clickEvent -> {
 			if (this.getEditor().isOpen())
 				this.getEditor().cancel();
 
