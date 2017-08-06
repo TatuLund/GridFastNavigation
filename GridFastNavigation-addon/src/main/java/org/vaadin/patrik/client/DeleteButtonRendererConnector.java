@@ -30,12 +30,10 @@ public class DeleteButtonRendererConnector extends ClickableRendererConnector<St
     public class DeleteButtonClientRenderer extends ClickableRenderer<String, Button> {
 
         private boolean htmlContentAllowed = false;
-        private String backgroundColor = null;
         
         @Override
         public Button createWidget() {
             Button b = GWT.create(Button.class);
-			backgroundColor = b.getElement().getStyle().getBackgroundColor();
             
             b.addClickHandler(new ClickHandler() {
             	@Override
@@ -43,6 +41,8 @@ public class DeleteButtonRendererConnector extends ClickableRendererConnector<St
                     Timer t = null;
             		String style = b.getStyleName();
             		if (style != null && style.contains("delete-confirm")) {
+            			// If button is in cofirmed state, timer needs to be stopped
+            			// and click event needs to be emitted
             			if (t != null) t.cancel();
             			b.removeStyleName("delete-confirm");
             			b.setText(getState().delete);
@@ -50,12 +50,15 @@ public class DeleteButtonRendererConnector extends ClickableRendererConnector<St
             	                .buildMouseEventDetails(event.getNativeEvent(),
             	                        b.getElement());
             			Element e = b.getElement();
-            			e.getStyle().setBackgroundColor(backgroundColor);
             			rpc.onClick(e.getPropertyString("rowKey"),mouseEventDetails);
             		} else {
+            			// At first click we change button to confirm mode,
+            			// change text accordingly and add style name, so
+            			// that accent can be defined in theme
             			b.setText(getState().confirm);
             			b.setStyleName("delete-confirm");
-            			b.getElement().getStyle().setBackgroundColor("red");
+            			// Set timer 10 sec, if not clicked by then, go
+            			// back to normal mode
             			t = new Timer() {
             				@Override
             				public void run() {
@@ -94,7 +97,6 @@ public class DeleteButtonRendererConnector extends ClickableRendererConnector<St
     		String style = button.getStyleName();
     		if (style != null && style.contains("delete-confirm")) {
     			button.removeStyleName("delete-confirm");
-    			button.getElement().getStyle().setBackgroundColor(backgroundColor);
     		}
 			button.setText(getState().delete);
     		

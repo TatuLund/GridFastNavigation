@@ -19,10 +19,9 @@ import com.vaadin.util.ReflectTools;
 public class DeleteButtonRenderer<T> extends ClickableRenderer<T, String> {
 
     /**
-     * An interface for listening to {@link RendererClickEvent renderer click
+     * An interface for listening to {@link DeleteRendererClickEvent renderer click
      * events}.
      *
-     * @see ButtonRenderer#addClickListener(RendererClickListener)
      */
     @FunctionalInterface
     public interface DeleteRendererClickListener<T> extends ConnectorEventListener {
@@ -40,7 +39,7 @@ public class DeleteButtonRenderer<T> extends ClickableRenderer<T, String> {
     }
 
     /**
-     * An event fired when a clickable widget rendered by a ClickableRenderer is
+     * An event fired when a clickable widget rendered by a DeleteButtonRenderer is
      * clicked.
      *
      * @param <T>
@@ -62,7 +61,6 @@ public class DeleteButtonRenderer<T> extends ClickableRenderer<T, String> {
          * Returns the item of the row where the click event originated.
          *
          * @return the item of the clicked row
-         * @since 8.0
          */
         public T getItem() {
             return item;
@@ -113,7 +111,10 @@ public class DeleteButtonRenderer<T> extends ClickableRenderer<T, String> {
     }
 
     /**
-     * Creates a new button renderer.
+     * Creates a new delete button renderer.
+     * 
+     * Delete button renderer creates two stage Delete - Confirm button
+     * When in confirm state "delete-confirm" stylename is set.
      */
     public DeleteButtonRenderer() {
         this("Delete","Confirm");

@@ -53,6 +53,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.0
+- Added DeleteButtonRenderer
+- Demo updated 
+
 ### Version 2.0.0
 - First version for Vaadin 8
 - Features on par with version 0.5.7
