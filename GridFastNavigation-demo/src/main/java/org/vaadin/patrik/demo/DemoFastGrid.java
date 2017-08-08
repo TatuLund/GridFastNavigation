@@ -97,13 +97,15 @@ public class DemoFastGrid extends Grid<DemoColumns>
 			addDemoRow();
 		});
 
-		this.addColumn(action -> "Delete", new DeleteButtonRenderer<DemoColumns>(clickEvent -> {
+		DeleteButtonRenderer<DemoColumns> deleteButton = new DeleteButtonRenderer<DemoColumns>(clickEvent -> {
 			if (this.getEditor().isOpen())
 				this.getEditor().cancel();
 
 			demoList.remove(clickEvent.getItem());
 			this.getDataProvider().refreshAll();
-		})).setCaption("Action").setWidth(100);
+		},VaadinIcons.TRASH.getHtml()+" Delete",VaadinIcons.CHECK.getHtml()+" Confirm");
+		deleteButton.setHtmlContentAllowed(true);
+		this.addColumn(action -> "Delete",deleteButton).setCaption("Action").setWidth(120);
 
 		// Open with F2
 		nav.addEditorOpenShortcut(KeyCode.F2);

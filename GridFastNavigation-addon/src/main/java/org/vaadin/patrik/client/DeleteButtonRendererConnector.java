@@ -45,7 +45,11 @@ public class DeleteButtonRendererConnector extends ClickableRendererConnector<St
             			// and click event needs to be emitted
             			if (t != null) t.cancel();
             			b.removeStyleName("delete-confirm");
-            			b.setText(getState().delete);
+    		        	if (htmlContentAllowed) {
+    		                b.setHTML(getState().delete);
+    		        	} else {
+    		        		b.setText(getState().delete);    		
+    		            }
             			MouseEventDetails mouseEventDetails = MouseEventDetailsBuilder
             	                .buildMouseEventDetails(event.getNativeEvent(),
             	                        b.getElement());
@@ -55,7 +59,11 @@ public class DeleteButtonRendererConnector extends ClickableRendererConnector<St
             			// At first click we change button to confirm mode,
             			// change text accordingly and add style name, so
             			// that accent can be defined in theme
-            			b.setText(getState().confirm);
+    		        	if (htmlContentAllowed) {
+    		                b.setHTML(getState().confirm);
+    		        	} else {
+    		        		b.setText(getState().confirm);    		
+    		            }
             			b.setStyleName("delete-confirm");
             			// Set timer 10 sec, if not clicked by then, go
             			// back to normal mode
@@ -63,7 +71,11 @@ public class DeleteButtonRendererConnector extends ClickableRendererConnector<St
             				@Override
             				public void run() {
             					b.removeStyleName("delete-confirm");
-            					b.setText(getState().delete);
+            		        	if (htmlContentAllowed) {
+            		                b.setHTML(getState().delete);
+            		        	} else {
+            		        		b.setText(getState().delete);    		
+            		            }
             					Element e = b.getElement();
             				}
             			};
@@ -98,12 +110,10 @@ public class DeleteButtonRendererConnector extends ClickableRendererConnector<St
     		if (style != null && style.contains("delete-confirm")) {
     			button.removeStyleName("delete-confirm");
     		}
-			button.setText(getState().delete);
-    		
         	if (htmlContentAllowed) {
-                button.setHTML(text);
-            } else {
-                button.setText(text);
+                button.setHTML(getState().delete);
+        	} else {
+        		button.setText(getState().delete);    		
             }
         }
     }

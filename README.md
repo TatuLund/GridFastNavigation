@@ -53,6 +53,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.1
+- Fixed DeleteButtonRenderer: Html content mode support in client side was missing
+- Demo updated 
+
 ### Version 2.1.0
 - Added DeleteButtonRenderer
 - Demo updated 
