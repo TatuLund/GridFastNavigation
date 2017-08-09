@@ -24,10 +24,10 @@ import com.vaadin.shared.ui.Connect;
 import elemental.json.JsonObject;
 
 @Connect(org.vaadin.patrik.DeleteButtonRenderer.class)
-public class DeleteButtonRendererConnector extends ClickableRendererConnector<String> {
+public class DeleteButtonRendererConnector extends ClickableRendererConnector<Boolean> {
 	DeleteButtonRendererServerRpc rpc = RpcProxy.create(DeleteButtonRendererServerRpc.class, this);
 			
-    public class DeleteButtonClientRenderer extends ClickableRenderer<String, Button> {
+    public class DeleteButtonClientRenderer extends ClickableRenderer<Boolean, Button> {
 
         private boolean htmlContentAllowed = false;
         
@@ -97,7 +97,7 @@ public class DeleteButtonRendererConnector extends ClickableRendererConnector<St
         }
 
         @Override
-        public void render(RendererCellReference cell, String text, Button button) {
+        public void render(RendererCellReference cell, Boolean enable, Button button) {
 
 			Element e = button.getElement();
 
@@ -115,6 +115,7 @@ public class DeleteButtonRendererConnector extends ClickableRendererConnector<St
         	} else {
         		button.setText(getState().delete);    		
             }
+        	button.setEnabled(enable);
         }
     }
     	    
@@ -124,7 +125,7 @@ public DeleteButtonClientRenderer getRenderer() {
 }
 
 @Override
-protected Renderer<String> createRenderer() {
+protected Renderer<Boolean> createRenderer() {
 	return new DeleteButtonClientRenderer();
 }
 

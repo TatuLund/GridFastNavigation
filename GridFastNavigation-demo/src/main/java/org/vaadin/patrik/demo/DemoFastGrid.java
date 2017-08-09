@@ -105,7 +105,7 @@ public class DemoFastGrid extends Grid<DemoColumns>
 			this.getDataProvider().refreshAll();
 		},VaadinIcons.TRASH.getHtml()+" Delete",VaadinIcons.CHECK.getHtml()+" Confirm");
 		deleteButton.setHtmlContentAllowed(true);
-		this.addColumn(action -> "Delete",deleteButton).setCaption("Action").setWidth(120);
+		this.addColumn(action -> true,deleteButton).setCaption("Action").setWidth(120);
 
 		// Open with F2
 		nav.addEditorOpenShortcut(KeyCode.F2);

@@ -16,7 +16,7 @@ import com.vaadin.ui.renderers.ClickableRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.util.ReflectTools;
 
-public class DeleteButtonRenderer<T> extends ClickableRenderer<T, String> {
+public class DeleteButtonRenderer<T> extends ClickableRenderer<T, Boolean> {
 
     /**
      * An interface for listening to {@link DeleteRendererClickEvent renderer click
@@ -87,7 +87,7 @@ public class DeleteButtonRenderer<T> extends ClickableRenderer<T, String> {
      *            text meaning confirm
      */
     public DeleteButtonRenderer(String delete, String confirm) {
-        super(String.class, "");
+        super(Boolean.class, "");
         getState().delete = delete;
         getState().confirm = confirm;
         setupRpc();
@@ -135,7 +135,7 @@ public class DeleteButtonRenderer<T> extends ClickableRenderer<T, String> {
     		public void onClick(String rowKey, MouseEventDetails mouseEventDetails) {
     	    	Grid<T> grid = getParentGrid();
     	        Object item = grid.getDataCommunicator().getKeyMapper().get(rowKey);
-    	        Column<T, String> column = getParent();
+    	        Column<T, Boolean> column = getParent();
     	        fireEvent(new DeleteRendererClickEvent(grid,item,column,mouseEventDetails));
     		}
     	});

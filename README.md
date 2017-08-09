@@ -53,6 +53,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.2
+- DeleteButtonRenderer, made it boolean type, so that property underneath controls whether the button is enabled or not
+
 ### Version 2.1.1
 - Fixed DeleteButtonRenderer: Html content mode support in client side was missing
 - Demo updated 
