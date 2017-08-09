@@ -53,6 +53,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 0.5.8
+- Added DeleteButtonRenderer to demo
+
 ### Version 0.5.7
 - Made opening by single click configurable
 - Bugfixes 

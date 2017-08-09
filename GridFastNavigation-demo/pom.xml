@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.patrik</groupId>
 	<artifactId>GridFastNavigation-demo</artifactId>
 	<packaging>war</packaging>
-	<version>0.5.7</version>
+	<version>0.5.8</version>
 	<name>GridFastNavigation Add-on Demo</name>
 
 	<properties>
@@ -89,6 +89,11 @@
 			<groupId>org.vaadin.patrik</groupId>
 			<artifactId>GridFastNavigation</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>grid-renderers-collection-addon</artifactId>
+			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
@@ -193,6 +198,42 @@
 			</plugin>
 
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.vaadin</groupId>
+										<artifactId>vaadin-maven-plugin</artifactId>
+										<versionRange>
+											[${vaadin.plugin.version},)
+										</versionRange>
+										<goals>
+											<goal>resources</goal>
+											<goal>update-widgetset</goal>
+											<goal>compile</goal>
+											<goal>update-theme</goal>
+											<goal>compile-theme</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	
 	</build>
 

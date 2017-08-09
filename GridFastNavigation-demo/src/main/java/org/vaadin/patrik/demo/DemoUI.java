@@ -7,6 +7,9 @@ import java.util.Random;
 
 import javax.servlet.annotation.WebServlet;
 
+import org.vaadin.grid.cellrenderers.action.DeleteButtonRenderer;
+import org.vaadin.grid.cellrenderers.action.DeleteButtonRenderer.DeleteRendererClickEvent;
+import org.vaadin.grid.cellrenderers.action.DeleteButtonRenderer.DeleteRendererClickListener;
 import org.vaadin.patrik.FastNavigation;
 import org.vaadin.patrik.FastNavigation.CellFocusListener;
 import org.vaadin.patrik.FastNavigation.EditorCloseListener;
@@ -26,6 +29,7 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Container.Indexed;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.ComboBox;
@@ -161,14 +165,26 @@ public class DemoUI extends UI {
         writeOutput("Added editor close listener");
     }
     
-    private void initGrid(Grid grid) {
+    private void initGrid(final Grid grid) {
         
         // Add some columns
+		DeleteButtonRenderer deleteButton = new DeleteButtonRenderer(new DeleteRendererClickListener() {
+			@Override
+			public void click(DeleteRendererClickEvent event) {
+				grid.getContainerDataSource().removeItem(event.getItem());
+			}
+			
+		},FontAwesome.TRASH.getHtml()+" Delete",FontAwesome.CHECK.getHtml()+" Confirm");
+		deleteButton.setHtmlContentAllowed(true);
+    	grid.addColumn("action", Boolean.class);
+    	grid.getColumn("action").setEditable(false);
+    	grid.getColumn("action").setRenderer(deleteButton);
+    	
         grid.addColumn("col1", String.class);
         grid.addColumn("col2", String.class);
         for (int i = 0; i < 5; ++i) {
             grid.addColumn("col" + (i + 3), Integer.class);
-        }
+        }	
         grid.addColumn("col8", Date.class);
         grid.addColumn("col10", Boolean.class);
         grid.addColumn("col11", String.class);
@@ -181,7 +197,7 @@ public class DemoUI extends UI {
         
         Random rand = new Random();
         for (int i = 0; i < 100; ++i) {
-            grid.addRow("string 1 " + i, "string 2 " + i, rand.nextInt(i + 10),
+            grid.addRow(true,"string 1 " + i, "string 2 " + i, rand.nextInt(i + 10),
                     rand.nextInt(i + 10), rand.nextInt(i + 10),
                     rand.nextInt(i + 10), rand.nextInt(i + 10), new Date(), false, "Medium");
         }
