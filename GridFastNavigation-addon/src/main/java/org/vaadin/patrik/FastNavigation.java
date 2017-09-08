@@ -80,24 +80,36 @@ public class FastNavigation extends AbstractExtension {
     /**
      * Default constructor. Enter key changes the row.
      * 
-     * @param g
+     * @param g Grid to extend
      */
     public FastNavigation(final Grid g) {
-    	setupFastNavigation(g,false);
+    	setupFastNavigation(g,false,false);
     }
 
     /**
      * Alternative constructor to set enter key change column instead of a row.
      * 
-     * @param g
-     * @param changeColumnOnEnter
+     * @param g Grid to extend
+     * @param changeColumnOnEnter Set Enter key behavior true = Enter changes the column like tab, false = Enter changes the row
      */
     public FastNavigation(final Grid g, boolean changeColumnOnEnter) {
-    	setupFastNavigation(g,changeColumnOnEnter);
+    	setupFastNavigation(g,changeColumnOnEnter,false);
     }
     
-    private void setupFastNavigation(final Grid g, boolean changeColumnOnEnter) {
+    /**
+     * Alternative constructor to set enter key change column instead of a row.
+     * 
+     * @param g Grid to extend
+     * @param changeColumnOnEnter Set Enter key behavior true = Enter changes the column like tab, false = Enter changes the row
+     * @param dispatchEditEventOnBlur Set Blur event behavior. If set to true, Editor is closed and possible Edit event is dispatched when user clicks outside Grid
+     */
+    public FastNavigation(final Grid g, boolean changeColumnOnEnter, boolean dispatchEditEventOnBlur) {
+    	setupFastNavigation(g,changeColumnOnEnter,dispatchEditEventOnBlur);
+    }
+    
+    private void setupFastNavigation(final Grid g, boolean changeColumnOnEnter, boolean dispatchEditEventOnBlur) {
     	getState().changeColumnOnEnter = changeColumnOnEnter;
+    	getState().dispatchEditEventOnBlur = dispatchEditEventOnBlur;
         g.setEditorBuffered(false);
         g.setEditorEnabled(true);
         
@@ -169,7 +181,6 @@ public class FastNavigation extends AbstractExtension {
         return (FastNavigationState) super.getState();
     }
 
-    
     /**
      * If set to true (default = true), editor opens with single mouse click.
      * 

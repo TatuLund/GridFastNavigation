@@ -53,6 +53,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 0.5.9
+- Added support for closing Editor and dispatching event when clicking outside of Grid.
+
 ### Version 0.5.8
 - Added DeleteButtonRenderer to demo
 

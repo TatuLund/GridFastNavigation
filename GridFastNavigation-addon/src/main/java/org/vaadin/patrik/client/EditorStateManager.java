@@ -23,6 +23,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.VConsole;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.FocusUtil;
 import com.vaadin.client.widget.grid.DefaultEditorEventHandler;
@@ -70,6 +71,7 @@ public class EditorStateManager {
         // It then also needs to handle that event.
         //
 
+    	
     	private boolean isClickEvent(EditorDomEvent<Object> event) {
     		final Event e = event.getDomEvent();
     		return e.getTypeInt() == Event.ONCLICK;
@@ -383,6 +385,32 @@ public class EditorStateManager {
                 }
             }
         }, KeyDownEvent.getType());
+
+        if (state.dispatchEditEventOnBlur) Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+           	@Override
+          	public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+           		if ((event.getTypeInt() == Event.ONMOUSEDOWN)) {
+                    int x1 = grid.getAbsoluteLeft();
+                    int y1 = grid.getAbsoluteTop();
+                    int y2 = y1 + grid.getOffsetHeight();
+                    int x2 = x1 + grid.getOffsetWidth();                    
+         			Event nativeEvent = Event.as(event.getNativeEvent());
+         			int ex = nativeEvent.getClientX();
+         			int ey = nativeEvent.getClientY();
+           			if (isEditorOpen() && !((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
+         				saveContent();
+                        Element focusedElement = WidgetUtil.getFocusedElement();
+                        Widget editorWidget = getCurrentEditorWidget();
+                        if (editorWidget.getElement().isOrHasChild(focusedElement)) {
+                            focusedElement.blur();
+                            focusedElement.focus();
+                        }
+           				closeEditor(false);
+           			}            			
+           		}
+           	}
+         });
+            
         
         // TODO: fix listening for keyboard while locked
     }
@@ -656,7 +684,7 @@ public class EditorStateManager {
     public void setOpenEditorWithSingleClick(boolean enable) {
     	openEditorWithSingleClick = enable;
     }
-    
+
     // If set to true, text is selected when editor is opened
     public void setSelectTextOnFocus(boolean enable) {
         selectTextOnFocus = enable;

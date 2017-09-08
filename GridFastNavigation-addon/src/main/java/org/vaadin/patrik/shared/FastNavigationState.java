@@ -38,6 +38,8 @@ public class FastNavigationState extends SharedState {
     
     public boolean openEditorWithSingleClick = true;
     
+    public boolean dispatchEditEventOnBlur = true;
+    
     public Set<Integer> openShortcuts = new HashSet<Integer>();
     
     public Set<Integer> closeShortcuts = new HashSet<Integer>();

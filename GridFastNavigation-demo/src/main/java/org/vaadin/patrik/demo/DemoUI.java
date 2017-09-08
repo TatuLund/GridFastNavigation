@@ -1,6 +1,5 @@
 package org.vaadin.patrik.demo;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Random;
@@ -32,6 +31,7 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
@@ -54,15 +54,13 @@ public class DemoUI extends UI {
 
     Table messageTable;
     IndexedContainer messageData;
-
     @Override
     protected void init(VaadinRequest vaadinRequest) {
         final VerticalLayout layout = new VerticalLayout();
         
         initMessageTable();
         
-        final Grid grid;
-        grid = new Grid();
+        final Grid grid = new Grid();
         initGrid(grid);
         initNavigation(grid);
         
@@ -101,7 +99,7 @@ public class DemoUI extends UI {
     }
     
     private void initNavigation(final Grid grid) {
-        FastNavigation nav = new FastNavigation(grid,false);
+        FastNavigation nav = new FastNavigation(grid,false,true);
         nav.setChangeColumnAfterLastRow(true);
         
         nav.addRowEditListener(new RowEditListener() {
@@ -129,7 +127,11 @@ public class DemoUI extends UI {
         nav.addRowFocusListener(new RowFocusListener() {
             @Override
             public void onEvent(RowFocusEvent event) {
+            	int row = event.getRow();
                 writeOutput("Focus moved to row " + event.getRow());
+                Indexed ds = grid.getContainerDataSource();
+                Object itemId = ds.getIdByIndex(row);
+                grid.select(itemId);
             }
         });
         writeOutput("Added row focus change listener");
@@ -201,7 +203,7 @@ public class DemoUI extends UI {
                     rand.nextInt(i + 10), rand.nextInt(i + 10),
                     rand.nextInt(i + 10), rand.nextInt(i + 10), new Date(), false, "Medium");
         }
-        grid.setSelectionMode(SelectionMode.NONE);
+        grid.setSelectionMode(SelectionMode.SINGLE);
         grid.setSizeFull();
     }
 
