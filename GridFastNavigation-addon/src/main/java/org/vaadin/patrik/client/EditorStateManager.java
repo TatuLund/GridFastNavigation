@@ -392,7 +392,32 @@ public class EditorStateManager {
                 }
             }
         }, KeyDownEvent.getType());
-        
+
+        if (state.dispatchEditEventOnBlur) Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+           	@Override
+          	public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+           		if ((event.getTypeInt() == Event.ONMOUSEDOWN)) {
+                    int x1 = grid.getAbsoluteLeft();
+                    int y1 = grid.getAbsoluteTop();
+                    int y2 = y1 + grid.getOffsetHeight();
+                    int x2 = x1 + grid.getOffsetWidth();                    
+         			Event nativeEvent = Event.as(event.getNativeEvent());
+         			int ex = nativeEvent.getClientX();
+         			int ey = nativeEvent.getClientY();
+           			if (isEditorOpen() && !((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
+         				saveContent();
+                        Element focusedElement = WidgetUtil.getFocusedElement();
+                        Widget editorWidget = getCurrentEditorWidget();
+                        if (editorWidget.getElement().isOrHasChild(focusedElement)) {
+                            focusedElement.blur();
+                            focusedElement.focus();
+                        }
+           				closeEditor(false);
+           			}            			
+           		}
+           	}
+         });
+                    
         // TODO: fix listening for keyboard while locked
     }
     
@@ -783,7 +808,7 @@ public class EditorStateManager {
             if ((oldContent != null) && !oldContent.equals(newContent)) {
             	notifyDataChanged(newContent,row,col);
             }
-            editor.save();
+            editor.cancel();
         }
 
         notifyEditorClosed(row, col, cancel);

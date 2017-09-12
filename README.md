@@ -53,6 +53,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.3
+- Added support for closing Editor and dispatching event when clicking outside of Grid.
+
 ### Version 2.1.2
 - DeleteButtonRenderer, made it boolean type, so that property underneath controls whether the button is enabled or not
 

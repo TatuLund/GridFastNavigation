@@ -72,7 +72,7 @@ public class DemoFastGrid extends Grid<DemoColumns>
 
 	private void initNavigation()
 	{
-		FastNavigation nav = new FastNavigation(this, false);
+		FastNavigation nav = new FastNavigation(this, false, true);
 		nav.setChangeColumnAfterLastRow(true);
 
 		nav.addRowEditListener(new RowEditListener()
