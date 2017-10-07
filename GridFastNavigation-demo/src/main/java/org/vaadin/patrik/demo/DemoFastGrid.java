@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.vaadin.patrik.DeleteButtonRenderer;
+import org.vaadin.grid.cellrenderers.action.DeleteButtonRenderer;
 import org.vaadin.patrik.FastNavigation;
 import org.vaadin.patrik.FastNavigation.CellFocusListener;
 import org.vaadin.patrik.FastNavigation.EditorCloseListener;
@@ -44,8 +44,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.DateRenderer;
 
-public class DemoFastGrid extends Grid<DemoColumns>
-{
+public class DemoFastGrid extends Grid<DemoColumns> {
 	private static final long serialVersionUID = 1L;
 
 	final List<DemoColumns> demoList;
@@ -53,8 +52,7 @@ public class DemoFastGrid extends Grid<DemoColumns>
 
 	private MessageLog messageLog;
 
-	DemoFastGrid(MessageLog messageLog)
-	{
+	DemoFastGrid(MessageLog messageLog) {
 		super("Fast Navigation Grid");
 		this.messageLog = messageLog;
 		demoList = new ArrayList<>();
@@ -70,20 +68,16 @@ public class DemoFastGrid extends Grid<DemoColumns>
 
 	}
 
-	private void initNavigation()
-	{
-		FastNavigation nav = new FastNavigation(this, false, true);
+	private void initNavigation() {
+		FastNavigation<DemoColumns> nav = new FastNavigation<>(this, false, true);
 		nav.setChangeColumnAfterLastRow(true);
 
-		nav.addRowEditListener(new RowEditListener()
-		{
+		nav.addRowEditListener(new RowEditListener() {
 			@Override
-			public void onEvent(RowEditEvent event)
-			{
+			public void onEvent(RowEditEvent<?> event) {
 				int rowIndex = event.getRowIndex();
-				if (rowIndex >= 0)
-				{
-					printChangedRow(rowIndex);
+				if (rowIndex >= 0) {
+					printChangedRow(rowIndex,(DemoColumns) event.getItem());
 				}
 
 			}
@@ -116,22 +110,18 @@ public class DemoFastGrid extends Grid<DemoColumns>
 		messageLog.writeOutput("Editor can also be closed with F3");
 
 		// Row focus change
-		nav.addRowFocusListener(new RowFocusListener()
-		{
+		nav.addRowFocusListener(new RowFocusListener() {
 			@Override
-			public void onEvent(RowFocusEvent event)
-			{
+			public void onEvent(RowFocusEvent event) {
 				messageLog.writeOutput("Focus moved to row " + event.getRow());
 			}
 		});
 		messageLog.writeOutput("Added row focus change listener");
 
 		// Cell focus change
-		nav.addCellFocusListener(new CellFocusListener()
-		{
+		nav.addCellFocusListener(new CellFocusListener() {
 			@Override
-			public void onEvent(CellFocusEvent event)
-			{
+			public void onEvent(CellFocusEvent event) {
 				int row = event.getRow();
 				int col = event.getColumn();
 				messageLog.writeOutput("Focus moved to cell [" + row + ", " + col + " ]");
@@ -140,11 +130,9 @@ public class DemoFastGrid extends Grid<DemoColumns>
 		messageLog.writeOutput("Added cell focus change listener");
 
 		// Listening to opening of editor
-		nav.addEditorOpenListener(new EditorOpenListener()
-		{
+		nav.addEditorOpenListener(new EditorOpenListener() {
 			@Override
-			public void onEvent(EditorOpenEvent event)
-			{
+			public void onEvent(EditorOpenEvent event) {
 				int row = event.getRow();
 				messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumn());
 			}
@@ -152,11 +140,9 @@ public class DemoFastGrid extends Grid<DemoColumns>
 		messageLog.writeOutput("Added editor open listener");
 
 		// Listening to closing of editor
-		nav.addEditorCloseListener(new EditorCloseListener()
-		{
+		nav.addEditorCloseListener(new EditorCloseListener() {
 			@Override
-			public void onEvent(EditorCloseEvent event)
-			{
+			public void onEvent(EditorCloseEvent event) {
 				messageLog.writeOutput("Editor closed on row " + event.getRow() + ", column " + event.getColumn() + ", "
 						+ (event.wasCancelled() ? "user cancelled change" : "user saved change"));
 			}
@@ -164,8 +150,7 @@ public class DemoFastGrid extends Grid<DemoColumns>
 		messageLog.writeOutput("Added editor close listener");
 	}
 
-	private void addDemoRow()
-	{
+	private void addDemoRow() {
 		// its an unbuffered editor so canceling doesn't lose data just
 		// closes the
 		// editor.
@@ -181,8 +166,7 @@ public class DemoFastGrid extends Grid<DemoColumns>
 	 * We bind each column to a field (shared by all rows) so that we can edit
 	 * each cell.
 	 */
-	private void bindColumnsToEditor()
-	{
+	private void bindColumnsToEditor() {
 		TextField col1 = createTextField(ValueChangeMode.BLUR);
 		TextField col3 = createTextField(ValueChangeMode.BLUR);
 		TextField col4 = createTextField(ValueChangeMode.BLUR);
@@ -263,9 +247,7 @@ public class DemoFastGrid extends Grid<DemoColumns>
 				DemoColumns::setCol10);
 		this.addColumn(DemoColumns::getCol10).setCaption("Combobox").setWidth(150).setEditorBinding(col11Binding);
 
-		for (int i = 0; i < 5; ++i)
-		{
-
+		for (int i = 0; i < 5; ++i) {
 			demoList.add(new DemoColumns());
 		}
 		demoData.refreshAll();
@@ -273,8 +255,7 @@ public class DemoFastGrid extends Grid<DemoColumns>
 		this.setSizeFull();
 	}
 
-	private TextField createTextField(ValueChangeMode valueChangeMode)
-	{
+	private TextField createTextField(ValueChangeMode valueChangeMode) {
 		TextField textField = new TextField();
 		textField.setValueChangeMode(valueChangeMode);
 		return textField;
@@ -282,24 +263,20 @@ public class DemoFastGrid extends Grid<DemoColumns>
 
 	// Add a blank row to the grid and tell the grid to refresh itself showing
 	// the new row.
-	public void addBlankRow()
-	{
+	public void addBlankRow() {
 		// its an unbuffered editor so canceling doesn't lose data just closes
 		// the
 		// editor.
-		if (getEditor().isOpen())
-		{
+		if (getEditor().isOpen()) {
 			getEditor().cancel();
 		}
 		demoList.add(new DemoColumns());
 		this.getDataProvider().refreshAll();
 	}
 
-	private void printChangedRow(int rowIndex)
-	{
-		if (demoList.size() >= rowIndex)
-		{
-			DemoColumns rowData = demoList.get(rowIndex);
+	private void printChangedRow(int rowIndex, DemoColumns rowData) {
+		if (demoList.size() >= rowIndex) {
+			// DemoColumns rowData = demoList.get(rowIndex);
 			messageLog.writeOutput("Row " + rowIndex + " changed to: " + rowData);
 		}
 	}

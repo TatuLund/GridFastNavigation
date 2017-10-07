@@ -16,6 +16,14 @@ import com.vaadin.ui.renderers.ClickableRenderer;
 import com.vaadin.ui.renderers.ClickableRenderer.RendererClickEvent;
 import com.vaadin.util.ReflectTools;
 
+/**
+ * This is not maintained anymore. DeleteButtonRenderer has moved to Grid RenderersCollection add-on
+ * 
+ * @author Tatu Lund
+ *
+ * @param <T> Type of the bean
+ */
+@Deprecated
 public class DeleteButtonRenderer<T> extends ClickableRenderer<T, Boolean> {
 
     /**

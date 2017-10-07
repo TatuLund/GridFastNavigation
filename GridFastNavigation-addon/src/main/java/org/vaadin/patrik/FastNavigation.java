@@ -2,6 +2,7 @@ package org.vaadin.patrik;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import org.vaadin.patrik.events.CellEditEvent;
 import org.vaadin.patrik.events.CellFocusEvent;
@@ -15,12 +16,15 @@ import org.vaadin.patrik.shared.FastNavigationClientRPC;
 import org.vaadin.patrik.shared.FastNavigationServerRPC;
 import org.vaadin.patrik.shared.FastNavigationState;
 
+import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.provider.Query;
 import com.vaadin.server.AbstractExtension;
+import com.vaadin.server.SerializablePredicate;
 import com.vaadin.ui.Grid;
 
 
 @SuppressWarnings("serial")
-public class FastNavigation extends AbstractExtension {
+public class FastNavigation<T> extends AbstractExtension {
 
     private static Logger _logger = Logger.getLogger("FastNavigation");
 
@@ -32,15 +36,15 @@ public class FastNavigation extends AbstractExtension {
     // Event interfaces
     //
 
-    public interface RowEditListener extends Listener<RowEditEvent> {
+    public interface RowEditListener extends Listener<RowEditEvent<?>> {
     }
     
-    private final EventListenerList<RowEditListener, RowEditEvent> rowEditListeners = new EventListenerList<RowEditListener, RowEditEvent>();
+    private final EventListenerList<RowEditListener, RowEditEvent<?>> rowEditListeners = new EventListenerList<RowEditListener, RowEditEvent<?>>();
 
-    public interface CellEditListener extends Listener<CellEditEvent> {
+    public interface CellEditListener extends Listener<CellEditEvent<?>> {
     }
     
-    private final EventListenerList<CellEditListener, CellEditEvent> cellEditListeners = new EventListenerList<CellEditListener, CellEditEvent>();
+    private final EventListenerList<CellEditListener, CellEditEvent<?>> cellEditListeners = new EventListenerList<CellEditListener, CellEditEvent<?>>();
 
     public interface CellFocusListener extends Listener<CellFocusEvent> {
     }
@@ -83,7 +87,7 @@ public class FastNavigation extends AbstractExtension {
      * 
      * @param g Grid to extend
      */
-    public FastNavigation(final Grid<?> g) {
+    public FastNavigation(final Grid<T> g) {
     	setupFastNavigation(g,false,false);
     }
 
@@ -93,7 +97,7 @@ public class FastNavigation extends AbstractExtension {
      * @param g Grid to extend
      * @param changeColumnOnEnter Set Enter key behavior true = Enter changes the column like tab, false = Enter changes the row
      */
-    public FastNavigation(final Grid<?> g, boolean changeColumnOnEnter) {
+    public FastNavigation(final Grid<T> g, boolean changeColumnOnEnter) {
     	setupFastNavigation(g,changeColumnOnEnter,false);
     }
     
@@ -104,11 +108,11 @@ public class FastNavigation extends AbstractExtension {
      * @param changeColumnOnEnter Set Enter key behavior true = Enter changes the column like tab, false = Enter changes the row
      * @param dispatchEditEventOnBlur Set Blur event behavior. If set to true, Editor is closed and possible Edit event is dispatched when user clicks outside Grid
      */
-    public FastNavigation(final Grid<?> g, boolean changeColumnOnEnter, boolean dispatchEditEventOnBlur) {
+    public FastNavigation(final Grid<T> g, boolean changeColumnOnEnter, boolean dispatchEditEventOnBlur) {
     	setupFastNavigation(g,changeColumnOnEnter,dispatchEditEventOnBlur);
     }
     
-    private void setupFastNavigation(final Grid<?> g, boolean changeColumnOnEnter, boolean dispatchEditEventOnBlur) {
+    private void setupFastNavigation(final Grid<T> g, boolean changeColumnOnEnter, boolean dispatchEditEventOnBlur) {
     	getState().changeColumnOnEnter = changeColumnOnEnter;
     	getState().dispatchEditEventOnBlur = dispatchEditEventOnBlur;    	
         g.getEditor().setBuffered(false);
@@ -116,14 +120,25 @@ public class FastNavigation extends AbstractExtension {
         
         registerRpc(new FastNavigationServerRPC() {
 
-            @Override
+        	private T getItemAt(int rowIndex) {
+            	// Vaadin 8.2.0: T item = g.getDataCommunicator().fetchItemsWithRange(rowIndex, 1).get(0);
+        		DataProvider dataProvider = g.getDataProvider();
+        		Query<T,SerializablePredicate<T>> query = new Query<T,SerializablePredicate<T>>(rowIndex,1,null,null,null);
+        		Stream<T> result = dataProvider.fetch((Query<T, SerializablePredicate<T>>) query);
+        		T myBean = result.findFirst().get();
+        		return myBean;
+        	}
+        	
+        	@Override
             public void rowUpdated(int rowIndex) {
-                rowEditListeners.dispatch(new RowEditEvent(g, rowIndex));
+        		T item = getItemAt(rowIndex);
+                rowEditListeners.dispatch(new RowEditEvent<T>(g, rowIndex, item));
             }
 
             @Override
             public void cellUpdated(int rowIndex, int colIndex, String newData) {
-                cellEditListeners.dispatch(new CellEditEvent(g, rowIndex, colIndex, newData));
+            	T item = getItemAt(rowIndex);
+                cellEditListeners.dispatch(new CellEditEvent<T>(g, rowIndex, colIndex, newData, item));
             }
 
             @Override

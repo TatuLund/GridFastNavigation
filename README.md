@@ -53,6 +53,13 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.4
+- Added getItem() CellEditEvent and RowEditEvent (experimental)
+- Fixed issue #37: Enter now saves the value when closing the editor in the last cell
+- Fixed issue #35: Listeners should be able to be used automatically now.
+- DeleteButtonRenderer deprecated, it is now maintained in Grid RenderersCollection add-on.
+- Updated the demo.
+
 ### Version 2.1.3
 - Added support for closing Editor and dispatching event when clicking outside of Grid.
 

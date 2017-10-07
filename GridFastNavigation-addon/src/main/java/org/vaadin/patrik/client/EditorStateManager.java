@@ -227,14 +227,14 @@ public class EditorStateManager {
                     }
                 }
                 
-                if(Keys.isHomeKey(key)) {
+                if (Keys.isHomeKey(key)) {
                 	saveContent();
                 	targetRow = 0;
                 	if (shift) targetCol = 0;
                     move = true;
                 }
                 
-                if(Keys.isEndKey(key)) {
+                if (Keys.isEndKey(key)) {
                 	saveContent();
                 	targetRow = rowCount-1;
                 	if (shift) targetCol = columnCount-1;
@@ -262,7 +262,7 @@ public class EditorStateManager {
         // neither success() nor failure() is called, resulting a timeout
         private void saveEditor(EditorDomEvent<Object> event) {
     	    triggerValueChange(event);
-    	    closeEditor(true);
+    	    closeEditor(false);
         }
 
         @Override
