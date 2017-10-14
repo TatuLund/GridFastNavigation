@@ -108,7 +108,7 @@ public class DemoUI extends UI {
                 int rowIndex = event.getRowIndex();
                 if (rowIndex >= 0) {
                     Indexed ds = grid.getContainerDataSource();
-                    Object itemId = ds.getIdByIndex(rowIndex);
+                    Object itemId = event.getItemId();
                     printChangedRow(rowIndex, ds, itemId);
                 }
                 

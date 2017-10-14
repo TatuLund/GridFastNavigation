@@ -6,19 +6,31 @@ import com.vaadin.ui.Component;
 public class RowEditEvent extends Component.Event {
 
     private int rowIndex;
-
-    public RowEditEvent(Component source, Integer rowIndex) {
+    private Object itemId;
+    
+    public RowEditEvent(Component source, Integer rowIndex, Object itemId) {
         super(source);
         this.rowIndex = rowIndex;
+        this.itemId = itemId;
     }
 
+    /**
+     * Get edited row index
+     * 
+     * @return Edited row index
+     */
     public int getRowIndex() {
         return rowIndex;
     }
 
-    public void setRowIndex(int rowIndex) {
-        this.rowIndex = rowIndex;
-    }
+    /**
+     * Get edited itemId from the underlying data Container
+     * 
+     * @return Edited itemId
+     */
+	public Object getItemId() {
+		return itemId;
+	}
 
 }
 

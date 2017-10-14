@@ -15,6 +15,7 @@ import org.vaadin.patrik.shared.FastNavigationClientRPC;
 import org.vaadin.patrik.shared.FastNavigationServerRPC;
 import org.vaadin.patrik.shared.FastNavigationState;
 
+import com.vaadin.data.Container.Indexed;
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.ui.Grid;
 
@@ -117,12 +118,16 @@ public class FastNavigation extends AbstractExtension {
 
             @Override
             public void rowUpdated(int rowIndex) {
-                rowEditListeners.dispatch(new RowEditEvent(g, rowIndex));
+            	Indexed ds = g.getContainerDataSource();
+            	Object itemId = ds.getIdByIndex(rowIndex);
+                rowEditListeners.dispatch(new RowEditEvent(g, rowIndex, itemId));
             }
 
             @Override
             public void cellUpdated(int rowIndex, int colIndex, String newData) {
-                cellEditListeners.dispatch(new CellEditEvent(g, rowIndex, colIndex, newData));
+            	Indexed ds = g.getContainerDataSource();
+            	Object itemId = ds.getIdByIndex(rowIndex);
+                cellEditListeners.dispatch(new CellEditEvent(g, rowIndex, colIndex, newData, itemId));
             }
 
             @Override
@@ -184,7 +189,7 @@ public class FastNavigation extends AbstractExtension {
     /**
      * If set to true (default = true), editor opens with single mouse click.
      * 
-     * @param enable
+     * @param enable true (default = true), editor opens with single mouse click.
      */
     public void setOpenEditorWithSingleClick(boolean enable) {
     	getState().openEditorWithSingleClick = enable;
@@ -199,7 +204,7 @@ public class FastNavigation extends AbstractExtension {
      * focus to first row and change column to next editable column. Not applicable
      * if enter key is set to change column instead of row.
      * 
-     * @param enable
+     * @param enable Boolean value, see description of the method
      */
     public void setChangeColumnAfterLastRow(boolean enable) {
         getState().changeColumnAfterLastRow = enable;
@@ -218,7 +223,7 @@ public class FastNavigation extends AbstractExtension {
      * focus around and switch to the next/previous row. If false, tabbing will
      * wrap around the current row.
      * 
-     * @param enable
+     * @param enable Boolean value, see description of the method
      */
     public void setAllowTabToChangeRow(boolean enable) {
         getState().allowTabRowChange = enable;
@@ -231,7 +236,7 @@ public class FastNavigation extends AbstractExtension {
     /**
      * If set to true, text is selected when editor is opened
      * 
-     * @param enable
+     * @param enable Boolean value, see description of the method
      */
     public void setSelectTextOnEditorOpen(boolean enable) {
         getState().selectTextOnEditorOpen = enable;
@@ -244,7 +249,7 @@ public class FastNavigation extends AbstractExtension {
     /**
      * If set to true, you can use the arrow keys to move the editor up and down
      * 
-     * @param enable
+     * @param enable Boolean value, see description of the method
      */
     public void setAllowArrowToChangeRow(boolean enable) {
         getState().allowArrowRowChange = enable;
@@ -263,7 +268,7 @@ public class FastNavigation extends AbstractExtension {
      * numeric key will open the editor. If false, the editor must be activated
      * by double clicking or pressing ENTER or a custom editor opening shortcut key
      * 
-     * @param enable
+     * @param enable Boolean value, see description of the method
      */
     public void setOpenEditorOnTyping(boolean enable) {
         getState().openEditorOnType = enable;
@@ -277,7 +282,7 @@ public class FastNavigation extends AbstractExtension {
     /**
      * Editor opening extra shortcuts
      * 
-     * @param code
+     * @param code Key code
      */
     public void addEditorOpenShortcut(int code) {
         getState().openShortcuts.add(code);
@@ -294,7 +299,7 @@ public class FastNavigation extends AbstractExtension {
     /**
      * Editor close/cancel extra shortcuts
      * 
-     * @param code
+     * @param code Key code
      */
     public void addEditorCloseShortcut(int code) {
         getState().closeShortcuts.add(code);

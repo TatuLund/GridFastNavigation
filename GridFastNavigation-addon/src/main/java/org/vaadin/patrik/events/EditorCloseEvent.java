@@ -16,14 +16,29 @@ public class EditorCloseEvent  extends Component.Event {
         cancelled = cancel;
     }
 
+    /**
+     * Return true if the editor closed after canceling event
+     * 
+     * @return True if edit was canceled
+     */
     public boolean wasCancelled() {
         return cancelled;
     }
-    
+
+    /**
+     * Get the row where editor was before closing
+     * 
+     * @return The row index
+     */
     public int getRow() {
         return rowIndex;
     }
     
+    /**
+     * Get the column where editor was before closing
+     * 
+     * @return The column index
+     */
     public int getColumn() {
         return colIndex;
     }

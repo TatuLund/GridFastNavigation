@@ -53,6 +53,12 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 1.1.4
+- Added getItemId() to CellEditEvent and RowEditEvent
+- Fixed issue #35: Listeners should be able to be used independently now.
+- Updated the demo
+- Synched the version numbers between 2.x.x / Vaadin 8 and 1.x.x / Vaadin 7 edition
+
 ### Version 0.5.9
 - Added support for closing Editor and dispatching event when clicking outside of Grid.
 

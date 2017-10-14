@@ -19,22 +19,38 @@ public class EditorOpenEvent extends Component.Event {
         colIndex = col;
     }
 
+    /**
+     * Get row where editor was opened
+     * 
+     * @return Row index
+     */
     public int getRow() {
         return rowIndex;
     }
     
+    /**
+     * Get column where editor was opened
+     * 
+     * @return Column index
+     */
     public int getColumn() {
         return colIndex;
     }
     
     /**
      * Use this method to mark columns as not editable 
-     * @param columns
+     * 
+     * @param columns The columns that will be marked not editable
      */
     public void disableColumns(int... columns) {
         disabledCols = columns;
     }
-    
+
+    /** 
+     * Get columns that are not editable
+     * 
+     * @return Indeces of the non editable columns
+     */
     public int[] getDisabledColumns() {
         return disabledCols;
     }

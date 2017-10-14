@@ -152,10 +152,10 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         }
     }
 
-    @OnStateChange({"hasFocusListener", "hasCellFocusListener", "hasRowFocusListener" })
+    @OnStateChange({"hasFocusListener", "hasCellFocusListener", "hasRowFocusListener", "hasRowEditListener", "hasCellEditListener", "hasEditorOpenListener" })
     void updateFocusTracking() {
         FastNavigationState state = getState();
-        if (state.hasFocusListener || state.hasCellFocusListener || state.hasRowFocusListener) {
+        if (state.hasFocusListener || state.hasCellFocusListener || state.hasRowFocusListener || state.hasCellEditListener || state.hasRowEditListener || state.hasEditorOpenListener) {
             focusTracker.start();
         } else {
             focusTracker.stop();

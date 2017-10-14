@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.patrik</groupId>
 	<artifactId>GridFastNavigation</artifactId>
 	<packaging>jar</packaging>
-	<version>0.5.9</version>
+	<version>1.1.4</version>
 	<name>GridFastNavigation Add-on</name>
 
 	<properties>

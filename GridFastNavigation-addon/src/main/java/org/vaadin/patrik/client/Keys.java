@@ -77,6 +77,10 @@ public final class Keys {
 
     /**
      * Test if keycode is one of the alpha numeric keys [0-9a-zA-Z]
+     * 
+     * @param keyCode Key code to be tested
+     * 
+     * @return True if condition match 
      */
     public static boolean isAlphaNumericKey(int keyCode) {
         return alphaNumSet.contains(keyCode);
@@ -84,11 +88,22 @@ public final class Keys {
 
     /**
      * Test if keycode is defined as a row change key
+     * 
+     * @param keyCode Key code to be tested
+     * 
+     * @return True if condition match 
      */
     public static boolean isRowChangeKey(int keyCode) {
         return rowChangeKeys.contains(keyCode);
     }
     
+    /**
+     * Test if keycode is defined as a column change key
+     * 
+     * @param keyCode Key code to be tested
+     * 
+     * @return True if condition match 
+     */
     public static boolean isColumnChangeKey(int keyCode) {
         return colChangeKeys.contains(keyCode);
     }
