@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -41,7 +42,6 @@ import com.vaadin.ui.DateTimeField;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.DateRenderer;
 
 public class DemoFastGrid extends Grid<DemoColumns> {
@@ -109,10 +109,17 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addEditorCloseShortcut(KeyCode.F3);
 		messageLog.writeOutput("Editor can also be closed with F3");
 
+		
+		Grid grid = this; 
+		ListDataProvider dataProvider = (ListDataProvider) grid.getDataProvider();
+		
 		// Row focus change
 		nav.addRowFocusListener(new RowFocusListener() {
 			@Override
 			public void onEvent(RowFocusEvent event) {
+//				List<DemoColumns> data = (List<DemoColumns>) dataProvider.getItems();
+//				DemoColumns item = data.get(event.getRow());
+				grid.select(event.getItem());
 				messageLog.writeOutput("Focus moved to row " + event.getRow());
 			}
 		});
@@ -251,7 +258,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			demoList.add(new DemoColumns());
 		}
 		demoData.refreshAll();
-		this.setSelectionMode(SelectionMode.NONE);
+		this.setSelectionMode(SelectionMode.SINGLE);
 		this.setSizeFull();
 	}
 

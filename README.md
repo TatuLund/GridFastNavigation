@@ -53,6 +53,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.5
+- Added getItem() to RowFocusEvent and CellFocusEvent
+- Minor bugfix, there was regression in fix for issue #35
+
 ### Version 2.1.4
 - Added getItem() CellEditEvent and RowEditEvent (experimental)
 - Fixed issue #37: Enter now saves the value when closing the editor in the last cell

@@ -143,14 +143,15 @@ public class FastNavigation<T> extends AbstractExtension {
 
             @Override
             public void focusUpdated(int rowIndex, int colIndex) {
+            	T item = getItemAt(rowIndex);
                 if (hasRowFocusListener && rowIndex != lastFocusedRow) {
-                    rowFocusListeners.dispatch(new RowFocusEvent(g, rowIndex));
+                    rowFocusListeners.dispatch(new RowFocusEvent(g, rowIndex, item));
                 }
 
                 if (hasCellFocusListener && (rowIndex != lastFocusedRow || colIndex != lastFocusedCol)) {
                     cellFocusListeners.dispatch(new CellFocusEvent(g, rowIndex, colIndex,
                             lastFocusedRow == rowIndex,
-                            lastFocusedCol == colIndex));
+                            lastFocusedCol == colIndex, item));
                 }
                 
                 lastFocusedRow = rowIndex;
