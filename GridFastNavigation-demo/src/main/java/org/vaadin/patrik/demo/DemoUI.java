@@ -129,9 +129,7 @@ public class DemoUI extends UI {
             public void onEvent(RowFocusEvent event) {
             	int row = event.getRow();
                 writeOutput("Focus moved to row " + event.getRow());
-                Indexed ds = grid.getContainerDataSource();
-                Object itemId = ds.getIdByIndex(row);
-                grid.select(itemId);
+                grid.select(event.getItemId());
             }
         });
         writeOutput("Added row focus change listener");

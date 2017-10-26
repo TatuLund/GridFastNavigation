@@ -53,6 +53,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 1.1.5
+- Added getItemId() to CellFocusEvent and RowFocusEvent
+- Minor bug fix, there was regression due fix to issue #35
+
 ### Version 1.1.4
 - Added getItemId() to CellEditEvent and RowEditEvent
 - Fixed issue #35: Listeners should be able to be used independently now.

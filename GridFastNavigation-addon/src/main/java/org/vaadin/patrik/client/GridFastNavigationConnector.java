@@ -126,10 +126,10 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         editorManager.setOpenEditorByTyping(getState().openEditorOnType);
     }
 
-    @OnStateChange("hasEditorOpenListener")
-    void updateEditorOpenLocking() {
-        editorManager.setWaitForExternalUnlock(getState().hasFocusListener);
-    }
+//    @OnStateChange("hasEditorOpenListener")
+//    void updateEditorOpenLocking() {
+//        editorManager.setWaitForExternalUnlock(getState().hasFocusListener);
+//    }
 
     @OnStateChange("selectTextOnEditorOpen")
     void updateSelectAll() {
@@ -157,6 +157,8 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         FastNavigationState state = getState();
         if (state.hasFocusListener || state.hasCellFocusListener || state.hasRowFocusListener || state.hasCellEditListener || state.hasRowEditListener || state.hasEditorOpenListener) {
             focusTracker.start();
+            if (state.hasEditorOpenListener) editorManager.setWaitForExternalUnlock(getState().hasFocusListener);
+            else editorManager.setWaitForExternalUnlock(false);
         } else {
             focusTracker.stop();
         }

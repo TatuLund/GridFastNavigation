@@ -9,11 +9,13 @@ public class CellFocusEvent extends Component.Event {
     private int col;
     private boolean rowChanged;
     private boolean colChanged;
+    private Object itemId;
     
-    public CellFocusEvent(Component source, int row, int col, boolean rowChanged, boolean colChanged) {
+    public CellFocusEvent(Component source, int row, int col, boolean rowChanged, boolean colChanged, Object itemId) {
         super(source);
         this.row = row;
         this.col = col;
+        this.itemId = itemId;
     }
 
     /**
@@ -51,5 +53,13 @@ public class CellFocusEvent extends Component.Event {
     public boolean wasColumnChanged() {
         return colChanged;
     }
-    
+
+    /**
+     * Get itemId which was edited from underlying datasource
+     * 
+     * @return itemId which is edited
+     */
+	public Object getItemId() {
+		return itemId;
+	}
 }
