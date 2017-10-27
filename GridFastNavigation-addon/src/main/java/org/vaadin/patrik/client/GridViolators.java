@@ -46,5 +46,19 @@ public class GridViolators {
     public static native final int getEditorColumn(Editor<?> editor) /*-{
 	return editor.@com.vaadin.client.widgets.Grid.Editor::focusedColumnIndexDOM;
 }-*/;
+   /**
+   	return a minus integer to ignore focused footer/header rows
+   */
+    public static native final int getGridBodyFocusedRow(Grid<?> g)/*-{
+        var h = g.@com.vaadin.client.widgets.Grid::cellFocusHandler;
+        var r=h.@com.vaadin.client.widgets.Grid.CellFocusHandler::rowWithFocus;
+        var co=h.@com.vaadin.client.widgets.Grid.CellFocusHandler::containerWithFocus;
+        var cl = g.@com.vaadin.client.widgets.Grid::getEscalator()();
+        var conBody = cl.@com.vaadin.client.widgets.Escalator::getBody()();
+        if(co == conBody)
+            return r;
+        else
+            return -1000;
+    }-*/;
 
 }
