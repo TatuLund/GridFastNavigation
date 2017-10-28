@@ -33,7 +33,13 @@ public class GridViolators {
     public static native final int getFocusedRow(Grid<?> grid) /*-{
         var cfh = grid.@com.vaadin.client.widgets.Grid::cellFocusHandler;
         var row = cfh.@com.vaadin.client.widgets.Grid.CellFocusHandler::rowWithFocus;
-        return row;
+        var contWithFocus= cfh.@com.vaadin.client.widgets.Grid.CellFocusHandler::containerWithFocus;
+        var escallator = grid.@com.vaadin.client.widgets.Grid::getEscalator()(); 
+ 		var conBody = escallator.@com.vaadin.client.widgets.Escalator::getBody()(); 
+        if (contWithFocus == conBody)  
+        	return row;
+        else
+        	return -1;
     }-*/;
     
     public static native final int getFocusedCol(Grid<?> grid) /*-{

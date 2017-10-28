@@ -53,6 +53,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 1.1.6
+- Modified CellFocusEvent and RowFocusEvent to return -1 if focus is in Header/Footer
+- Updated JavaDocs
+
 ### Version 1.1.5
 - Added getItemId() to CellFocusEvent and RowFocusEvent
 - Minor bug fix, there was regression due fix to issue #35
