@@ -1,4 +1,4 @@
-# GridFastNavigation Add-on for Vaadin 7
+# GridFastNavigation Add-on for Vaadin 8
 
 Do you like the Grid but would want it to appeal more to old Excel jockeys?
 Then this add-on is for you!
@@ -7,11 +7,12 @@ unbuffered editing mode and alters its keyboard controls to provide a faster
 editing experience.
 
 ## Online demo
-[Try it here](http://patrik.app.fi/GridFastNavigation-demo-0.2.0/)
+[Todo](...)
 
 ## Download release
 
-Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to https://vaadin.com/directory/-/directory/addon/#!addon/gridfastnavigation-add-on
+Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to
+https://vaadin.com/directory/component/gridfastnavigation-add-on
 
 ## Building and running demo
 
@@ -42,7 +43,7 @@ If you have not already compiled the widgetset, do it now by running vaadin:inst
 
 If you have a JRebel license, it makes on the fly code changes faster. Just add JRebel nature to your GridFastNavigation-demo project by clicking project with right mouse button and choosing JRebel > Add JRebel Nature
 
-To debug project and make code modifications on the fly in the server-side, right-click the GridFastNavigation-demo project and choose Debug As > Debug on Server. Navigate to http://localhost:8080/GridFastNavigation-demo/ to see the application.
+To debug project and make code modifications on the fly in the server-side, right-click the GridFastNavigation-demo project and choose Debug As > Debug on Server. Navigate to http://localhost:8080/ to see the application.
 
 ### Debugging client-side
 
@@ -52,6 +53,10 @@ Debugging client side code in the GridFastNavigation-demo project:
   - You can access Java-sources and set breakpoints inside Chrome if you enable source maps from inspector settings.
  
 ## Release notes
+
+### Version 2.1.6
+- Modified CellFocusEvent and RowFocusEvent to return -1 if focus is in Header/Footer
+- Updated JavaDocs
 
 ### Version 2.1.5
 - Added getItem() to RowFocusEvent and CellFocusEvent

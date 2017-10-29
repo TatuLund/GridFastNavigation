@@ -19,7 +19,9 @@ public class CellFocusEvent<T> extends Component.Event {
     }
 
     /**
-     * Get currently focused row index
+     * Get index of the row which was edited
+     * 
+     * @return Index of the row which is edited, -1 if focus in Header/Footer
      */
     public int getRow() {
         return row;
@@ -47,9 +49,9 @@ public class CellFocusEvent<T> extends Component.Event {
     }
     
     /**
-     * Get item which was edited from underlying datasource
+     * Get item which wherew focus is from underlying datasource
      * 
-     * @return Item which is edited
+     * @return item where focus is, null if focus in Header/Footer 
      */
 	public T getItem() {
 		return item;

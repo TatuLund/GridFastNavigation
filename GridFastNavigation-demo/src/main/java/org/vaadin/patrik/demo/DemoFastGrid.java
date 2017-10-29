@@ -119,7 +119,8 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			public void onEvent(RowFocusEvent event) {
 //				List<DemoColumns> data = (List<DemoColumns>) dataProvider.getItems();
 //				DemoColumns item = data.get(event.getRow());
-				grid.select(event.getItem());
+				if (event.getRow() >= 0) grid.select(event.getItem());
+				else grid.deselectAll();
 				messageLog.writeOutput("Focus moved to row " + event.getRow());
 			}
 		});

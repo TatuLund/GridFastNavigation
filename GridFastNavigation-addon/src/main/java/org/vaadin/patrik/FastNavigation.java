@@ -122,10 +122,13 @@ public class FastNavigation<T> extends AbstractExtension {
 
         	private T getItemAt(int rowIndex) {
             	// Vaadin 8.2.0: T item = g.getDataCommunicator().fetchItemsWithRange(rowIndex, 1).get(0);
-        		DataProvider dataProvider = g.getDataProvider();
-        		Query<T,SerializablePredicate<T>> query = new Query<T,SerializablePredicate<T>>(rowIndex,1,null,null,null);
-        		Stream<T> result = dataProvider.fetch((Query<T, SerializablePredicate<T>>) query);
-        		T myBean = result.findFirst().get();
+        		T myBean = null;
+        		if (rowIndex >= 0) {
+        			DataProvider dataProvider = g.getDataProvider();
+        			Query<T,SerializablePredicate<T>> query = new Query<T,SerializablePredicate<T>>(rowIndex,1,null,null,null);
+        			Stream<T> result = dataProvider.fetch((Query<T, SerializablePredicate<T>>) query);
+        			myBean = result.findFirst().get();
+        		}
         		return myBean;
         	}
         	
