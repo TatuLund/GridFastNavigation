@@ -2,5 +2,15 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.5.1//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.5.1/distro-source/core/src/gwt-module.dtd">
 <module>
     <inherits name="com.vaadin.DefaultWidgetSet" />
-    <inherits name="org.vaadin.patrik.GridFastNavigation" />
+    <inherits name="org.vaadin.patrik.GridFastNavigationWidgetSet" />
+
+    <inherits name="org.vaadin.gridfiledownloader.GridFileDownloaderWidgetset" />
+
+    <inherits name="org.vaadin.teemu.ratingstars.gwt.RatingStarsWidgetset" />
+
+    <inherits name="org.vaadin.sparklines.SparklinesWidgetset" />
+
+    <inherits name="org.vaadin.anna.gridactionrenderer.WidgetSet" />
+
+    <inherits name="org.vaadin.grid.cellrenderers.RenderersCollectionWidgetSet" />
 </module>

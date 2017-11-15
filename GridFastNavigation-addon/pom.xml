@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.patrik</groupId>
 	<artifactId>GridFastNavigation</artifactId>
 	<packaging>jar</packaging>
-	<version>1.1.6</version>
+	<version>1.1.7</version>
 	<name>GridFastNavigation Add-on</name>
 
 	<properties>
@@ -123,7 +123,7 @@
 							<!-- Package format version - do not change -->
 							<Vaadin-Package-Version>1</Vaadin-Package-Version>
 							<Vaadin-License-Title>${Vaadin-License-Title}</Vaadin-License-Title>
-							<Vaadin-Widgetsets>org.vaadin.patrik.GridFastNavigation</Vaadin-Widgetsets>
+							<Vaadin-Widgetsets>org.vaadin.patrik.GridFastNavigationWidgetSet</Vaadin-Widgetsets>
 						</manifestEntries>
 					</archive>
 				</configuration>
