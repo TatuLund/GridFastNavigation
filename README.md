@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.7
+- Changed widgetset.xml filename, Fixed issues #40, #41
+
 ### Version 2.1.6
 - Modified CellFocusEvent and RowFocusEvent to return -1 if focus is in Header/Footer
 - Updated JavaDocs
