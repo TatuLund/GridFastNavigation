@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.8
+- Added ClickOutListener 
+
 ### Version 2.1.7
 - Changed widgetset.xml filename, Fixed issues #40, #41
 

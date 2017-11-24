@@ -34,6 +34,8 @@ public class FastNavigationState extends SharedState {
     
     public boolean hasEditorCloseListener = false;
     
+    public boolean hasClickOutListener = false;
+    
     public boolean changeColumnOnEnter = false;
     
     public boolean openEditorWithSingleClick = true;

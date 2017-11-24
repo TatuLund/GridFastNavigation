@@ -78,6 +78,14 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     rpc.rowUpdated(row);
                 }
             }
+
+			@Override
+			public void clickOut(Grid<Object> grid) {
+                if(getState().hasClickOutListener) {
+                    rpc.clickOut();
+                }
+				
+			}
         });
         
         focusTracker.addListener(new FocusListener() {

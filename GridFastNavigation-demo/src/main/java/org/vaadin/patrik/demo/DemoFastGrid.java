@@ -156,6 +156,10 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			}
 		});
 		messageLog.writeOutput("Added editor close listener");
+		
+		nav.addClickOutListener(event -> {
+			messageLog.writeOutput("User clicked outside Grid: "+event.getSource().toString());
+		});
 	}
 
 	private void addDemoRow() {

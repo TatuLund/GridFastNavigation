@@ -55,6 +55,7 @@ public class EditorStateManager {
                 Widget widget, String newContent, int row,
                 int col);
 
+        void clickOut(Grid<Object> grid);
     }
 
     //
@@ -404,15 +405,18 @@ public class EditorStateManager {
          			Event nativeEvent = Event.as(event.getNativeEvent());
          			int ex = nativeEvent.getClientX();
          			int ey = nativeEvent.getClientY();
-           			if (isEditorOpen() && !((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
-         				saveContent();
-                        Element focusedElement = WidgetUtil.getFocusedElement();
-                        Widget editorWidget = getCurrentEditorWidget();
-                        if (editorWidget.getElement().isOrHasChild(focusedElement)) {
-                            focusedElement.blur();
-                            focusedElement.focus();
-                        }
-           				closeEditor(false);
+           			if (!((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
+           				if (isEditorOpen()) {
+           					saveContent();
+           					Element focusedElement = WidgetUtil.getFocusedElement();
+           					Widget editorWidget = getCurrentEditorWidget();
+           					if (editorWidget.getElement().isOrHasChild(focusedElement)) {
+           						focusedElement.blur();
+           						focusedElement.focus();
+           					}
+           					closeEditor(false);
+           				}
+           				notifyClickOut();
            			}            			
            		}
            	}
@@ -618,6 +622,12 @@ public class EditorStateManager {
         for (EditorListener l : editorListeners) {
             l.dataChanged(grid, editor, getCurrentEditorWidget(),
                     newContent, row, col);
+        }
+    }
+
+    private void notifyClickOut() {
+        for (EditorListener l : editorListeners) {
+            l.clickOut(grid);
         }
     }
 
