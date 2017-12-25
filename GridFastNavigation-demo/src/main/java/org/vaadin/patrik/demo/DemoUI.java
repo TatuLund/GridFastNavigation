@@ -11,11 +11,13 @@ import org.vaadin.grid.cellrenderers.action.DeleteButtonRenderer.DeleteRendererC
 import org.vaadin.grid.cellrenderers.action.DeleteButtonRenderer.DeleteRendererClickListener;
 import org.vaadin.patrik.FastNavigation;
 import org.vaadin.patrik.FastNavigation.CellFocusListener;
+import org.vaadin.patrik.FastNavigation.ClickOutListener;
 import org.vaadin.patrik.FastNavigation.EditorCloseListener;
 import org.vaadin.patrik.FastNavigation.EditorOpenListener;
 import org.vaadin.patrik.FastNavigation.RowEditListener;
 import org.vaadin.patrik.FastNavigation.RowFocusListener;
 import org.vaadin.patrik.events.CellFocusEvent;
+import org.vaadin.patrik.events.ClickOutEvent;
 import org.vaadin.patrik.events.EditorCloseEvent;
 import org.vaadin.patrik.events.EditorOpenEvent;
 import org.vaadin.patrik.events.RowEditEvent;
@@ -163,6 +165,14 @@ public class DemoUI extends UI {
             }
         });
         writeOutput("Added editor close listener");
+        
+        nav.addClickOutListener(new ClickOutListener() {
+        	@Override
+        	public void onEvent(ClickOutEvent event) {
+        		writeOutput("User click outside Grid: "+event.getSource().toString());
+        	}
+        });
+        
     }
     
     private void initGrid(final Grid grid) {

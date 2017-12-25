@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import org.vaadin.patrik.events.CellEditEvent;
 import org.vaadin.patrik.events.CellFocusEvent;
+import org.vaadin.patrik.events.ClickOutEvent;
 import org.vaadin.patrik.events.EditorCloseEvent;
 import org.vaadin.patrik.events.EditorOpenEvent;
 import org.vaadin.patrik.events.EventListenerList;
@@ -63,7 +64,11 @@ public class FastNavigation extends AbstractExtension {
     
     private final EventListenerList<EditorCloseListener, EditorCloseEvent> editorCloseListeners = new EventListenerList<EditorCloseListener, EditorCloseEvent>();
 
-
+    public interface ClickOutListener extends Listener<ClickOutEvent> {
+    }
+    
+    private final EventListenerList<ClickOutListener, ClickOutEvent> clickOutListeners = new EventListenerList<ClickOutListener, ClickOutEvent>();
+    
     //
     // Actual class stuff
     //
@@ -178,6 +183,11 @@ public class FastNavigation extends AbstractExtension {
                 editorCloseListeners.dispatch(new EditorCloseEvent(g, rowIndex, colIndex, wasCancelled));
             }
 
+			@Override
+			public void clickOut() {
+				clickOutListeners.dispatch(new ClickOutEvent(g));
+			}
+			
         }, FastNavigationServerRPC.class);
 
         extend(g);
@@ -385,9 +395,27 @@ public class FastNavigation extends AbstractExtension {
         getState().hasEditorOpenListener = true;
     }
     
+
+    /**
+     * Register editor close listener, which is emitted each time editor is being closed.
+     * 
+     * @param listener an EditorCloseListener instance
+     */
     public void addEditorCloseListener(EditorCloseListener listener) {
         editorCloseListeners.addListener(listener);
         
         getState().hasEditorCloseListener = true;
+    }
+
+    /**
+     * Register click out listener, which is emitted when user clicks outside the
+     * grid. This is not true blur event, since it is triggered by mouse only 
+     * 
+     * @param listener a ClickOutListener instance
+     */
+    public void addClickOutListener(ClickOutListener listener) {
+        clickOutListeners.addListener(listener);
+        
+        getState().hasClickOutListener = true;
     }
 }
