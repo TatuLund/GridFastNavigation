@@ -17,23 +17,18 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("demo")
 @Title("GridFastNavigation Add-on Demo")
 @SuppressWarnings("serial")
-public class DemoUI extends UI
-{
+public class DemoUI extends UI {
 
 	@WebServlet(value = "/*", asyncSupported = true)
 	@VaadinServletConfiguration(productionMode = false, ui = DemoUI.class, widgetset = "org.vaadin.patrik.demo.DemoWidgetSet")
-	public static class Servlet extends VaadinServlet
-	{
+	public static class Servlet extends VaadinServlet {
 	}
 
-	public DemoUI()
-	{
-			
+	public DemoUI() {
 	}
 
 	@Override
-	protected void init(VaadinRequest vaadinRequest)
-	{
+	protected void init(VaadinRequest vaadinRequest) {
 		final VerticalLayout layout = new VerticalLayout();
 
 		layout.setSizeFull();

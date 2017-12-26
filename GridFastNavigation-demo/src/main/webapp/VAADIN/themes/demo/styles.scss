@@ -3,6 +3,8 @@
 $gray: #d1d1cf;
 $green: #40b527;
 $darkgreen: darken($green, 30%);
+// $v-grid-row-stripe-background-color: $v-grid-row-background-color !default;
+$v-grid-header-background-color: #20a020;
 
 // Prefix all selectors in your theme with .demo
 .demo {
@@ -17,6 +19,13 @@ $darkgreen: darken($green, 30%);
 		background-size: 90%;
 		background-position: center center;
 		background-repeat: no-repeat;
+	}
+	
+	
+	.my-background {
+		background-color: blue;
+		color: white;
+		font-weight: bold;
 	}
 	
 	// You can also customize your component for the demo

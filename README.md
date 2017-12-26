@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.9
+- Changed getItem() in selected events to use DataCommunicator, requires Vaadin 8.2+ 
+
 ### Version 2.1.8
 - Added ClickOutListener 
 
@@ -113,4 +116,7 @@ Contributions are welcome, but there are no guarantees that they are accepted as
 Add-on is distributed under Apache License 2.0. For license terms, see LICENSE.txt.
 
 GridFastNavigation is written by Patrik Lindström, Tatu Lund and Johannes Tuikkala and maintained by the Tatu. Vaadin 8 migration initial work was contributed by Brett Sutton.
+
+Major pieces of development of this add-on has been sponsored by multiple Support and Prime customers of Vaadin. See vaadin.com/support and Development on Demand for more details. 
+
 

@@ -62,6 +62,8 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		this.getEditor().setEnabled(true);
 		this.getEditor().setBuffered(false);
 
+		this.getHeaderRow(0).setStyleName("my-background");
+		
 		initNavigation();
 
 		bindColumnsToEditor();

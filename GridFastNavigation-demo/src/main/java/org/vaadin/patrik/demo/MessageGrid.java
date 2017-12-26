@@ -25,6 +25,8 @@ public class MessageGrid extends Grid<ServerMessage> implements MessageLog
 		messageList = new ArrayList<>();
 		messageData = new ListDataProvider<ServerMessage>(messageList);
 
+		this.getHeaderRow(0).setStyleName("my-background");
+
 		this.setDataProvider(messageData);
 		this.addColumn(ServerMessage::getMessage).setCaption("Message").setExpandRatio(1);
 		this.setSizeFull();
