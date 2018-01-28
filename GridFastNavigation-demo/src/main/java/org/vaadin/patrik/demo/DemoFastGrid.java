@@ -7,22 +7,11 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import org.vaadin.grid.cellrenderers.action.DeleteButtonRenderer;
 import org.vaadin.patrik.FastNavigation;
-import org.vaadin.patrik.FastNavigation.CellFocusListener;
-import org.vaadin.patrik.FastNavigation.EditorCloseListener;
-import org.vaadin.patrik.FastNavigation.EditorOpenListener;
-import org.vaadin.patrik.FastNavigation.RowEditListener;
-import org.vaadin.patrik.FastNavigation.RowFocusListener;
-import org.vaadin.patrik.events.CellFocusEvent;
-import org.vaadin.patrik.events.EditorCloseEvent;
-import org.vaadin.patrik.events.EditorOpenEvent;
-import org.vaadin.patrik.events.RowEditEvent;
-import org.vaadin.patrik.events.RowFocusEvent;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.Binder.Binding;
@@ -73,15 +62,12 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 	private void initNavigation() {
 		FastNavigation<DemoColumns> nav = new FastNavigation<>(this, false, true);
 		nav.setChangeColumnAfterLastRow(true);
-
-		nav.addRowEditListener(new RowEditListener() {
-			@Override
-			public void onEvent(RowEditEvent<?> event) {
-				int rowIndex = event.getRowIndex();
-				if (rowIndex >= 0) {
-					printChangedRow(rowIndex,(DemoColumns) event.getItem());
-				}
-
+//		nav.setOpenEditorWithSingleClick(false);
+		
+		nav.addRowEditListener(event -> {
+			int rowIndex = event.getRowIndex();
+			if (rowIndex >= 0) {
+				printChangedRow(rowIndex,(DemoColumns) event.getItem());
 			}
 		});
 
@@ -111,51 +97,36 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addEditorCloseShortcut(KeyCode.F3);
 		messageLog.writeOutput("Editor can also be closed with F3");
 
-		
-		Grid grid = this; 
-		ListDataProvider dataProvider = (ListDataProvider) grid.getDataProvider();
+
+		Grid<DemoColumns> grid = this; 
 		
 		// Row focus change
-		nav.addRowFocusListener(new RowFocusListener() {
-			@Override
-			public void onEvent(RowFocusEvent event) {
-//				List<DemoColumns> data = (List<DemoColumns>) dataProvider.getItems();
-//				DemoColumns item = data.get(event.getRow());
-				if (event.getRow() >= 0) grid.select(event.getItem());
-				else grid.deselectAll();
-				messageLog.writeOutput("Focus moved to row " + event.getRow());
-			}
+		nav.addRowFocusListener(event -> {
+			if (event.getRow() >= 0) grid.select((DemoColumns) event.getItem());
+			else grid.deselectAll();
+			messageLog.writeOutput("Focus moved to row " + event.getRow());
 		});
 		messageLog.writeOutput("Added row focus change listener");
 
 		// Cell focus change
-		nav.addCellFocusListener(new CellFocusListener() {
-			@Override
-			public void onEvent(CellFocusEvent event) {
-				int row = event.getRow();
-				int col = event.getColumn();
-				messageLog.writeOutput("Focus moved to cell [" + row + ", " + col + " ]");
-			}
+		nav.addCellFocusListener(event -> {
+			int row = event.getRow();
+			int col = event.getColumn();
+			messageLog.writeOutput("Focus moved to cell [" + row + ", " + col + " ]");
 		});
 		messageLog.writeOutput("Added cell focus change listener");
 
 		// Listening to opening of editor
-		nav.addEditorOpenListener(new EditorOpenListener() {
-			@Override
-			public void onEvent(EditorOpenEvent event) {
-				int row = event.getRow();
-				messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumn());
-			}
+		nav.addEditorOpenListener(event ->  {
+			int row = event.getRow();
+			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumn());
 		});
 		messageLog.writeOutput("Added editor open listener");
 
 		// Listening to closing of editor
-		nav.addEditorCloseListener(new EditorCloseListener() {
-			@Override
-			public void onEvent(EditorCloseEvent event) {
-				messageLog.writeOutput("Editor closed on row " + event.getRow() + ", column " + event.getColumn() + ", "
-						+ (event.wasCancelled() ? "user cancelled change" : "user saved change"));
-			}
+		nav.addEditorCloseListener(event -> {
+			messageLog.writeOutput("Editor closed on row " + event.getRow() + ", column " + event.getColumn() + ", "
+					+ (event.wasCancelled() ? "user cancelled change" : "user saved change"));
 		});
 		messageLog.writeOutput("Added editor close listener");
 		
@@ -266,6 +237,13 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		}
 		demoData.refreshAll();
 		this.setSelectionMode(SelectionMode.SINGLE);
+		this.addSelectionListener(event -> {
+			if (event.isUserOriginated()) System.out.println("Selection event happens: "+event.getFirstSelectedItem().toString());
+			else System.out.println("Programmatic selection event happens: "+event.getFirstSelectedItem().toString());
+		});
+		this.addItemClickListener(event -> {
+			System.out.println("Item click event happens: "+event.getItem().toString());			
+		});
 		this.setSizeFull();
 	}
 

@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.10
+- Clarifying setOpenEditorWithSingleClick(true) JavaDoc. Using it will prevent Grid's item click event and selection event firing.
+
 ### Version 2.1.9
 - Changed getItem() in selected events to use DataCommunicator, requires Vaadin 8.2+ 
 

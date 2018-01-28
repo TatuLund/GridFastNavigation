@@ -375,9 +375,9 @@ public class EditorStateManager {
             public void onBrowserEvent(Event event) {
                 if ((event.getTypeInt() & Event.ONKEYDOWN) > 0) {
                     queueKey(event.getKeyCode(), event.getShiftKey());
+                    event.stopPropagation();
+                    event.preventDefault();
                 }
-                event.stopPropagation();
-                event.preventDefault();
             }
         });
 

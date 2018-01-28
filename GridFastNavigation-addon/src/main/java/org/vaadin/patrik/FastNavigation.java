@@ -2,7 +2,6 @@ package org.vaadin.patrik;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import org.vaadin.patrik.events.CellEditEvent;
 import org.vaadin.patrik.events.CellFocusEvent;
@@ -17,10 +16,7 @@ import org.vaadin.patrik.shared.FastNavigationClientRPC;
 import org.vaadin.patrik.shared.FastNavigationServerRPC;
 import org.vaadin.patrik.shared.FastNavigationState;
 
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.Query;
 import com.vaadin.server.AbstractExtension;
-import com.vaadin.server.SerializablePredicate;
 import com.vaadin.ui.Grid;
 
 
@@ -47,15 +43,15 @@ public class FastNavigation<T> extends AbstractExtension {
     
     private final EventListenerList<CellEditListener, CellEditEvent<?>> cellEditListeners = new EventListenerList<CellEditListener, CellEditEvent<?>>();
 
-    public interface CellFocusListener extends Listener<CellFocusEvent> {
+    public interface CellFocusListener extends Listener<CellFocusEvent<?>> {
     }
     
-    private final EventListenerList<CellFocusListener, CellFocusEvent> cellFocusListeners = new EventListenerList<CellFocusListener, CellFocusEvent>();
+    private final EventListenerList<CellFocusListener, CellFocusEvent<?>> cellFocusListeners = new EventListenerList<CellFocusListener, CellFocusEvent<?>>();
 
-    public interface RowFocusListener extends Listener<RowFocusEvent> {
+    public interface RowFocusListener extends Listener<RowFocusEvent<?>> {
     }
     
-    private final EventListenerList<RowFocusListener, RowFocusEvent> rowFocusListeners = new EventListenerList<RowFocusListener, RowFocusEvent>();
+    private final EventListenerList<RowFocusListener, RowFocusEvent<?>> rowFocusListeners = new EventListenerList<RowFocusListener, RowFocusEvent<?>>();
 
     public interface EditorOpenListener extends Listener<EditorOpenEvent> {
     }
@@ -210,6 +206,10 @@ public class FastNavigation<T> extends AbstractExtension {
 
     /**
      * If set to true (default = true), editor opens with single mouse click.
+     *
+     * Note, if this is set to true, Grid's selection listener and item click 
+     * listeners will not get the click. Selection event will work with 
+     * shift + space.
      * 
      * @param enable
      */
