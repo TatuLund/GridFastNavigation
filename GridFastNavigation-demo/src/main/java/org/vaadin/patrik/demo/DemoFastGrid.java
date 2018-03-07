@@ -20,6 +20,7 @@ import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.data.converter.StringToFloatConverter;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ValueChangeMode;
@@ -56,13 +57,13 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		initNavigation();
 
 		bindColumnsToEditor();
-
+		
 	}
 
 	private void initNavigation() {
 		FastNavigation<DemoColumns> nav = new FastNavigation<>(this, false, true);
 		nav.setChangeColumnAfterLastRow(true);
-//		nav.setOpenEditorWithSingleClick(false);
+		nav.setOpenEditorWithSingleClick(true);
 		
 		nav.addRowEditListener(event -> {
 			int rowIndex = event.getRowIndex();
@@ -169,7 +170,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		Binder<DemoColumns> binder = this.getEditor().getBinder();
 
 		// Col1 simple string
-		Binding<DemoColumns, String> col1Binding = binder.forField(col1).bind(DemoColumns::getCol1,
+		Binding<DemoColumns, String> col1Binding = binder.forField(col1).asRequired("Empty value not accepted").bind(DemoColumns::getCol1,
 				DemoColumns::setCol1);
 		this.addColumn(DemoColumns::getCol1).setCaption("Col1").setExpandRatio(1).setEditorBinding(col1Binding);
 
@@ -178,7 +179,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 		// Col3 Integer
 		Binding<DemoColumns, Integer> col3Binding = binder.forField(col3).withNullRepresentation("")
-				.withConverter(new StringToIntegerConverter("Must enter a number"))
+				.withConverter(new StringToIntegerConverter("Must enter a number")).withValidator(new IntegerRangeValidator("Input integer between 0 and 10",0,10))
 				.bind(DemoColumns::getCol3, DemoColumns::setCol3);
 		this.addColumn(DemoColumns::getCol3).setCaption("Integer").setWidth(150).setEditorBinding(col3Binding);
 
