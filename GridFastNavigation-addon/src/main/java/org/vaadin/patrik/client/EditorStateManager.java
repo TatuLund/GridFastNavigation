@@ -31,6 +31,7 @@ import com.vaadin.client.widgets.Grid;
 import com.vaadin.client.widgets.Grid.Column;
 import com.vaadin.client.widgets.Grid.Editor;
 import com.vaadin.client.widgets.Grid.EditorDomEvent;
+import com.vaadin.event.ShortcutAction.KeyCode;
 
 public class EditorStateManager {
 
@@ -270,25 +271,39 @@ public class EditorStateManager {
         protected boolean handleCloseEvent(EditorDomEvent<Object> event) {
             
             if(isBusy()) return false;
+
+            boolean hasValidationError = false;
+            for (Column<?,Object> column : grid.getColumns()) {
+            	if (grid.getEditor().isEditorColumnError(column)) hasValidationError = true;
+            }
             
             //
-            // This is actually the explicit _CANCEL_ of the editor. 
-            // TODO: We might actually want to add additional explicit _SAVE_ shortcuts
+            // This is actually the explicit _CANCEL_ or _SAVE_ of the editor. 
             //
             
             boolean close = false;
+            boolean save = false;
             if (isCloseEvent(event)) {
                 close = true;
-            } else if(isKeyPressEvent(event)) {
+            } else if (isKeyPressEvent(event)) {
+            	boolean ctrl = event.getDomEvent().getCtrlKey();
                 int key = event.getDomEvent().getKeyCode();
-                if(closeShortcuts.contains(key)) {
+                if (closeShortcuts.contains(key)) {
                     close = true;
+                }
+                if (!hasValidationError && (saveShortcuts.contains(key) || (saveWithCtrlS && ctrl && key == KeyCode.S))) {
+                	close = true;
+                    save = true;
                 }
             }
             
-            if(close) {
+            if (close) {
                 event.getDomEvent().preventDefault();
-                closeEditor(true);
+                if (save) {
+                	saveEditor(event);
+                } else {
+                	closeEditor(true);
+                }
             }
             
             return close;
@@ -332,6 +347,7 @@ public class EditorStateManager {
     private List<Character> keybuf = new ArrayList<Character>();
     private Set<Integer> openShortcuts = new LinkedHashSet<Integer>();
     private Set<Integer> closeShortcuts = new LinkedHashSet<Integer>();
+    private Set<Integer> saveShortcuts = new LinkedHashSet<Integer>();
     private Set<Integer> disabledColumns = new HashSet<Integer>();
 
     private RPCLock externalLocks;
@@ -345,6 +361,7 @@ public class EditorStateManager {
     private boolean selectTextOnFocus = true;
     private boolean tabWrapping = true;
     private boolean changeColumnAfterLastRow = false;
+    private boolean saveWithCtrlS = false;
     
     @SuppressWarnings("unchecked")
     public EditorStateManager(Grid<?> g, FastNavigationState state) {
@@ -592,6 +609,14 @@ public class EditorStateManager {
         closeShortcuts.clear();
     }
 
+    public void addSaveShortcut(int key) {
+        saveShortcuts.add(key);
+    }
+
+    public void clearSaveShortcuts() {
+        saveShortcuts.clear();
+    }
+
     //
     // Listeners
     //
@@ -742,6 +767,10 @@ public class EditorStateManager {
         openEditorOnType = enable;
     }
     
+    public void setSaveWithCtrlS (boolean enable) {
+    	saveWithCtrlS = enable;
+    }
+     
     public void saveOldContent() {
     	if (isEditorOpen()) {
     		String value = EditorWidgets.getValue(getCurrentEditorWidget());

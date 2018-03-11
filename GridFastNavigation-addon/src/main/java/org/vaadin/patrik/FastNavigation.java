@@ -211,7 +211,7 @@ public class FastNavigation<T> extends AbstractExtension {
      * listeners will not get the click. Selection event will work with 
      * shift + space.
      * 
-     * @param enable
+     * @param enable Boolean value
      */
     public void setOpenEditorWithSingleClick(boolean enable) {
       	getState().openEditorWithSingleClick = enable;
@@ -226,7 +226,7 @@ public class FastNavigation<T> extends AbstractExtension {
      * focus to first row and change column to next editable column. Not applicable
      * if enter key is set to change column instead of row.
      * 
-     * @param enable
+     * @param enable Boolean value
      */
     public void setChangeColumnAfterLastRow(boolean enable) {
         getState().changeColumnAfterLastRow = enable;
@@ -245,7 +245,7 @@ public class FastNavigation<T> extends AbstractExtension {
      * focus around and switch to the next/previous row. If false, tabbing will
      * wrap around the current row.
      * 
-     * @param enable
+     * @param enable Boolean value
      */
     public void setAllowTabToChangeRow(boolean enable) {
         getState().allowTabRowChange = enable;
@@ -258,7 +258,7 @@ public class FastNavigation<T> extends AbstractExtension {
     /**
      * If set to true, text is selected when editor is opened
      * 
-     * @param enable
+     * @param enable Boolean value
      */
     public void setSelectTextOnEditorOpen(boolean enable) {
         getState().selectTextOnEditorOpen = enable;
@@ -271,7 +271,7 @@ public class FastNavigation<T> extends AbstractExtension {
     /**
      * If set to true, you can use the arrow keys to move the editor up and down
      * 
-     * @param enable
+     * @param enable Boolean value
      */
     public void setAllowArrowToChangeRow(boolean enable) {
         getState().allowArrowRowChange = enable;
@@ -290,7 +290,7 @@ public class FastNavigation<T> extends AbstractExtension {
      * numeric key will open the editor. If false, the editor must be activated
      * by double clicking or pressing ENTER or a custom editor opening shortcut key
      * 
-     * @param enable
+     * @param enable Boolean value
      */
     public void setOpenEditorOnTyping(boolean enable) {
         getState().openEditorOnType = enable;
@@ -304,7 +304,7 @@ public class FastNavigation<T> extends AbstractExtension {
     /**
      * Editor opening extra shortcuts
      * 
-     * @param code
+     * @param code The keycode
      */
     public void addEditorOpenShortcut(int code) {
         getState().openShortcuts.add(code);
@@ -321,7 +321,7 @@ public class FastNavigation<T> extends AbstractExtension {
     /**
      * Editor close/cancel extra shortcuts
      * 
-     * @param code
+     * @param code The keycode
      */
     public void addEditorCloseShortcut(int code) {
         getState().closeShortcuts.add(code);
@@ -335,6 +335,32 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().closeShortcuts.clear();
     }
 
+    /**
+     * Editor save extra shortcuts
+     * 
+     * @param code The keycode
+     */
+    public void addEditorSaveShortcut(int code) {
+        getState().saveShortcuts.add(code);
+    }
+
+    public void removeSaveCloseShortcut(int code) {
+        getState().saveShortcuts.remove(code);
+    }
+
+    public void clearSaveCloseShortcut(int code) {
+        getState().saveShortcuts.clear();
+    }
+
+    /**
+     * Turn on saving by CTRL+S key combination
+     * 
+     * @param enable Boolean value, true = CTRL+S saving enabled
+     */
+    public void setSaveWithCtrlS(boolean enable) {
+    	getState().saveWithCtrlS = enable;
+    }
+    
     //
     // Event listeners
     //

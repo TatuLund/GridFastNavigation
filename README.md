@@ -54,8 +54,12 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.11
+- Added possibility to add save shortcuts (see: issue #49)
+- setSaveWithCtrlS(true) -> CTRL+S does save and close editor
+
 ### Version 2.1.10
-- Solving issue 42: Clarifying setOpenEditorWithSingleClick(true) JavaDoc. Using it will prevent Grid's item click event and selection event getting the click.
+- Solving issue #42: Clarifying setOpenEditorWithSingleClick(true) JavaDoc. Using it will prevent Grid's item click event and selection event getting the click.
 
 ### Version 2.1.9
 - Changed getItem() in selected events to use DataCommunicator, requires Vaadin 8.2+ 

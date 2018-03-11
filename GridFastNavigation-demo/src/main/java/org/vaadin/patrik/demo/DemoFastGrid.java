@@ -98,6 +98,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addEditorCloseShortcut(KeyCode.F3);
 		messageLog.writeOutput("Editor can also be closed with F3");
 
+		nav.setSaveWithCtrlS(true);
 
 		Grid<DemoColumns> grid = this; 
 		

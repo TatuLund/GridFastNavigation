@@ -101,10 +101,16 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         });
 
         updateCloseShortcuts();
+        updateSaveShortcuts();
         updateOpenShortcuts();
         updateFocusTracking();
     }
 
+    @OnStateChange("saveWithCtrlS")
+    void saveWithCtrlS() {
+    	editorManager.setSaveWithCtrlS(getState().saveWithCtrlS);
+    }
+    
     @OnStateChange("openEditorWithSingleClick")
     void openEditorWithSingleClick() {
     	editorManager.setOpenEditorWithSingleClick(getState().openEditorWithSingleClick);
@@ -156,6 +162,14 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         }
     }
 
+    @OnStateChange("closeShortcuts")
+    void updateSaveShortcuts() {
+        editorManager.clearSaveShortcuts();
+        for (int sc : getState().saveShortcuts) {
+            editorManager.addSaveShortcut(sc);
+        }
+    }
+ 
     @OnStateChange({"hasFocusListener", "hasCellFocusListener", "hasRowFocusListener", "hasRowEditListener", "hasCellEditListener", "hasEditorOpenListener" })
     void updateFocusTracking() {
         FastNavigationState state = getState();
