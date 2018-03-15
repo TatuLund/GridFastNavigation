@@ -64,6 +64,8 @@ public class EditorWidgets {
             @Override
             public void setValue(VTextField widget, String value) {
                 widget.setValue(value);
+                widget.getElement().blur();
+                widget.getElement().focus();
             }
 
             public void focus(VTextField widget) {

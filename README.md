@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.12
+- Fixing issue #52
+
 ### Version 2.1.11
 - Added possibility to add save shortcuts (see: issue #49)
 - setSaveWithCtrlS(true) -> CTRL+S does save and close editor

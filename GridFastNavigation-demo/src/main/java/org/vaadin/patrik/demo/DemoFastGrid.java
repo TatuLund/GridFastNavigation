@@ -154,11 +154,11 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 	 * each cell.
 	 */
 	private void bindColumnsToEditor() {
-		TextField col1 = createTextField(ValueChangeMode.BLUR);
-		TextField col3 = createTextField(ValueChangeMode.BLUR);
-		TextField col4 = createTextField(ValueChangeMode.BLUR);
-		TextField col5 = createTextField(ValueChangeMode.BLUR);
-		TextField col6 = createTextField(ValueChangeMode.BLUR);
+		TextField col1 = new TextField();
+		TextField col3 = new TextField();
+		TextField col4 = new TextField();
+		TextField col5 = new TextField();
+		TextField col6 = new TextField();
 		DateTimeField col7 = new DateTimeField();
 		DateField col8 = new DateField();
 		CheckBox col9 = new CheckBox();
@@ -233,7 +233,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		Binding<DemoColumns, String> col11Binding = binder.forField(col10).bind(DemoColumns::getCol10,
 				DemoColumns::setCol10);
 		this.addColumn(DemoColumns::getCol10).setCaption("Combobox").setWidth(150).setEditorBinding(col11Binding);
-
+		
 		for (int i = 0; i < 5; ++i) {
 			demoList.add(new DemoColumns());
 		}
@@ -247,12 +247,6 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			System.out.println("Item click event happens: "+event.getItem().toString());			
 		});
 		this.setSizeFull();
-	}
-
-	private TextField createTextField(ValueChangeMode valueChangeMode) {
-		TextField textField = new TextField();
-		textField.setValueChangeMode(valueChangeMode);
-		return textField;
 	}
 
 	// Add a blank row to the grid and tell the grid to refresh itself showing
