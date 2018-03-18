@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.13
+- Bugfix, cursor up/down did not open ComboBox in IE11
+
 ### Version 2.1.12
 - Fixing issue #52
 

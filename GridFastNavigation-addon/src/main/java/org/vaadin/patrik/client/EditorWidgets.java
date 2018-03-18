@@ -63,13 +63,13 @@ public class EditorWidgets {
 
             @Override
             public void setValue(VTextField widget, String value) {
-                widget.setValue(value);
+                widget.setValue(value);                
                 widget.getElement().blur();
                 widget.getElement().focus();
             }
 
             public void focus(VTextField widget) {
-                if (widget.isReadOnly()) {
+                if (widget.isEnabled()) {
                     widget.getElement().blur();
                     widget.getElement().focus();
                 }
@@ -112,20 +112,20 @@ public class EditorWidgets {
             public void focus(VComboBox widget) {
                 if (widget.enabled) {
                     widget.getElement().blur();
-                    widget.getElement().focus();
+                    widget.focus();
                 }
             }
 
             @Override
             public void enable(VComboBox widget) {
             	widget.enabled = true;
-               // widget.setTextInputEnabled(true);
+            	widget.tb.setEnabled(true);
             }
 
             @Override
             public void disable(VComboBox widget) {
             	widget.enabled = false;
-               // widget.setTextInputEnabled(false);
+            	widget.tb.setEnabled(false);
             }
 
             @Override
