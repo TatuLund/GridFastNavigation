@@ -134,7 +134,7 @@ public class EditorStateManager {
 
                 boolean move = false;
                 
-                final int columnCount = event.getGrid().getVisibleColumns().size();
+                final int columnCount = event.getGrid().getColumns().size();
                 final int rowCount = event.getGrid().getDataSource().size();
                 final int visibleRows = (int) event.getGrid().getHeightByRows();
                 
@@ -480,7 +480,7 @@ public class EditorStateManager {
                 unlock();
                 
                 // Reset all editor widgets to enabled
-                for (int i = 0, l = grid.getVisibleColumns().size(); i < l; ++i) {
+                for (int i = 0, l = grid.getColumns().size(); i < l; ++i) {
                     EditorWidgets.enable(getEditorWidgetForColumn(i));
                 }
                 
@@ -525,7 +525,7 @@ public class EditorStateManager {
                         
                         // Try going right first
                         while(disabledColumns.contains(++currentCol)) {}
-                        if(currentCol < grid.getVisibleColumns().size()) {
+                        if(currentCol < grid.getColumns().size()) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
                             openEditor(getFocusedRow(), currentCol);
@@ -697,7 +697,7 @@ public class EditorStateManager {
                 @Override
                 public void complete() {
                     // Reset all editor widgets to enabled
-                    for(int i = 0, l = grid.getVisibleColumns().size(); i < l; ++i) {
+                    for(int i = 0, l = grid.getColumns().size(); i < l; ++i) {
                         EditorWidgets.enable(getEditorWidgetForColumn(i));
                     }
                     
@@ -716,7 +716,7 @@ public class EditorStateManager {
         
         // Add currently non-editable columns
         int i = 0;
-        for(Column<?, Object> c : grid.getVisibleColumns()) {
+        for(Column<?, Object> c : grid.getColumns()) {
             if(!c.isEditable()) {
                 disabledColumns.add(i);
             }
