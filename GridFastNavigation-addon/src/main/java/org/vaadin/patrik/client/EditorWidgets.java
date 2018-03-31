@@ -108,8 +108,8 @@ public class EditorWidgets {
 
             public void focus(VFilterSelect widget) {
                 if (widget.enabled) {
-                    widget.getElement().blur();
-                    widget.getElement().focus();
+                	widget.getElement().blur();
+                	widget.focus();
                 }
             }
 

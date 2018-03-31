@@ -5,14 +5,14 @@
 	<groupId>org.vaadin.patrik</groupId>
 	<artifactId>GridFastNavigation-demo</artifactId>
 	<packaging>war</packaging>
-	<version>1.1.8</version>
+	<version>1.1.9</version>
 	<name>GridFastNavigation Add-on Demo</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
-		<vaadin.version>7.7.8</vaadin.version>
+		<vaadin.version>7.7.13</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<jetty.plugin.version>9.2.3.v20140905</jetty.plugin.version>
 	</properties>

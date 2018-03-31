@@ -108,6 +108,11 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
     private int abs(int number) {
     	return (number < 0) ? -number : number;
     }
+
+    @OnStateChange("saveWithCtrlS")
+    void saveWithCtrlS() {
+        editorManager.setSaveWithCtrlS(getState().saveWithCtrlS);
+    }
     
     @OnStateChange("openEditorWithSingleClick")
     void openEditorWithSingleClick() {
@@ -157,6 +162,14 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         editorManager.clearCloseShortcuts();
         for (int sc : getState().closeShortcuts) {
             editorManager.addCloseShortcut(sc);
+        }
+    }
+
+    @OnStateChange("saveShortcuts")
+    void updateSaveShortcuts() {
+        editorManager.clearSaveShortcuts();
+        for (int sc : getState().saveShortcuts) {
+            editorManager.addSaveShortcut(sc);
         }
     }
 

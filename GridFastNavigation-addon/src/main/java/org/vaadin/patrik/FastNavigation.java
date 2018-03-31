@@ -130,7 +130,7 @@ public class FastNavigation extends AbstractExtension {
 			private Object getItemIdByRowIndex(final Grid g, int rowIndex) {
 				Indexed ds = g.getContainerDataSource();
             	Object itemId = null;
-            	if (rowIndex >= 0) itemId = ds.getIdByIndex(rowIndex);
+            	if (rowIndex >= 0 && (ds.size() > 0)) itemId = ds.getIdByIndex(rowIndex);
 				return itemId;
 			}
 
@@ -158,17 +158,21 @@ public class FastNavigation extends AbstractExtension {
             }
 
             @Override
-            public void editorOpened(int rowIndex, int colIndex, int lockId) {
-                EditorOpenEvent ev = new EditorOpenEvent(g, rowIndex, colIndex);
+            public void editorOpened(int rowIndex, int colIndex, int lockId) {            	
+            	Object itemId = getItemIdByRowIndex(g, rowIndex);
+                EditorOpenEvent ev = new EditorOpenEvent(g, rowIndex, colIndex, itemId);
                 editorOpenListeners.dispatch(ev);
-                int[] disabled = ev.getDisabledColumns();
-                if (disabled != null) {
-                    ArrayList<Integer> disabledColumns = new ArrayList<Integer>();
-                    for (int i : disabled) {
+                // Update disabled columns or readonly fields status if changed dynamically
+                ArrayList<Integer> disabledColumns = new ArrayList<Integer>();
+                for (int i=0;i<g.getColumns().size();i++) {
+                	if (!g.getColumns().get(i).isEditable()) {
+                		disabledColumns.add(i);
+                	} else if ((g.getColumns().get(i).getEditorField() != null) && 
+                			g.getColumns().get(i).getEditorField().isReadOnly()) {
                         disabledColumns.add(i);
                     }
-                    getRPC().setDisabledColumns(disabledColumns);
                 }
+                getRPC().setDisabledColumns(disabledColumns);
                 getRPC().unlockEditor(lockId);
             }
 
@@ -205,6 +209,10 @@ public class FastNavigation extends AbstractExtension {
     /**
      * If set to true (default = true), editor opens with single mouse click.
      * 
+     * Note, if this is set to true, Grid's selection listener and item click 
+     * listeners will not get the click. Selection event will work with 
+     * shift + space.
+	 *
      * @param enable true (default = true), editor opens with single mouse click.
      */
     public void setOpenEditorWithSingleClick(boolean enable) {
@@ -329,6 +337,23 @@ public class FastNavigation extends AbstractExtension {
         getState().closeShortcuts.clear();
     }
 
+    /**
+     * Editor save extra shortcuts
+     * 
+     * @param code The keycode
+     */
+    public void addEditorSaveShortcut(int code) {
+        getState().saveShortcuts.add(code);
+    }
+
+    public void removeSaveCloseShortcut(int code) {
+        getState().saveShortcuts.remove(code);
+    }
+
+    public void clearSaveCloseShortcut(int code) {
+        getState().saveShortcuts.clear();
+    }
+    
     //
     // Event listeners
     //

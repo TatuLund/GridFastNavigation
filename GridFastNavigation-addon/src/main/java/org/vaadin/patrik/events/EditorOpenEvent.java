@@ -11,12 +11,13 @@ public class EditorOpenEvent extends Component.Event {
 
     private int rowIndex;
     private int colIndex;
-    private int[] disabledCols;
+    private Object itemId;
     
-    public EditorOpenEvent(Component source, int row, int col) {
+    public EditorOpenEvent(Component source, int row, int col, Object itemId) {
         super(source);
         rowIndex = row;
         colIndex = col;
+        this.itemId = itemId;
     }
 
     /**
@@ -35,24 +36,14 @@ public class EditorOpenEvent extends Component.Event {
      */
     public int getColumn() {
         return colIndex;
-    }
-    
-    /**
-     * Use this method to mark columns as not editable 
-     * 
-     * @param columns The columns that will be marked not editable
-     */
-    public void disableColumns(int... columns) {
-        disabledCols = columns;
-    }
+    }    
 
-    /** 
-     * Get columns that are not editable
+    /**
+     * Get opened itemId from the underlying data Container
      * 
-     * @return Indeces of the non editable columns
+     * @return Opened itemId
      */
-    public int[] getDisabledColumns() {
-        return disabledCols;
-    }
-    
+	public Object getItemId() {
+		return itemId;
+	}
 }

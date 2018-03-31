@@ -54,6 +54,13 @@ Debugging client side code in the GridFastNavigation-demo project:
 ## Release notes
 
 
+### Version 1.1.9
+- Fix: Cursor up/down did not open ComboBox in IE11 
+- Added possibility to add save shortcuts & saveWithCtrlS(true) -> Ctrl + S for Save (issue #49)
+- Fixed JavaDocs for setOpenEditorWithSingleClick(true) (issue: #42)
+- Fixed issue #56
+- Fixed disabled columns / readonly fields detection (issue: #55)
+
 ### Version 1.1.8
 - Added ClickOutListener
 
