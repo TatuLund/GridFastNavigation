@@ -53,10 +53,10 @@ public class FastNavigation<T> extends AbstractExtension {
     
     private final EventListenerList<RowFocusListener, RowFocusEvent<?>> rowFocusListeners = new EventListenerList<RowFocusListener, RowFocusEvent<?>>();
 
-    public interface EditorOpenListener extends Listener<EditorOpenEvent> {
+    public interface EditorOpenListener extends Listener<EditorOpenEvent<?>> {
     }
     
-    private final EventListenerList<EditorOpenListener, EditorOpenEvent> editorOpenListeners = new EventListenerList<EditorOpenListener, EditorOpenEvent>();
+    private final EventListenerList<EditorOpenListener, EditorOpenEvent<?>> editorOpenListeners = new EventListenerList<EditorOpenListener, EditorOpenEvent<?>>();
 
     public interface EditorCloseListener extends Listener<EditorCloseEvent> {
     }
@@ -124,7 +124,7 @@ public class FastNavigation<T> extends AbstractExtension {
 
         	private T getItemAt(int rowIndex) {
         		T myBean = null;
-        		if (rowIndex >= 0) {
+        		if (rowIndex >= 0 && g.getDataCommunicator().getDataProviderSize() > 0) {
         			myBean = g.getDataCommunicator().fetchItemsWithRange(rowIndex, 1).get(0);
         		}
         		return myBean;
@@ -146,11 +146,11 @@ public class FastNavigation<T> extends AbstractExtension {
             public void focusUpdated(int rowIndex, int colIndex) {
             	T item = getItemAt(rowIndex);
                 if (hasRowFocusListener && rowIndex != lastFocusedRow) {
-                    rowFocusListeners.dispatch(new RowFocusEvent(g, rowIndex, item));
+                    rowFocusListeners.dispatch(new RowFocusEvent<T>(g, rowIndex, item));
                 }
 
                 if (hasCellFocusListener && (rowIndex != lastFocusedRow || colIndex != lastFocusedCol)) {
-                    cellFocusListeners.dispatch(new CellFocusEvent(g, rowIndex, colIndex,
+                    cellFocusListeners.dispatch(new CellFocusEvent<T>(g, rowIndex, colIndex,
                             lastFocusedRow == rowIndex,
                             lastFocusedCol == colIndex, item));
                 }
@@ -161,16 +161,22 @@ public class FastNavigation<T> extends AbstractExtension {
 
             @Override
             public void editorOpened(int rowIndex, int colIndex, int lockId) {
-                EditorOpenEvent ev = new EditorOpenEvent(g, rowIndex, colIndex);
+            	T item = getItemAt(rowIndex);
+                EditorOpenEvent<T> ev = new EditorOpenEvent<>(g, rowIndex, colIndex, item);
                 editorOpenListeners.dispatch(ev);
-                int[] disabled = ev.getDisabledColumns();
-                if (disabled != null) {
-                    ArrayList<Integer> disabledColumns = new ArrayList<Integer>();
-                    for (int i : disabled) {
+                // Update disabled columns or readonly fields status if changed dynamically
+                ArrayList<Integer> disabledColumns = new ArrayList<Integer>();
+                for (int i=0;i<g.getColumns().size();i++) {
+                	if (!g.getColumns().get(i).isEditable()) {
+                		System.out.println("Disabled column: "+i);
+                		disabledColumns.add(i);
+                	} else if ((g.getColumns().get(i).getEditorBinding() != null) && 
+                			g.getColumns().get(i).getEditorBinding().getField().isReadOnly()) {
+                        System.out.println("Disabled column: "+i);
                         disabledColumns.add(i);
                     }
-                    getRPC().setDisabledColumns(disabledColumns);
                 }
+                getRPC().setDisabledColumns(disabledColumns);
                 getRPC().unlockEditor(lockId);
             }
 

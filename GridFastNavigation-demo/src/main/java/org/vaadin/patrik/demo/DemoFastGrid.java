@@ -23,7 +23,6 @@ import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
@@ -69,6 +68,11 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			int rowIndex = event.getRowIndex();
 			if (rowIndex >= 0) {
 				printChangedRow(rowIndex,(DemoColumns) event.getItem());
+			}			
+			if (((DemoColumns) event.getItem()).getCol9() == true) {
+				this.getColumn("col6").getEditorBinding().getField().setReadOnly(true);
+			} else {
+				this.getColumn("col6").getEditorBinding().getField().setReadOnly(false);				
 			}
 		});
 
@@ -162,6 +166,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		DateTimeField col7 = new DateTimeField();
 		DateField col8 = new DateField();
 		CheckBox col9 = new CheckBox();
+		col9.setDescription("Selecting this will disable Col6");
 		ComboBox<String> col10 = new ComboBox<>();
 		String[] options =
 		{ "Soft", "Medium", "Hard" };
@@ -200,7 +205,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		Binding<DemoColumns, Integer> col6Binding = binder.forField(col6).withNullRepresentation("")
 				.withConverter(new StringToIntegerConverter("Must enter a number"))
 				.bind(DemoColumns::getCol6, DemoColumns::setCol6);
-		this.addColumn(DemoColumns::getCol6).setCaption("Col6").setWidth(100).setEditorBinding(col6Binding);
+		this.addColumn(DemoColumns::getCol6).setId("col6").setCaption("Col6").setWidth(100).setEditorBinding(col6Binding);
 
 		// Col 7 DateTime
 		// Need a zoneoffset for datetimefield

@@ -30,6 +30,8 @@ public class EditorWidgets {
         void disable(T widget);
 
         boolean isUpDownNavAllowed(T widget);
+        
+        boolean isReadOnly(T widget);
     }
 
     private static final Map<Class<?>, WidgetHandler<?>> widgetHandlers;
@@ -91,6 +93,11 @@ public class EditorWidgets {
             public boolean isUpDownNavAllowed(VTextField widget) {
                 return true;
             }
+            
+            @Override
+            public boolean isReadOnly(VTextField widget) {
+            	return widget.isReadOnly();
+            }
         });
 
         registerHandler(VComboBox.class, new WidgetHandler<VComboBox>() {
@@ -109,6 +116,7 @@ public class EditorWidgets {
                 widget.tb.setValue(value);
             }
 
+            @Override
             public void focus(VComboBox widget) {
                 if (widget.enabled) {
                     widget.getElement().blur();
@@ -132,6 +140,11 @@ public class EditorWidgets {
             public boolean isUpDownNavAllowed(VComboBox widget) {
                 return false;
             }
+
+            @Override
+            public boolean isReadOnly(VComboBox widget) {
+            	return widget.tb.isReadOnly();
+            }
         });
 
         registerHandler(VCheckBox.class, new WidgetHandler<VCheckBox>() {
@@ -150,6 +163,7 @@ public class EditorWidgets {
                 widget.setValue(value);
             }
 
+            @Override
             public void focus(VCheckBox widget) {
                 if (widget.isEnabled()) {
                     widget.getElement().blur();
@@ -174,9 +188,13 @@ public class EditorWidgets {
 
 			@Override
 			public void selectAll(VCheckBox widget) {
-				// TODO Auto-generated method stub
-				
+				// TODO Auto-generated method stub				
 			}
+
+            @Override
+            public boolean isReadOnly(VCheckBox widget) {
+            	return widget.isEnabled();
+            }
         });
 
        registerHandler(VPopupCalendar.class,
@@ -226,6 +244,10 @@ public class EditorWidgets {
                         return false;
                     }
 
+                    @Override
+                    public boolean isReadOnly(VPopupCalendar widget) {
+                    	return widget.isReadonly();
+                    }
                 });
        
        registerHandler(VPopupTimeCalendar.class,
@@ -275,6 +297,10 @@ public class EditorWidgets {
                        return false;
                    }
 
+                   @Override
+                   public boolean isReadOnly(VPopupTimeCalendar widget) {
+                   	return widget.isReadonly();
+                   }
                });
 
 
@@ -376,6 +402,19 @@ public class EditorWidgets {
             }
         } else {
             logger.warning("EditorWidgets.isUpDownNavAllowed: Widget is null");
+        }
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Widget> boolean isReadOnly(T widget) {
+        if (widget != null) {
+            WidgetHandler<?> handler = getHandler(widget.getClass());
+            if (handler != null) {
+                return ((WidgetHandler<T>) handler).isReadOnly(widget);
+            }
+        } else {
+            logger.warning("EditorWidgets.isReadOnly: Widget is null");
         }
         return true;
     }

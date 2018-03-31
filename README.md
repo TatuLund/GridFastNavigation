@@ -54,6 +54,11 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.14
+- Fix, disabled columns / readonly fields detection logic was flawed (see: issue #55)
+- Fixing internal columns handling (see: issue #50)
+- Fix, Internal method to get item for events, did NPE with empty DataProvider (see: issue #56) 
+
 ### Version 2.1.13
 - Bugfix, cursor up/down did not open ComboBox in IE11
 

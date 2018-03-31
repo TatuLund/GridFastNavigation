@@ -7,16 +7,17 @@ import com.vaadin.ui.Component;
  * to disable some columns (in other words: make them read-only)  
  */
 @SuppressWarnings("serial")
-public class EditorOpenEvent extends Component.Event {
+public class EditorOpenEvent<T> extends Component.Event {
 
     private int rowIndex;
     private int colIndex;
-    private int[] disabledCols;
+    private T item;
     
-    public EditorOpenEvent(Component source, int row, int col) {
+    public EditorOpenEvent(Component source, int row, int col, T item) {
         super(source);
         rowIndex = row;
         colIndex = col;
+        this.item = item;
     }
 
     public int getRow() {
@@ -28,15 +29,11 @@ public class EditorOpenEvent extends Component.Event {
     }
     
     /**
-     * Use this method to mark columns as not editable 
-     * @param columns
+     * Get item which was opened from underlying datasource
+     * 
+     * @return Item which is edited
      */
-    public void disableColumns(int... columns) {
-        disabledCols = columns;
-    }
-    
-    public int[] getDisabledColumns() {
-        return disabledCols;
-    }
-    
+	public T getItem() {
+		return item;
+	}
 }
