@@ -162,7 +162,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         }
     }
 
-    @OnStateChange("closeShortcuts")
+    @OnStateChange("saveShortcuts")
     void updateSaveShortcuts() {
         editorManager.clearSaveShortcuts();
         for (int sc : getState().saveShortcuts) {
