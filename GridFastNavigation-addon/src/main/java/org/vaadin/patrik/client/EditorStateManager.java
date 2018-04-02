@@ -362,10 +362,13 @@ public class EditorStateManager {
     private boolean tabWrapping = true;
     private boolean changeColumnAfterLastRow = false;
     private boolean saveWithCtrlS = false;
-    
+	private boolean clickOutListenerAdded = false;
+	private FastNavigationState state;
+	
     @SuppressWarnings("unchecked")
     public EditorStateManager(Grid<?> g, FastNavigationState state) {
-        
+    	this.state = state;
+    	
     	Keys.setEnterBehavior(state.changeColumnOnEnter);
         grid = ((Grid<Object>) g);
         editor = grid.getEditor();
@@ -411,36 +414,43 @@ public class EditorStateManager {
             }
         }, KeyDownEvent.getType());
 
-        if (state.dispatchEditEventOnBlur) Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-           	@Override
-          	public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-           		if ((event.getTypeInt() == Event.ONMOUSEDOWN)) {
-                    int x1 = grid.getAbsoluteLeft();
-                    int y1 = grid.getAbsoluteTop();
-                    int y2 = y1 + grid.getOffsetHeight();
-                    int x2 = x1 + grid.getOffsetWidth();                    
-         			Event nativeEvent = Event.as(event.getNativeEvent());
-         			int ex = nativeEvent.getClientX();
-         			int ey = nativeEvent.getClientY();
-           			if (!((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
-           				if (isEditorOpen()) {
-           					saveContent();
-           					Element focusedElement = WidgetUtil.getFocusedElement();
-           					Widget editorWidget = getCurrentEditorWidget();
-           					if (editorWidget.getElement().isOrHasChild(focusedElement)) {
-           						focusedElement.blur();
-           						focusedElement.focus();
-           					}
-           					closeEditor(false);
-           				}
-           				notifyClickOut();
-           			}            			
-           		}
-           	}
-         });
+        if (state.dispatchEditEventOnBlur) addClickOutListener();
                     
         // TODO: fix listening for keyboard while locked
     }
+
+	public void addClickOutListener() {
+		if (!clickOutListenerAdded) {
+			Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+				@Override
+				public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+					if ((event.getTypeInt() == Event.ONMOUSEDOWN)) {
+						int x1 = grid.getAbsoluteLeft();
+						int y1 = grid.getAbsoluteTop();
+						int y2 = y1 + grid.getOffsetHeight();
+						int x2 = x1 + grid.getOffsetWidth();                    
+						Event nativeEvent = Event.as(event.getNativeEvent());
+						int ex = nativeEvent.getClientX();
+						int ey = nativeEvent.getClientY();
+						if (!((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
+							if (state.dispatchEditEventOnBlur && isEditorOpen()) {
+								saveContent();
+								Element focusedElement = WidgetUtil.getFocusedElement();
+								Widget editorWidget = getCurrentEditorWidget();
+								if (editorWidget.getElement().isOrHasChild(focusedElement)) {
+									focusedElement.blur();
+									focusedElement.focus();
+								}
+								closeEditor(false);
+							}
+							notifyClickOut();
+						}            			
+					}
+				}
+			});
+			clickOutListenerAdded = true;
+		}
+	}
     
     private boolean isBusy() {
         boolean busy = (useExternalLocking && externalLocks.isLocked())

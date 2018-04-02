@@ -40,6 +40,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 	final ListDataProvider<DemoColumns> demoData;
 
 	private MessageLog messageLog;
+	private int lastEditedRow = 0;
 
 	DemoFastGrid(MessageLog messageLog) {
 		super("Fast Navigation Grid");
@@ -60,9 +61,17 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 	}
 
 	private void initNavigation() {
+		
 		FastNavigation<DemoColumns> nav = new FastNavigation<>(this, false, true);
 		nav.setChangeColumnAfterLastRow(true);
 		nav.setOpenEditorWithSingleClick(true);
+		
+		this.addColumnResizeListener(event -> {
+			if (this.getEditor().isOpen()) {
+				this.getEditor().cancel();
+				this.getEditor().editRow(lastEditedRow);
+			}
+		});		
 		
 		nav.addRowEditListener(event -> {
 			int rowIndex = event.getRowIndex();
@@ -125,6 +134,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		// Listening to opening of editor
 		nav.addEditorOpenListener(event ->  {
 			int row = event.getRow();
+			lastEditedRow = row;
 			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumn());
 		});
 		messageLog.writeOutput("Added editor open listener");

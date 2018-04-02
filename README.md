@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.15
+- Fix, clickOutListener did not work if FastNavigation was not instantiated with dispatchEditEventOnBlur=true parameter (issue: #54)
+
 ### Version 2.1.14
 - Fix, disabled columns / readonly fields detection logic was flawed (see: issue #55)
 - Fixing internal columns handling (see: issue #50)
