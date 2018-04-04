@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.16
+- Returned disableColumns(..) to EditorOpenEvent. It can be used to disable additional columns from editing.
+
 ### Version 2.1.15
 - Fix, clickOutListener did not work if FastNavigation was not instantiated with dispatchEditEventOnBlur=true parameter (issue: #54)
 

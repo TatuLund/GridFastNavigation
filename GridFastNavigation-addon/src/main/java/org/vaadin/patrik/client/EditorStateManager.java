@@ -444,7 +444,7 @@ public class EditorStateManager {
 								closeEditor(false);
 							}
 							notifyClickOut();
-						}            			
+						}
 					}
 				}
 			});
