@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.17
+- Fix: Do not fire ClickOutEvent if ComboBox or DateField is open.
+
 ### Version 2.1.16
 - Returned disableColumns(..) to EditorOpenEvent. It can be used to disable additional columns from editing.
 

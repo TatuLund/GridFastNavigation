@@ -34,7 +34,8 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         rpc = getRpcProxy(FastNavigationServerRPC.class);
         editorManager = new EditorStateManager(grid,getState());
         focusTracker = new FocusTracker(grid);
-
+        editorManager.setConnector(this);
+        
         registerRpc(FastNavigationClientRPC.class,
                 new FastNavigationClientRPC() {
                     @Override

@@ -13,6 +13,7 @@ import org.vaadin.patrik.shared.FastNavigationState;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
@@ -25,6 +26,7 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.FocusUtil;
+import com.vaadin.client.ui.VOverlay;
 import com.vaadin.client.widget.grid.DefaultEditorEventHandler;
 import com.vaadin.client.widget.grid.EventCellReference;
 import com.vaadin.client.widgets.Grid;
@@ -364,6 +366,7 @@ public class EditorStateManager {
     private boolean saveWithCtrlS = false;
 	private boolean clickOutListenerAdded = false;
 	private FastNavigationState state;
+	private GridFastNavigationConnector gridFastNavigationConnector;
 	
     @SuppressWarnings("unchecked")
     public EditorStateManager(Grid<?> g, FastNavigationState state) {
@@ -424,6 +427,10 @@ public class EditorStateManager {
 			Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
 				@Override
 				public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+					EventTarget eventTarget = event.getNativeEvent().getEventTarget();
+					if (Element.is(eventTarget) && VOverlay.getOverlayContainer(gridFastNavigationConnector.getConnection()).isOrHasChild(eventTarget.cast())) {
+						return;
+					}
 					if ((event.getTypeInt() == Event.ONMOUSEDOWN)) {
 						int x1 = grid.getAbsoluteLeft();
 						int y1 = grid.getAbsoluteTop();
@@ -912,5 +919,10 @@ public class EditorStateManager {
     private Widget getCurrentEditorWidget() {
         return getEditorWidgetForColumn(GridViolators.getFocusedCol(grid));
     }
+
+	public void setConnector(
+			GridFastNavigationConnector gridFastNavigationConnector) {
+				this.gridFastNavigationConnector = gridFastNavigationConnector;
+	}
 
 }
