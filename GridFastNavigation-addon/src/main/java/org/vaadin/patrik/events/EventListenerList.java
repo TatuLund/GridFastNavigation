@@ -1,9 +1,10 @@
 package org.vaadin.patrik.events;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventListenerList<LISTENER extends Listener<EVENT>, EVENT> {
+public class EventListenerList<LISTENER extends Listener<EVENT>, EVENT> implements Serializable {
     private final List<LISTENER> listeners;
     
     public EventListenerList() {
