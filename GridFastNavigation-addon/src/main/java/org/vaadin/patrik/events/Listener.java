@@ -1,5 +1,7 @@
 package org.vaadin.patrik.events;
 
-public interface Listener<EventType> {
+import java.io.Serializable;
+
+public interface Listener<EventType> extends Serializable {
     public void onEvent(EventType event);
 }
