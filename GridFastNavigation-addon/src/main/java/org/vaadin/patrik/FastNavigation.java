@@ -166,12 +166,18 @@ public class FastNavigation extends AbstractExtension {
                 ArrayList<Integer> disabledColumns = new ArrayList<Integer>();
                 for (int i=0;i<g.getColumns().size();i++) {
                 	if (!g.getColumns().get(i).isEditable()) {
-                		disabledColumns.add(i);
+                		if (!disabledColumns.contains(i)) disabledColumns.add(i);
                 	} else if ((g.getColumns().get(i).getEditorField() != null) && 
                 			g.getColumns().get(i).getEditorField().isReadOnly()) {
-                        disabledColumns.add(i);
+                		if (!disabledColumns.contains(i)) disabledColumns.add(i);
                     }
                 }
+                int[] disabled = ev.getDisabledColumns();
+                if (disabled != null) {
+                    for (int i : disabled) {
+                    	if (!disabledColumns.contains(i)) disabledColumns.add(i);
+                    }
+                }                
                 getRPC().setDisabledColumns(disabledColumns);
                 getRPC().unlockEditor(lockId);
             }

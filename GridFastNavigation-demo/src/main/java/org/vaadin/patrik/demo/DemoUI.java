@@ -56,6 +56,7 @@ public class DemoUI extends UI {
 
     Table messageTable;
     IndexedContainer messageData;
+    
     @Override
     protected void init(VaadinRequest vaadinRequest) {
         final VerticalLayout layout = new VerticalLayout();
@@ -103,7 +104,7 @@ public class DemoUI extends UI {
     private void initNavigation(final Grid grid) {
         FastNavigation nav = new FastNavigation(grid,false,true);
         nav.setChangeColumnAfterLastRow(true);
-        
+
         nav.addRowEditListener(new RowEditListener() {
             @Override
             public void onEvent(RowEditEvent event) {

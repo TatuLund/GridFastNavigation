@@ -53,6 +53,11 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 1.1.10
+- Fix, clickOutListener did not work if FastNavigation was not instantiated with dispatchEditEventOnBlur=true parameter (issue: #54)
+- Returned disableColumns(..) to EditorOpenEvent. It can be used to disable additional columns from editing.
+- Fix: Do not fire ClickOutEvent if ComboBox or DateField is open.
+- Fixing serialization issue
 
 ### Version 1.1.9
 - Fix: Cursor up/down did not open ComboBox in IE11 

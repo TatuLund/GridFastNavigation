@@ -13,7 +13,7 @@ public class RowEditEvent extends Component.Event {
         this.rowIndex = rowIndex;
         this.itemId = itemId;
     }
-
+   
     /**
      * Get edited row index
      * 

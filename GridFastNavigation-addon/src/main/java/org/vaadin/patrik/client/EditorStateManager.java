@@ -13,7 +13,9 @@ import org.vaadin.patrik.shared.FastNavigationState;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -26,6 +28,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.VConsole;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.FocusUtil;
+import com.vaadin.client.ui.VOverlay;
 import com.vaadin.client.widget.grid.DefaultEditorEventHandler;
 import com.vaadin.client.widget.grid.EventCellReference;
 import com.vaadin.client.widgets.Grid;
@@ -356,10 +359,14 @@ public class EditorStateManager {
     private boolean tabWrapping = true;
     private boolean changeColumnAfterLastRow = false;
     private boolean saveWithCtrlS = false;
+    private boolean clickOutListenerAdded = false;
+    private FastNavigationState state;
+    private GridFastNavigationConnector gridFastNavigationConnector;
     
     @SuppressWarnings("unchecked")
     public EditorStateManager(Grid<?> g, FastNavigationState state) {
         
+        this.state = state;
     	Keys.setEnterBehavior(state.changeColumnOnEnter);
         grid = ((Grid<Object>) g);
         editor = grid.getEditor();
@@ -405,38 +412,48 @@ public class EditorStateManager {
             }
         }, KeyDownEvent.getType());
 
-        if (state.dispatchEditEventOnBlur) Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-           	@Override
-          	public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-           		if ((event.getTypeInt() == Event.ONMOUSEDOWN)) {
-                    int x1 = grid.getAbsoluteLeft();
-                    int y1 = grid.getAbsoluteTop();
-                    int y2 = y1 + grid.getOffsetHeight();
-                    int x2 = x1 + grid.getOffsetWidth();                    
-         			Event nativeEvent = Event.as(event.getNativeEvent());
-         			int ex = nativeEvent.getClientX();
-         			int ey = nativeEvent.getClientY();
-           			if (!((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
-           				if (isEditorOpen()) {
-           					saveContent();
-           					Element focusedElement = WidgetUtil.getFocusedElement();
-           					Widget editorWidget = getCurrentEditorWidget();
-           					if (editorWidget.getElement().isOrHasChild(focusedElement)) {
-           						focusedElement.blur();
-           						focusedElement.focus();
-           					}
-           					closeEditor(false);
-           				}
-           				notifyClickOut();
-           			}            			
-           		}
-           	}
-         });
+        if (state.dispatchEditEventOnBlur) addClickOutListener();
             
         
         // TODO: fix listening for keyboard while locked
     }
-    
+
+	public void addClickOutListener() {
+		if (!clickOutListenerAdded) {
+			Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
+				@Override
+				public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
+					EventTarget eventTarget = event.getNativeEvent().getEventTarget();
+					if (Element.is(eventTarget) && VOverlay.getOverlayContainer(gridFastNavigationConnector.getConnection()).isOrHasChild((Node) eventTarget.cast())) {
+						return;
+					}
+					if ((event.getTypeInt() == Event.ONMOUSEDOWN)) {
+						int x1 = grid.getAbsoluteLeft();
+						int y1 = grid.getAbsoluteTop();
+						int y2 = y1 + grid.getOffsetHeight();
+						int x2 = x1 + grid.getOffsetWidth();                    
+						Event nativeEvent = Event.as(event.getNativeEvent());
+						int ex = nativeEvent.getClientX();
+						int ey = nativeEvent.getClientY();
+						if (!((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
+							if (state.dispatchEditEventOnBlur && isEditorOpen()) {
+								saveContent();
+								Element focusedElement = WidgetUtil.getFocusedElement();
+								Widget editorWidget = getCurrentEditorWidget();
+								if (editorWidget.getElement().isOrHasChild(focusedElement)) {
+									focusedElement.blur();
+									focusedElement.focus();
+								}
+								closeEditor(false);
+							}
+							notifyClickOut();
+						}
+					}
+				}
+			});
+			clickOutListenerAdded = true;
+		}
+	}    
     private boolean isBusy() {
         boolean busy = (useExternalLocking && externalLocks.isLocked())
                 || waitingForEditorOpen;
@@ -891,5 +908,10 @@ public class EditorStateManager {
     private Widget getCurrentEditorWidget() {
         return getEditorWidgetForColumn(GridViolators.getFocusedCol(grid));
     }
+
+	public void setConnector(
+		GridFastNavigationConnector gridFastNavigationConnector) {
+			this.gridFastNavigationConnector = gridFastNavigationConnector;
+	}
 
 }
