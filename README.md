@@ -2,12 +2,35 @@
 
 Do you like the Grid but would want it to appeal more to old Excel jockeys?
 Then this add-on is for you!
-GridFastNavigation is a compnent extension for Vaadin Grid, which uses the
+GridFastNavigation is a component extension for Vaadin Grid, which uses the
 unbuffered editing mode and alters its keyboard controls to provide a faster
 editing experience.
 
+List of features:
+- Enter key can be configured to change column instead of a row
+- PgDown/PgUp support
+- Tab changes column, Grid can be browsed with cursor keys.
+- Typing text enables edit mode. (If you start typing with Delete key, the cell will be emptied first)
+- In ComboBox / DateField cursor down will open popup
+- The add-on supports TextField, PopupDateField, ComboBox and CheckBox in the edit fields of the editor.
+- RowEditEvent and CellEditEvent logic
+- Pressing Esc cancel edit and reset the value
+- Home/End key support: Home - first row, End - last row, Shift+Home - first column on first row, Shift+End last column on last row
+- Server-side focus tracking events either on per-cell or per-row basis
+- Editor open/close events
+- DateFields now don't stop working after using up/down arrow navigation
+- Selecting text when opening editor can be enabled and disabled
+- Tab navigation skips disabled columns
+- Move with enter/shift+enter and tab/shift+tab as well as up/down arrow keys while editing
+- Allows user to start editing without first opening the editor
+- Open editor with single mouse click (configurable)
+- Optional mode to close editor and dispatch edit event when clicking outside of Grid
+- getItem() method in cell and row edit/focus, editor open events
+
+Vaadin 8 branch is at https://github.com/TatuLund/GridFastNavigation/tree/vaadin8
+
 ## Online demo
-[Try it here](http://patrik.app.fi/GridFastNavigation-demo-0.2.0/)
+ToDo
 
 ## Download release
 
@@ -15,7 +38,7 @@ Official releases of this add-on are available at Vaadin Directory. For Maven in
 
 ## Building and running demo
 
-git clone https://github.com/thinwire/GridFastNavigation.git
+git clone https://github.com/tatulund/GridFastNavigation.git
 mvn clean install
 cd GridFastNavigation-demo
 mvn jetty:run
@@ -157,7 +180,7 @@ NOTE: server-side notification of changed data has been removed (for now), but c
 
 ## Issue tracking
 
-The issues for this add-on are tracked on its github.com page. All bug reports and feature requests are appreciated. 
+The issues for this add-on are tracked on its github.com page. All bug reports and feature requests are appreciated. They have been helpful for adding right features and improving the quality of the add-on.
 
 ## Contributions
 
@@ -174,4 +197,6 @@ Contributions are welcome, but there are no guarantees that they are accepted as
 Add-on is distributed under Apache License 2.0. For license terms, see LICENSE.txt.
 
 GridFastNavigation is written by Patrik Lindström, Tatu Lund and Johannes Tuikkala and maintained by the Tatu
+
+Major pieces of development of this add-on has been sponsored by multiple Support and Prime customers of Vaadin. See vaadin.com/support and Development on Demand for more details.
 
