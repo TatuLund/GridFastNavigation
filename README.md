@@ -54,6 +54,11 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.1.18
+- Fixed serialization issue
+- Made EditorWidgets.registerHandler(..) public so that it is possible to add your custom editor widget handlers, and added java docs.
+- Fix: Selection of the ComboBox textfield was missing
+ 
 ### Version 2.1.17
 - Fix: Do not fire ClickOutEvent if ComboBox or DateField is open.
 

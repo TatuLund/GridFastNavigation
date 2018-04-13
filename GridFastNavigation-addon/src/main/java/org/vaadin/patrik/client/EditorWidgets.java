@@ -15,22 +15,79 @@ public class EditorWidgets {
 
     private static final Logger logger = Logger.getLogger("EditorWidgets");
 
+    /**
+     * This is interface for WidgetHandler. Purpose of the WidgetHandlers is to give
+     * uniform API of Editor widgets for the internal logic of the GridFastNavigation.
+     * This is necessary since unfortunately there are API differences between
+     * different editor widgets.
+     * 
+     * Use registerHandler(..) method to register new handlers 
+     * 
+     * @author Tatu Lund
+     *
+     * @param <T> The type parameter, i.e. editor widget class to be wrapped
+     */
     public interface WidgetHandler<T extends Widget> {
 
+    	/**
+    	 * Select the content of the field. If it is not possible implement as NOP. 
+    	 * 
+    	 * @param widget The editor widget
+    	 */
         void selectAll(T widget);
 
+        /**
+         * Get value of the editor widget
+         * 
+         * @param widget The editor widget
+         * @return Current value of the editor widget
+         */
         String getValue(T widget);
 
+        /**
+         * Set the value of the ditor widget
+         *  
+         * @param widget The editor widget
+         * @param value
+         */
         void setValue(T widget, String value);
 
+        /**
+         * Force focus to widget
+         * 
+         * @param widget The editor widget
+         */
         void focus(T widget);
 
+        /**
+         * Make the widget editable 
+         *  
+         * @param widget The editor widget
+         */
         void enable(T widget);
 
+        /**
+         * Make the widget uneditable 
+         *  
+         * @param widget The editor widget
+         */
         void disable(T widget);
 
+        /**
+         * Return true, if it is more natural that with this
+         * widget cursor up/down should not change Grid row
+         *  
+         * @param widget The editor widget
+         * @return return true/false
+         */
         boolean isUpDownNavAllowed(T widget);
         
+        /**
+         * Return true if widget is currently editable
+         * 
+         * @param widget The editor widget
+         * @return true/false
+         */
         boolean isReadOnly(T widget);
     }
 
@@ -41,10 +98,15 @@ public class EditorWidgets {
     // This enables support for value revert, append and selectAll
     //
 
-    // Function exists to power syntax assist...
-    private static <T extends Widget> void registerHandler(Class<T> cls,
+    /**
+     * Register a new widget handler. Purpose
+     *  
+     * @param clazz Class name of the editor widget to be registered
+     * @param handler The handler, implements WidgetHandler interface
+     */
+    public static <T extends Widget> void registerHandler(Class<T> clazz,
             WidgetHandler<T> handler) {
-        widgetHandlers.put(cls, handler);
+        widgetHandlers.put(clazz, handler);
     }
 
     static {
@@ -103,7 +165,9 @@ public class EditorWidgets {
         registerHandler(VComboBox.class, new WidgetHandler<VComboBox>() {
             @Override
             public void selectAll(VComboBox widget) {
-
+                if (!widget.tb.isReadOnly()) {
+                    widget.tb.selectAll();
+                }
             }
 
             @Override
