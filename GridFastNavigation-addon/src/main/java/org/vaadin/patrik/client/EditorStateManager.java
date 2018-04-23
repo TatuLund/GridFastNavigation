@@ -97,7 +97,7 @@ public class EditorStateManager {
                 } else if (openEditorOnType) {
                     if (Keys.isAlphaNumericKey(key)) {
                         open = true;
-                        queueKey(key, shift);
+                        queueKey(Keys.translateNumKey(key), shift);
                     } else if (Keys.isDelKey(key)) {
                     	open = true;
                     	deletePressed = true;

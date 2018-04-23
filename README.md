@@ -55,6 +55,9 @@ Debugging client side code in the GridFastNavigation-demo project:
 ## Release notes
 
 ### Version 2.1.18
+- Fixed issue #63: Numpad input was not filttered properly
+
+### Version 2.1.18
 - Fixed serialization issue
 - Made EditorWidgets.registerHandler(..) public so that it is possible to add your custom editor widget handlers, and added java docs.
 - Fix: Selection of the ComboBox textfield was missing

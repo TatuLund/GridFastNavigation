@@ -46,6 +46,11 @@ public final class Keys {
     	}
     }
     
+    public static int translateNumKey(int keycode) {
+    	if (keycode >= 96 && keycode <= 105) return keycode - 48;
+    	else return keycode;    	
+    }
+    
     public static boolean isUpDownArrowKey(int keycode) {
         if(keycode == KeyCodes.KEY_UP || keycode == KeyCodes.KEY_DOWN || keycode == KeyCodes.KEY_PAGEUP || keycode == KeyCodes.KEY_PAGEDOWN) {
             return true;
