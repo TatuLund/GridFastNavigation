@@ -54,7 +54,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
-### Version 2.1.18
+### Version 2.1.20
+- Fixed issue #64: RowEditEvent fired after ESC-key 
+
+### Version 2.1.19
 - Fixed issue #63: Numpad input was not filttered properly
 
 ### Version 2.1.18

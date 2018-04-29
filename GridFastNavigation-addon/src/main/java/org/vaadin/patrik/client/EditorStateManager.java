@@ -832,7 +832,8 @@ public class EditorStateManager {
     // Request opening the editor. This function should be used internally instead
     // of the direct editor.editRow() calls.
     public void openEditor(int row, int col) {
-        if(GridViolators.isEditorReallyClosed(editor)) {
+    	if (!editor.isEnabled()) return;
+        if (GridViolators.isEditorReallyClosed(editor)) {
             editor.editRow(row,col);
             notifyEditorOpened(row,col);
             waitForEditorOpen();
@@ -860,6 +861,7 @@ public class EditorStateManager {
         if (cancel) {
         	EditorWidgets.setValue(getCurrentEditorWidget(), oldContent);
             editor.cancel();
+            resetContent();
         } else {
             if ((oldContent != null) && !oldContent.equals(newContent)) {
             	notifyDataChanged(newContent,row,col);
