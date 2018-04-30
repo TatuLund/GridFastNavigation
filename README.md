@@ -54,6 +54,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.2.0
+- Fixed issue #65: Column indeces where off by one with multiselect model, and column disabling did not work 
+- Changed behavior, FastNavigation will no longer force Editor to be enabled
+
 ### Version 2.1.20
 - Fixed issue #64: RowEditEvent fired after ESC-key 
 

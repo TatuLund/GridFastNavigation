@@ -18,6 +18,7 @@ import org.vaadin.patrik.shared.FastNavigationState;
 
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.components.grid.MultiSelectionModel;
 
 
 @SuppressWarnings("serial")
@@ -118,7 +119,6 @@ public class FastNavigation<T> extends AbstractExtension {
     	getState().changeColumnOnEnter = changeColumnOnEnter;
     	getState().dispatchEditEventOnBlur = dispatchEditEventOnBlur;    	
         g.getEditor().setBuffered(false);
-        g.getEditor().setEnabled(true);
         
         registerRpc(new FastNavigationServerRPC() {
 
@@ -166,18 +166,20 @@ public class FastNavigation<T> extends AbstractExtension {
                 editorOpenListeners.dispatch(ev);
                 // Update disabled columns or readonly fields status if changed dynamically
                 ArrayList<Integer> disabledColumns = new ArrayList<Integer>();
+                int offset = 0;
+                if (g.getSelectionModel() instanceof MultiSelectionModel) offset = 1;
                 for (int i=0;i<g.getColumns().size();i++) {
                 	if (!g.getColumns().get(i).isEditable()) {
-                		if (!disabledColumns.contains(i)) disabledColumns.add(i);
+                		if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);
                 	} else if ((g.getColumns().get(i).getEditorBinding() != null) && 
                 			g.getColumns().get(i).getEditorBinding().getField().isReadOnly()) {
-                		if (!disabledColumns.contains(i)) disabledColumns.add(i);
+                		if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);
                     }
                 }
                 int[] disabled = ev.getDisabledColumns();
                 if (disabled != null) {
                     for (int i : disabled) {
-                    	if (!disabledColumns.contains(i)) disabledColumns.add(i);
+                    	if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);
                     }
                 }
                 getRPC().setDisabledColumns(disabledColumns);

@@ -49,13 +49,13 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		demoData = new ListDataProvider<>(demoList);
 
 		this.setDataProvider(demoData);
-		this.getEditor().setEnabled(true);
-		this.getEditor().setBuffered(false);
-
 		this.getHeaderRow(0).setStyleName("my-background");
 		
 		initNavigation();
 
+		this.getEditor().setEnabled(true);
+		this.getEditor().setBuffered(false);
+		
 		bindColumnsToEditor();
 		
 	}
@@ -126,7 +126,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		// Cell focus change
 		nav.addCellFocusListener(event -> {
 			int row = event.getRow();
-			int col = event.getColumn();
+			int col = event.getColumnIndex();
 			messageLog.writeOutput("Focus moved to cell [" + row + ", " + col + " ]");
 		});
 		messageLog.writeOutput("Added cell focus change listener");
@@ -135,13 +135,13 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addEditorOpenListener(event ->  {
 			int row = event.getRow();
 			lastEditedRow = row;
-			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumn());
+			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumnIndex());
 		});
 		messageLog.writeOutput("Added editor open listener");
 
 		// Listening to closing of editor
 		nav.addEditorCloseListener(event -> {
-			messageLog.writeOutput("Editor closed on row " + event.getRow() + ", column " + event.getColumn() + ", "
+			messageLog.writeOutput("Editor closed on row " + event.getRow() + ", column " + event.getColumnIndex() + ", "
 					+ (event.wasCancelled() ? "user cancelled change" : "user saved change"));
 		});
 		messageLog.writeOutput("Added editor close listener");
