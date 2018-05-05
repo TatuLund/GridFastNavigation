@@ -306,6 +306,8 @@ public class EditorStateManager {
                 } else {
                 	closeEditor(true);
                 }
+                // Ensure modality curtain is removed. If ESC was hold when Editor opened, it was probably closed too fast
+                unlock();
             }
             
             return close;
