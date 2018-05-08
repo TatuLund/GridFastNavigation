@@ -119,6 +119,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addRowFocusListener(event -> {
 			if (event.getRow() >= 0) grid.select((DemoColumns) event.getItem());
 			else grid.deselectAll();
+			getEditor().getBinder().validate();
 			messageLog.writeOutput("Focus moved to row " + event.getRow());
 		});
 		messageLog.writeOutput("Added row focus change listener");

@@ -292,6 +292,7 @@ public class FastNavigation<T> extends AbstractExtension {
     public boolean getAllowArrowToChangeRow() {
         return getState().allowArrowRowChange;
     }
+
     
     //
     // Editor opening

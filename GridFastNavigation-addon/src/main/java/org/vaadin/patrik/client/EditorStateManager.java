@@ -274,18 +274,13 @@ public class EditorStateManager {
             
             if(isBusy()) return false;
 
-            boolean hasValidationError = false;
-            for (Column<?,Object> column : grid.getColumns()) {
-            	if (grid.getEditor().isEditorColumnError(column)) hasValidationError = true;
-            }
-            
             //
             // This is actually the explicit _CANCEL_ or _SAVE_ of the editor. 
             //
             
             boolean close = false;
             boolean save = false;
-            if (isCloseEvent(event)) {
+            if (!hasValidationError()) if (isCloseEvent(event)) {
                 close = true;
             } else if (isKeyPressEvent(event)) {
             	boolean ctrl = event.getDomEvent().getCtrlKey();
@@ -293,7 +288,7 @@ public class EditorStateManager {
                 if (closeShortcuts.contains(key)) {
                     close = true;
                 }
-                if (!hasValidationError && (saveShortcuts.contains(key) || (saveWithCtrlS && ctrl && key == KeyCode.S))) {
+                if (saveShortcuts.contains(key) || (saveWithCtrlS && ctrl && key == KeyCode.S)) {
                 	close = true;
                     save = true;
                 }
@@ -480,11 +475,19 @@ public class EditorStateManager {
             /* ignored */
         }
     }
-    
+
+    // Check if validation errors are in any of the columns
+    private boolean hasValidationError() {
+        boolean validationError = false;
+        for (Column<?,Object> column : grid.getColumns()) {
+        	if (grid.getEditor().isEditorColumnError(column)) validationError = true;
+        }
+        return validationError;
+    }
+            
     //
     // Spinlocks
     //
-    
     private void waitForEditorOpen() {
         SpinLock.lock(new LockFunction() {
             @Override
@@ -861,9 +864,9 @@ public class EditorStateManager {
         int col = getFocusedCol();
         
         if (cancel) {
-        	EditorWidgets.setValue(getCurrentEditorWidget(), oldContent);
-            editor.cancel();
-            resetContent();
+       		EditorWidgets.setValue(getCurrentEditorWidget(), oldContent);
+       		editor.cancel();
+       		resetContent();
         } else {
             if ((oldContent != null) && !oldContent.equals(newContent)) {
             	notifyDataChanged(newContent,row,col);
