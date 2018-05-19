@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
+import com.google.gwt.animation.client.AnimationScheduler.AnimationHandle;
 import com.vaadin.client.widgets.Grid;
 
 /**
@@ -24,6 +25,7 @@ public class FocusTracker {
     private int lastRow;
     private int lastCol;
     private boolean run;
+	protected AnimationHandle handle;
 
     public FocusTracker(Grid<?> g) {
         this.grid = g;
@@ -49,7 +51,13 @@ public class FocusTracker {
     public boolean isRunning() {
         return run;
     }
-
+    
+    public void reset() {
+    	currentRow = -1;
+    	currentCol = -1;
+        notifyFocusMoved();
+    }
+    
     private void notifyFocusMoved() {
         for (FocusListener l : listeners) {
             l.focusMoved(currentRow, currentCol, lastRow, lastCol);
@@ -72,8 +80,6 @@ public class FocusTracker {
         @Override
         public void execute(double timestamp) {
             
-            // TODO: do not update position or notify of moved focus if focus is in header/footer!
-            
             int row = GridViolators.getFocusedRow(grid);
             int col = GridViolators.getFocusedCol(grid);
 
@@ -86,7 +92,7 @@ public class FocusTracker {
             }
 
             if (run) {
-                AnimationScheduler.get().requestAnimationFrame(updateLoop);
+                handle = AnimationScheduler.get().requestAnimationFrame(updateLoop);
             }
         }
     };

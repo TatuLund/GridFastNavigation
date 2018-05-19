@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.2.3
+- Improvements to full row validation (see issues #69 and #51), with setRowValidation(..) API
+
 ### Version 2.2.2
 - Making possible to have full row validation (see issues #69 and #51)
 - Updated demo

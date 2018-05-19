@@ -47,6 +47,12 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     public void unlockEditor(int lockId) {
                         editorManager.externalUnlock(lockId);
                     }
+                    
+                    @Override
+                    public void validationHasErrors() {
+                    	editorManager.moveEditorToError();
+                    }
+                    
                 });
 
         editorManager.addListener(new EditorListener() {
@@ -107,6 +113,19 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         updateFocusTracking();
     }
 
+    public FocusTracker getFocusTracker() {
+    	return focusTracker;
+    }
+    
+    public void requestValidate() {
+    	rpc.forceValidate();
+    }
+
+    @OnStateChange("rowValidation")
+    void setRowValidation() {
+    	editorManager.setRowValidation(getState().rowValidation);
+    }
+    
     @OnStateChange("saveWithCtrlS")
     void saveWithCtrlS() {
     	editorManager.setSaveWithCtrlS(getState().saveWithCtrlS);

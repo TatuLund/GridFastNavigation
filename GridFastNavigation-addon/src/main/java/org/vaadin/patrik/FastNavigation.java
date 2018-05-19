@@ -16,6 +16,7 @@ import org.vaadin.patrik.shared.FastNavigationClientRPC;
 import org.vaadin.patrik.shared.FastNavigationServerRPC;
 import org.vaadin.patrik.shared.FastNavigationState;
 
+import com.vaadin.data.BinderValidationStatus;
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.components.grid.MultiSelectionModel;
@@ -201,6 +202,12 @@ public class FastNavigation<T> extends AbstractExtension {
 			public void clickOut() {
 				clickOutListeners.dispatch(new ClickOutEvent(g));
 			}
+			
+			@Override
+			public void forceValidate() {
+				BinderValidationStatus<T> status = g.getEditor().getBinder().validate();
+				if (status.hasErrors()) getRPC().validationHasErrors();
+			}
 
         }, FastNavigationServerRPC.class);
 
@@ -251,6 +258,21 @@ public class FastNavigation<T> extends AbstractExtension {
     //
     // Tab capture
     //
+
+    /**
+     * If set to true (default = false), FastNavigation will attempt to trigger validation of the 
+     * whole row, and closing of editor is not possible if the validation error indicator is on.
+     * Also FastNavigation will not jump to first error column.
+     * 
+     * @param enable Boolean value
+     */
+    public void setRowValidation(boolean enable) {
+        getState().rowValidation = enable;
+    }
+      
+    public boolean getrowValidation() {
+        return getState().rowValidation;
+    }
 
     /**
      * If set to true, tabbing outside the edge of the current row will wrap the
