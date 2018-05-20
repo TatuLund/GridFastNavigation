@@ -1,6 +1,8 @@
 package org.vaadin.patrik.events;
 
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.MultiSelectionModel;
 
 @SuppressWarnings("serial")
 public class CellEditEvent extends Component.Event {
@@ -12,6 +14,7 @@ public class CellEditEvent extends Component.Event {
     private String newData;
 
     private Object itemId;
+    private int offset = 0;
     
     public CellEditEvent(Component source, Integer rowIndex, Integer colIndex, String newData, Object itemId) {
         super(source);
@@ -19,6 +22,8 @@ public class CellEditEvent extends Component.Event {
         this.colIndex = colIndex;
         this.newData = newData;
         this.itemId = itemId;
+        Grid grid = (Grid) source;
+        if (grid.getSelectionModel() instanceof MultiSelectionModel) offset = 1;
     }
     
     /**
@@ -36,7 +41,7 @@ public class CellEditEvent extends Component.Event {
      * @return Edited column index
      */
     public int getColumnIndex() {
-        return colIndex;
+        return colIndex-offset;
     }
     
     /**

@@ -1,0 +1,65 @@
+// If you edit this file you need to compile the theme. See README.md for details.
+
+// Global variable overrides. Must be declared before importing Valo.
+
+// Defines the plaintext font size, weight and family. Font size affects general component sizing.
+//$v-font-size: 16px;
+//$v-font-weight: 300;
+//$v-font-family: "Open Sans", sans-serif;
+
+// Defines the border used by all components.
+//$v-border: 1px solid (v-shade 0.7);
+//$v-border-radius: 4px;
+
+// Affects the color of some component elements, e.g Button, Panel title, etc
+//$v-background-color: hsl(210, 0%, 98%);
+// Affects the color of content areas, e.g  Panel and Window content, TextField input etc
+//$v-app-background-color: $v-background-color;
+
+// Affects the visual appearance of all components
+//$v-gradient: v-linear 8%;
+//$v-bevel-depth: 30%;
+//$v-shadow-opacity: 5%;
+
+// Defines colors for indicating status (focus, success, failure)
+//$v-focus-color: valo-focus-color(); // Calculates a suitable color automatically
+//$v-friendly-color: #2c9720;
+//$v-error-indicator-color: #ed473b;
+
+// For more information, see: https://vaadin.com/book/-/page/themes.valo.html
+// Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples
+
+@import "../valo/valo.scss";
+
+@mixin demo {
+  @include valo;
+
+	$gray: #d1d1cf;
+	$green: #40b527;
+	$darkgreen: darken($green, 30%);
+
+  	// Insert your own theme rules here
+	// You can style your demo app right here
+	.demoContentLayout {
+		background-color: $gray;
+		background-image: url(images/radial-gradient.png);
+		background-size: 90%;
+		background-position: center center;
+		background-repeat: no-repeat;
+	}
+	
+	// You can also customize your component for the demo
+	// app, but remember that these styles are not part of
+	// the component. To include built-in CSS for your component,
+	// edit client/styles.css under java sources
+	div.GridFastNavigation {
+		color: $green;
+		font-size: 50pt;
+		font-weight: bold;
+		text-shadow: 0px 3px 0px $darkgreen,
+             0px 14px 10px rgba(0,0,0,0.15),
+             0px 24px 2px rgba(0,0,0,0.1),
+             0px 34px 30px rgba(0,0,0,0.1);
+        text-align: center;
+	}
+}

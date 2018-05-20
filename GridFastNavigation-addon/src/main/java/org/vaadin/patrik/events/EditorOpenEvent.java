@@ -1,6 +1,8 @@
 package org.vaadin.patrik.events;
 
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.MultiSelectionModel;
 
 /**
  * Event used to notify of editor being opened. Can be used
@@ -13,30 +15,33 @@ public class EditorOpenEvent extends Component.Event {
     private int colIndex;
     private Object itemId;
     private int[] disabledCols;
+    private int offset = 0;
 
     public EditorOpenEvent(Component source, int row, int col, Object itemId) {
         super(source);
         rowIndex = row;
         colIndex = col;
         this.itemId = itemId;
+        Grid grid = (Grid) source;
+        if (grid.getSelectionModel() instanceof MultiSelectionModel) offset = 1;
     }
 
     /**
-     * Get row where editor was opened
+     * Get index of the row where editor was opened
      * 
-     * @return Row index
+     * @return Index of the row where editor was opened
      */
     public int getRow() {
         return rowIndex;
     }
     
     /**
-     * Get column where editor was opened
+     * Get index of the column where editor was opened
      * 
-     * @return Column index
+     * @return Index of the column where editor was opened
      */
     public int getColumn() {
-        return colIndex;
+        return colIndex-offset;
     }    
 
     /**

@@ -76,6 +76,16 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 1.2.0
+- Fixed issue #65: Column indeces where off by one with multiselect model, and column disabling did not work 
+- Changed behavior, FastNavigation will no longer force Editor to be enabled
+- Fixed issue #63: Numpad input was not filttered properly
+- Fixed issue #64: RowEditEvent fired after ESC-key 
+- Fixing issue #67: ESC-Click combination froze editor
+- Improvements to full row validation (see issues #69 and #51), with setRowValidation(..) API
+- Made EditorWidgets.registerHandler(..) public so that it is possible to add your custom editor widget handlers, and added java docs.
+- Fix: Selection of the ComboBox textfield was missing
+
 ### Version 1.1.10
 - Fix, clickOutListener did not work if FastNavigation was not instantiated with dispatchEditEventOnBlur=true parameter (issue: #54)
 - Returned disableColumns(..) to EditorOpenEvent. It can be used to disable additional columns from editing.

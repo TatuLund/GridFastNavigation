@@ -13,4 +13,5 @@ public interface FastNavigationClientRPC extends ClientRpc {
  
     void unlockEditor(int lockId);
     
+    void validationHasErrors();
 }

@@ -11,6 +11,8 @@ import org.vaadin.patrik.client.SpinLock.Callback;
 import org.vaadin.patrik.client.SpinLock.LockFunction;
 import org.vaadin.patrik.shared.FastNavigationState;
 
+import com.google.gwt.animation.client.AnimationScheduler;
+import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -101,7 +103,7 @@ public class EditorStateManager {
                 } else if (openEditorOnType) {
                     if (Keys.isAlphaNumericKey(key)) {
                         open = true;
-                        queueKey(key, shift);
+                        queueKey(Keys.translateNumKey(key), shift);
                     } else if (Keys.isDelKey(key)) {
                     	open = true;
                     	deletePressed = true;
@@ -112,7 +114,7 @@ public class EditorStateManager {
             if (open) {
                 final EventCellReference<?> cell = event.getCell();
                 event.getDomEvent().preventDefault();
-                openEditor(cell.getRowIndex(), cell.getColumnIndexDOM()); // TODO: IndexDOM or Index?
+                openEditor(cell.getRowIndex(), cell.getColumnIndexDOM());
             }
             
             return open;
@@ -132,8 +134,12 @@ public class EditorStateManager {
             
             if (e.getTypeInt() == Event.ONCLICK) {
             	saveContent();
-                openEditor(cell.getRowIndex(), cell.getColumnIndexDOM());
-                return true;
+            	int errorCol = hasValidationError();
+            	if (errorCol > -1) {
+            		openEditor(cell.getRowIndex(), errorCol);
+            	} else {
+            		openEditor(cell.getRowIndex(), cell.getColumnIndexDOM());
+            	}
             }
             
             if (e.getTypeInt() == Event.ONKEYDOWN) {
@@ -154,32 +160,38 @@ public class EditorStateManager {
                 
                 if(Keys.isColumnChangeKey(key)) {
                 	saveContent();
-                    int colDelta = shift ? -1 : 1;
+                	int validationError = hasValidationError();
+                	if (validationError > -1) {
+                		targetCol = validationError;
+                	} else { 
+
+                		int colDelta = shift ? -1 : 1;
                     
-                    // Remember to skip disabled columns
-                    do {
-                        targetCol += colDelta;
-                    } while (disabledColumns.contains(targetCol) && targetCol < columnCount);
+                		// Remember to skip disabled columns
+                		do {
+                			targetCol += colDelta;
+                		} while (disabledColumns.contains(targetCol) && targetCol < columnCount);
                     
-                    // Test if we need to move up
-                    if(targetCol < 0) {
-                        if(allowTabRowChange) {
-                            targetCol = columnCount - 1;
-                            targetRow--;
-                        } else {
-                            targetCol = tabWrapping ? columnCount - 1 : 0;
-                        }
-                    }
+                		// Test if we need to move up
+                		if(targetCol < 0) {
+                			if(allowTabRowChange) {
+                				targetCol = columnCount - 1;
+                				targetRow--;
+                			} else {
+                				targetCol = tabWrapping ? columnCount - 1 : 0;
+                			}
+                		}
                     
-                    // Test if we need to move down
-                    if(targetCol >= columnCount) {
-                        if(allowTabRowChange) {
-                            targetCol = 0;
-                            targetRow++;
-                        } else {
-                            targetCol = tabWrapping ? 0 : columnCount - 1;
-                        }
-                    }
+                		// Test if we need to move down
+                		if(targetCol >= columnCount) {
+                			if(allowTabRowChange) {
+                				targetCol = 0;
+                				targetRow++;
+                			} else {
+                				targetCol = tabWrapping ? 0 : columnCount - 1;
+                			}
+                		}
+                	}
                     
                     move = true;
                 }
@@ -207,7 +219,6 @@ public class EditorStateManager {
                     
                     // Close editor if we're moving outside bounds - fixes Dan Golob's issue
                     // regarding single-column Grids, where close shortcuts will cancel changes.
-                    // TODO: re-think this functionality when save-and-close shortcuts are available.
                     if (targetRow < 0) {
                         closeEditor(false);
                         targetRow = 0;
@@ -269,18 +280,13 @@ public class EditorStateManager {
             
             if(isBusy()) return false;
             
-            boolean hasValidationError = false;
-            for (Column<?, Object> column : grid.getColumns()) {
-            	if (grid.getEditor().isEditorColumnError(column)) hasValidationError = true;
-            }
-            
             //
             // This is actually the explicit _CANCEL_ or _SAVE_ of the editor. 
             //
             
             boolean close = false;
             boolean save = false;
-            if (isCloseEvent(event)) {
+            if (hasValidationError() == -1) if (isCloseEvent(event)) {
                 close = true;
             } else if (isKeyPressEvent(event)) {
                 boolean ctrl = event.getDomEvent().getCtrlKey();
@@ -288,7 +294,7 @@ public class EditorStateManager {
                 if (closeShortcuts.contains(key)) {
                     close = true;
                 }
-                if (!hasValidationError && (saveShortcuts.contains(key) || (saveWithCtrlS && ctrl && key == KeyCode.S))) {
+                if (saveShortcuts.contains(key) || (saveWithCtrlS && ctrl && key == KeyCode.S)) {
                     close = true;
                     save = true;
                 }
@@ -301,7 +307,9 @@ public class EditorStateManager {
                 } else {
                 	closeEditor(true);
                 }
-            }
+                // Ensure modality curtain is removed. If ESC was hold when Editor opened, it was probably closed too fast
+                unlock();
+          }
             
             return close;
         }
@@ -360,6 +368,7 @@ public class EditorStateManager {
     private boolean changeColumnAfterLastRow = false;
     private boolean saveWithCtrlS = false;
     private boolean clickOutListenerAdded = false;
+    private boolean rowValidation = false;
     private FastNavigationState state;
     private GridFastNavigationConnector gridFastNavigationConnector;
     
@@ -375,7 +384,6 @@ public class EditorStateManager {
         externalLocks = new RPCLock();
         
         // Create modality curtain
-        // TODO: make this minimally obtrusive - constant movement is likely to cause flicker
         curtain = Document.get().createDivElement();
         curtain.setClassName("v-grid-editor-curtain");
         curtain.getStyle().setBackgroundColor("#777");
@@ -414,8 +422,6 @@ public class EditorStateManager {
 
         if (state.dispatchEditEventOnBlur) addClickOutListener();
             
-        
-        // TODO: fix listening for keyboard while locked
     }
 
 	public void addClickOutListener() {
@@ -477,7 +483,20 @@ public class EditorStateManager {
     //
     // Spinlocks
     //
-    
+
+    // Check if validation errors are in any of the columns
+    private int  hasValidationError() {
+    	if (!rowValidation) return -1;
+        int validationError = -1;
+        for (int i = 0, l = grid.getColumns().size(); i < l; ++i) {
+        	Column<?,Object> column = grid.getColumn(i);
+        	if (grid.getEditor().isEditorColumnError(column)) {
+        		validationError = i;
+        		break;
+        	}
+        }
+        return validationError;
+    }    
     private void waitForEditorOpen() {
         SpinLock.lock(new LockFunction() {
             @Override
@@ -821,24 +840,41 @@ public class EditorStateManager {
     // Request opening the editor. This function should be used internally instead
     // of the direct editor.editRow() calls.
     public void openEditor(int row, int col) {
-        if(GridViolators.isEditorReallyClosed(editor)) {
+    	openEditor(row,col,true);
+    }
+    
+    // Request opening the editor. This function should be used internally instead
+    // of the direct editor.editRow() calls.
+    public void openEditor(int row, int col, boolean validate) {
+    	AnimationCallback validateCallback = new AnimationCallback() {
+    			@Override
+    			public void execute(double timestamp) {
+    			gridFastNavigationConnector.requestValidate();        
+    		}
+    	};
+    	
+    	if (!editor.isEnabled()) return;
+    	if(GridViolators.isEditorReallyClosed(editor)) {
             editor.editRow(row,col);
-            notifyEditorOpened(row,col);
             waitForEditorOpen();
+            notifyEditorOpened(row,col);
         } else {
             int oldRow = getFocusedRow();
 
             if(oldRow != row) {
                 notifyEditorClosed(oldRow, col, false);
                 editor.editRow(row,col);
-                notifyEditorOpened(row,col);
                 waitForEditorOpen();
+                notifyEditorOpened(row,col); // Trigger event after the editor has opened
             } else {
                 editor.editRow(row,col);
                 waitForEditorReady();
+                // No need to trigger event if editor just moved to other column
             }
         }
-    }
+     	// Trigger deferred row validation due timing issue 
+        if (validate && rowValidation) AnimationScheduler.get().requestAnimationFrame(validateCallback);
+	}
 
     // Request closing the editor. This function should be used internally instead
     // of the direct editor.save() or editor.cancel() calls.
@@ -849,11 +885,13 @@ public class EditorStateManager {
         if (cancel) {
         	EditorWidgets.setValue(getEditorWidgetForColumn(col), oldContent);
             editor.cancel();
+            resetContent();
         } else {
-            editor.save();
+//            editor.save();
             if ((oldContent != null) && !oldContent.equals(newContent)) {
             	notifyDataChanged(newContent,row,col);
             }
+            editor.cancel();
         }
 
         notifyEditorClosed(row, col, cancel);
@@ -914,4 +952,13 @@ public class EditorStateManager {
 			this.gridFastNavigationConnector = gridFastNavigationConnector;
 	}
 
+	public void setRowValidation(boolean rowValidation) {
+		this.rowValidation = rowValidation;		
+	}
+
+	public void moveEditorToError() {
+		int errorCol = hasValidationError();
+		openEditor(getFocusedRow(),errorCol,false);		
+	}
+	
 }

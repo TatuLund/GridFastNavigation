@@ -1,6 +1,8 @@
 package org.vaadin.patrik.events;
 
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.MultiSelectionModel;
 
 @SuppressWarnings("serial")
 public class CellFocusEvent extends Component.Event {
@@ -10,12 +12,15 @@ public class CellFocusEvent extends Component.Event {
     private boolean rowChanged;
     private boolean colChanged;
     private Object itemId;
-    
+    private int offset = 0;
+
     public CellFocusEvent(Component source, int row, int col, boolean rowChanged, boolean colChanged, Object itemId) {
         super(source);
         this.row = row;
         this.col = col;
         this.itemId = itemId;
+        Grid grid = (Grid) source;
+        if (grid.getSelectionModel() instanceof MultiSelectionModel) offset = 1;
     }
 
     /**
@@ -42,7 +47,7 @@ public class CellFocusEvent extends Component.Event {
      * @return The column index
      */
     public int getColumn() {
-        return col;
+        return col-offset;
     }
     
     /**
@@ -55,7 +60,7 @@ public class CellFocusEvent extends Component.Event {
     }
 
     /**
-     * Get itemId which wherew focus is from underlying datasource
+     * Get itemId which where focus is from underlying datasource
      * 
      * @return itemId where focus is, null if focus in Header/Footer 
      */

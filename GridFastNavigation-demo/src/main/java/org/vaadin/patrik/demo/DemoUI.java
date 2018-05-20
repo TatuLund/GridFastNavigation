@@ -29,15 +29,16 @@ import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Container.Indexed;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -104,7 +105,7 @@ public class DemoUI extends UI {
     private void initNavigation(final Grid grid) {
         FastNavigation nav = new FastNavigation(grid,false,true);
         nav.setChangeColumnAfterLastRow(true);
-
+        
         nav.addRowEditListener(new RowEditListener() {
             @Override
             public void onEvent(RowEditEvent event) {
@@ -178,6 +179,7 @@ public class DemoUI extends UI {
     
     private void initGrid(final Grid grid) {
         
+    	grid.setEditorEnabled(true);
         // Add some columns
 		DeleteButtonRenderer deleteButton = new DeleteButtonRenderer(new DeleteRendererClickListener() {
 			@Override
@@ -196,6 +198,9 @@ public class DemoUI extends UI {
         for (int i = 0; i < 5; ++i) {
             grid.addColumn("col" + (i + 3), Integer.class);
         }	
+       	TextField field = new TextField();
+       	field.addValidator(new IntegerRangeValidator("The value needs to be between 0 and 10",0,40));
+       	grid.getColumn("col3").setEditorField(field);
         grid.addColumn("col8", Date.class);
         grid.addColumn("col10", Boolean.class);
         grid.addColumn("col11", String.class);

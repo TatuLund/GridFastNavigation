@@ -21,4 +21,6 @@ public interface FastNavigationServerRPC extends ServerRpc {
     
     void ping();
 
+    void forceValidate();
+
 }

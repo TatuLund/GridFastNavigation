@@ -19,6 +19,7 @@ import org.vaadin.patrik.shared.FastNavigationState;
 import com.vaadin.data.Container.Indexed;
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.MultiSelectionModel;
 
 
 @SuppressWarnings("serial")
@@ -117,7 +118,6 @@ public class FastNavigation extends AbstractExtension {
     	getState().changeColumnOnEnter = changeColumnOnEnter;
     	getState().dispatchEditEventOnBlur = dispatchEditEventOnBlur;
         g.setEditorBuffered(false);
-        g.setEditorEnabled(true);
         
         registerRpc(new FastNavigationServerRPC() {
 
@@ -164,18 +164,20 @@ public class FastNavigation extends AbstractExtension {
                 editorOpenListeners.dispatch(ev);
                 // Update disabled columns or readonly fields status if changed dynamically
                 ArrayList<Integer> disabledColumns = new ArrayList<Integer>();
+                int offset = 0;
+                if (g.getSelectionModel() instanceof MultiSelectionModel) offset = 1;
                 for (int i=0;i<g.getColumns().size();i++) {
                 	if (!g.getColumns().get(i).isEditable()) {
-                		if (!disabledColumns.contains(i)) disabledColumns.add(i);
+                        if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);
                 	} else if ((g.getColumns().get(i).getEditorField() != null) && 
                 			g.getColumns().get(i).getEditorField().isReadOnly()) {
-                		if (!disabledColumns.contains(i)) disabledColumns.add(i);
+                        if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);
                     }
                 }
                 int[] disabled = ev.getDisabledColumns();
                 if (disabled != null) {
                     for (int i : disabled) {
-                    	if (!disabledColumns.contains(i)) disabledColumns.add(i);
+                        if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);
                     }
                 }                
                 getRPC().setDisabledColumns(disabledColumns);
@@ -197,7 +199,12 @@ public class FastNavigation extends AbstractExtension {
 			public void clickOut() {
 				clickOutListeners.dispatch(new ClickOutEvent(g));
 			}
-			
+
+            @Override
+            public void forceValidate() {                
+                if (!g.getEditorFieldGroup().isValid()) getRPC().validationHasErrors();
+            }
+
         }, FastNavigationServerRPC.class);
 
         extend(g);
@@ -244,6 +251,21 @@ public class FastNavigation extends AbstractExtension {
         return getState().changeColumnAfterLastRow;
     }
 
+    /**
+     * If set to true (default = false), FastNavigation will attempt to trigger validation of the 
+     * whole row, and closing of editor is not possible if the validation error indicator is on.
+     * Also FastNavigation will not jump to first error column.
+     * 
+     * @param enable Boolean value
+     */
+    public void setRowValidation(boolean enable) {
+        getState().rowValidation = enable;
+    }
+      
+    public boolean getrowValidation() {
+        return getState().rowValidation;
+    }
+    
     //
     // Tab capture
     //
