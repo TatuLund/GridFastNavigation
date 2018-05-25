@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.2.4
+- Fix bug: Clicking outside Grid when setRowValidation(true) closed editor
+
 ### Version 2.2.3
 - Improvements to full row validation (see issues #69 and #51), with setRowValidation(..) API
 

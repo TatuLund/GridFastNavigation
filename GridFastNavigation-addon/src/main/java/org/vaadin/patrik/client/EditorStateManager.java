@@ -447,7 +447,7 @@ public class EditorStateManager {
 						int ex = nativeEvent.getClientX();
 						int ey = nativeEvent.getClientY();
 						if (!((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
-							if (state.dispatchEditEventOnBlur && isEditorOpen()) {
+							if (state.dispatchEditEventOnBlur && isEditorOpen() && (hasValidationError() == -1)) {
 								saveContent();
 								Element focusedElement = WidgetUtil.getFocusedElement();
 								Widget editorWidget = getCurrentEditorWidget();
@@ -487,10 +487,9 @@ public class EditorStateManager {
     }
 
     // Check if validation errors are in any of the columns
-    private int  hasValidationError() {
+    private int hasValidationError() {
     	if (!rowValidation) return -1;
         int validationError = -1;
-//        for (Column<?,Object> column : grid.getColumns()) {
         for (int i = 0, l = grid.getColumns().size(); i < l; ++i) {
         	Column<?,Object> column = grid.getColumn(i);
         	if (grid.getEditor().isEditorColumnError(column)) {
