@@ -21,7 +21,13 @@ $v-grid-header-background-color: #20a020;
 		background-repeat: no-repeat;
 	}
 	
-	
+	.v-grid {
+		.v-grid-row-selected > td {
+   			color: black !important;
+   			background: yellow !important;
+   	 	}
+   	}
+   
 	.my-background {
 		background-color: blue;
 		color: white;

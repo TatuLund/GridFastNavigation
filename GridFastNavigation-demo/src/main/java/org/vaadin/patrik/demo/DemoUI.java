@@ -10,8 +10,10 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @Push
 @Theme("demo")
@@ -50,15 +52,48 @@ public class DemoUI extends UI {
 		});
 		addButton.setDescription("Add a new row");
 
+		Button rowValidationButton = new Button();
+		rowValidationButton.setIcon(VaadinIcons.CHECK_CIRCLE_O);
+		rowValidationButton.setStyleName(ValoTheme.BUTTON_QUIET);
+		rowValidationButton.addClickListener(e -> {
+			demoGrid.getNavigation().setRowValidation(!demoGrid.getNavigation().getRowValidation());
+			if (!demoGrid.getNavigation().getRowValidation()) rowValidationButton.setStyleName(ValoTheme.BUTTON_QUIET);
+			else rowValidationButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+		});
+		rowValidationButton.setDescription("Toggle rowValidation");
+
+		Button rowOpenClickButton = new Button();
+		rowOpenClickButton.setIcon(VaadinIcons.FOLDER_OPEN_O);
+		rowOpenClickButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+		rowOpenClickButton.addClickListener(e -> {
+			demoGrid.getNavigation().setOpenEditorWithSingleClick(!demoGrid.getNavigation().getOpenEditorWithSingleClick());
+			if (!demoGrid.getNavigation().getOpenEditorWithSingleClick()) rowOpenClickButton.setStyleName(ValoTheme.BUTTON_QUIET);
+			else rowOpenClickButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+		});
+		rowOpenClickButton.setDescription("Toggle openEditorWithSingleClick");
+
+		Button rowOpenByTypingButton = new Button();
+		rowOpenByTypingButton.setIcon(VaadinIcons.KEYBOARD_O);
+		rowOpenByTypingButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+		rowOpenByTypingButton.addClickListener(e -> {
+			demoGrid.getNavigation().setOpenEditorOnTyping(!demoGrid.getNavigation().getOpenEditorOnTyping());
+			if (!demoGrid.getNavigation().getOpenEditorOnTyping()) rowOpenByTypingButton.setStyleName(ValoTheme.BUTTON_QUIET);
+			else rowOpenByTypingButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+		});
+		rowOpenByTypingButton.setDescription("Toggle openEditorOnTyping");
+		
+		HorizontalLayout buttons = new HorizontalLayout();
+		buttons.addComponents(addButton,rowValidationButton,rowOpenClickButton,rowOpenByTypingButton);
+		
 		layout.setMargin(true);
 		layout.setSpacing(true);
 		layout.addComponent(demoGrid);
-		layout.addComponent(addButton);
+		layout.addComponent(buttons);
 		layout.addComponent(messageGrid);
 		layout.addComponent(clearButton);
 		layout.setSizeFull();
 		layout.setExpandRatio(demoGrid, 10);
-		layout.setExpandRatio(addButton, 1);
+		layout.setExpandRatio(buttons, 1);
 		layout.setExpandRatio(clearButton, 1);
 		layout.setExpandRatio(messageGrid, 6);
 

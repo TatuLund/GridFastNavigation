@@ -143,7 +143,7 @@ public class EditorStateManager {
 
                 boolean move = false;
                 
-                final int columnCount = event.getGrid().getColumns().size();
+                final int columnCount = event.getGrid().getVisibleColumns().size();
                 final int rowCount = event.getGrid().getDataSource().size();
                 final int visibleRows = (int) event.getGrid().getHeightByRows();
                 
@@ -152,47 +152,49 @@ public class EditorStateManager {
                 int currentCol = getFocusedCol();
                 int currentRow = getFocusedRow();
                 
+                // These indices are according to visible columns
                 int targetCol = currentCol;
                 int targetRow = currentRow;
+            	int validationError = hasValidationError();
                 
-                if(Keys.isColumnChangeKey(key)) {
+                if (Keys.isColumnChangeKey(key)) {
                 	saveContent();
 
-                	int validationError = hasValidationError();
+                	// If there is validation error, move to column where the error is
                 	if (validationError > -1) {
                 		targetCol = validationError;
                 	} else {                 
                 	
-                   	int colDelta = shift ? -1 : 1;
-                    // Remember to skip disabled columns
-                    do {
-                        targetCol += colDelta;
-                    } while (disabledColumns.contains(targetCol) && targetCol < columnCount);
+                		int colDelta = shift ? -1 : 1;
+                		// Remember to skip disabled columns, take into account hidden columns
+                		do {
+                			targetCol += colDelta;
+                		} while (disabledColumns.contains(determineRealColumn(targetCol)) && targetCol < columnCount && targetCol > -1);
                     
-                    // Test if we need to move up
-                    if(targetCol < 0) {
-                        if(allowTabRowChange) {
-                            targetCol = columnCount - 1;
-                            targetRow--;
-                        } else {
-                            targetCol = tabWrapping ? columnCount - 1 : 0;
-                        }
-                    }
+                		// Test if we need to move up
+                		if (targetCol < 0) {
+                			if (allowTabRowChange) {
+                				targetCol = columnCount - 1;
+                				targetRow--;
+                			} else {
+                				targetCol = tabWrapping ? columnCount - 1 : 0;
+                			}
+                		}
                     
-                    // Test if we need to move down
-                    if(targetCol >= columnCount) {
-                        if(allowTabRowChange) {
-                            targetCol = 0;
-                            targetRow++;
-                        } else {
-                            targetCol = tabWrapping ? 0 : columnCount - 1;
-                        }
-                    }
+                		// Test if we need to move down
+                		if(targetCol >= columnCount) {
+                			if(allowTabRowChange) {
+                				targetCol = 0;
+                				targetRow++;
+                			} else {
+                				targetCol = tabWrapping ? 0 : columnCount - 1;
+                			}
+                		}
                 	}
                     move = true;
                 }
                 
-                if(Keys.isRowChangeKey(key)) {
+                if (validationError == -1 && Keys.isRowChangeKey(key)) {
                 	saveContent();
                 	int rowDelta = shift ? -1 : 1;
                     
@@ -224,52 +226,52 @@ public class EditorStateManager {
                             // Remember to skip disabled columns
                             do {
                                 targetCol++;
-                            } while (disabledColumns.contains(targetCol) && targetCol < columnCount);
+                            } while (disabledColumns.contains(determineRealColumn(targetCol)) && targetCol < columnCount);
                             move = true;
                             // If we were on last column do nothing
                             if (targetCol >= columnCount) {
                             	targetCol = columnCount-1;
                             	targetRow = rowCount-1;
                             	saveEditor(event);
-                        		move = false;
+                            	move = false;
                             }
                     	} else {
-                    	    saveEditor(event);
+                    		saveEditor(event);
                     		targetRow = rowCount - 1;
-                    	}
-                    } else {
-                        move = true;
-                    }
-                }
+                   		}
+                   	} else {
+                       	move = true;
+                   	}
+               	}
                 
-                if (Keys.isHomeKey(key)) {
-                	saveContent();
-                	targetRow = 0;
-                	if (shift) targetCol = 0;
-                    move = true;
-                }
+               	if (validationError == -1 && Keys.isHomeKey(key)) {
+               		saveContent();
+               		targetRow = 0;
+               		if (shift) targetCol = 0;
+                   	move = true;
+               	}
                 
-                if (Keys.isEndKey(key)) {
-                	saveContent();
-                	targetRow = rowCount-1;
-                	if (shift) targetCol = columnCount-1;
-                    move = true;
-                }
-
-                if (move) {
-                    event.getDomEvent().preventDefault();
-                    
+               	if (validationError == -1 && Keys.isEndKey(key)) {
+               		saveContent();
+               		targetRow = rowCount-1;
+               		if (shift) targetCol = columnCount-1;
+                   	move = true;
+               	}
+                
+               	if (move) {
+                   	event.getDomEvent().preventDefault();                    
                   
-                    if (currentCol != targetCol || currentRow != targetRow) {
-                        triggerValueChange(event);
-                        openEditor(targetRow, targetCol,false);
-                    }
-                }
-                
-                return move;
+                   	if (currentCol != targetCol || currentRow != targetRow) {
+                       	triggerValueChange(event);
+                       	openEditor(targetRow, targetCol);
+                   	}
+               	}
+               
+               	return move;
             }
 
-            return false;        
+            return false;
+            
         }
 
         // This is a hack to work around the issue that unbuffered editor cannot
@@ -290,7 +292,8 @@ public class EditorStateManager {
             //
             
             boolean close = false;
-            boolean save = false;
+            boolean save = rowValidation;
+            // Allow closing if there is now validation error
             if (hasValidationError() == -1) if (isCloseEvent(event)) {
                 close = true;
             } else if (isKeyPressEvent(event)) {
@@ -490,14 +493,17 @@ public class EditorStateManager {
     private int hasValidationError() {
     	if (!rowValidation) return -1;
         int validationError = -1;
+        int hidden = 0;
         for (int i = 0, l = grid.getColumns().size(); i < l; ++i) {
         	Column<?,Object> column = grid.getColumn(i);
+        	if (grid.getColumn(i).isHidden()) hidden++;
         	if (grid.getEditor().isEditorColumnError(column)) {
         		validationError = i;
         		break;
         	}
         }
-        return validationError;
+        if (validationError == -1 ) return -1;
+        return validationError-hidden;
     }
             
     //
@@ -518,19 +524,19 @@ public class EditorStateManager {
                 
                 // Reset all editor widgets to enabled
                 for (int i = 0, l = grid.getColumns().size(); i < l; ++i) {
-                    EditorWidgets.enable(getEditorWidgetForColumn(i));
+                    EditorWidgets.enable(getEditorWidgetForColumn(i,false));
                 }
                 
                 // Then disable the ones that should be disabled
                 for (int column : disabledColumns) {
-                    EditorWidgets.disable(getEditorWidgetForColumn(column));
+                    EditorWidgets.disable(getEditorWidgetForColumn(column,false));
                 }
                 
                 Widget editorWidget = getCurrentEditorWidget();
 
                 // Check required to avoid overwriting disabled editors
                 int currentCol = getFocusedCol();
-                if (!disabledColumns.contains(currentCol)) {
+                if (!disabledColumns.contains(determineRealColumn(currentCol))) {
                 
                     // Handle possible value reset of editor widget
                 	saveOldContent();
@@ -560,8 +566,8 @@ public class EditorStateManager {
                     int origCol = currentCol;
                     {
                         // Try going right first
-                        while(disabledColumns.contains(++currentCol)) {}
-                        if(currentCol < grid.getColumns().size()) {
+                        while (disabledColumns.contains(determineRealColumn(++currentCol))) {}
+                        if(currentCol < grid.getVisibleColumns().size()) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
                             openEditor(getFocusedRow(), currentCol);
@@ -572,7 +578,7 @@ public class EditorStateManager {
                         currentCol = origCol;
                         
                         // Try going left instead
-                        while(disabledColumns.contains(--currentCol)) {}
+                        while(disabledColumns.contains(determineRealColumn(--currentCol))) {}
                         if(currentCol >= 0) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
@@ -860,7 +866,7 @@ public class EditorStateManager {
         AnimationCallback validateCallback = new AnimationCallback() {
             @Override
             public void execute(double timestamp) {
-                gridFastNavigationConnector.requestValidate();        
+                gridFastNavigationConnector.requestValidate(true);        
             }
         };
             	
@@ -945,8 +951,33 @@ public class EditorStateManager {
         return GridViolators.getEditorColumn(editor);
     }
 
+    // Calculate the internal index of the column including the hidden columns
+    private int determineRealColumn(int index) {
+    	int columnCount = grid.getColumns().size();
+    	int j=0;
+    	int i=0;
+    	if (index == 0) {
+    		while (grid.getColumn(i).isHidden()) i++;
+    		return i;
+    	} 
+    	while (i<index && j<columnCount) {
+    		if (!grid.getColumn(j).isHidden()) {
+    			i++;
+    		}
+    		j++;
+    	}
+    	return j;
+    }
+
     private Widget getEditorWidgetForColumn(int index) {
-        Column<?, Object> column = grid.getColumn(index);
+    	return getEditorWidgetForColumn(index,true);
+    }
+    
+    private Widget getEditorWidgetForColumn(int index, boolean compensate) {
+    	int i = 0;
+    	if (compensate) i = determineRealColumn(index);
+    	else i = index;
+        Column<?, Object> column = grid.getColumn(i);
         Map<Column<?, ?>, Widget> editorColumnToWidgetMap = GridViolators
                 .getEditorColumnToWidgetMap(editor);
         Widget widget = editorColumnToWidgetMap.get(column);
@@ -957,6 +988,7 @@ public class EditorStateManager {
         return getEditorWidgetForColumn(GridViolators.getFocusedCol(grid));
     }
 
+    // Connector sets gridFastNavigationConnector using this method, hence public
 	public void setConnector(
 			GridFastNavigationConnector gridFastNavigationConnector) {
 				this.gridFastNavigationConnector = gridFastNavigationConnector;
@@ -965,7 +997,7 @@ public class EditorStateManager {
 	public void setRowValidation(boolean rowValidation) {
 		this.rowValidation = rowValidation;		
 	}
-
+	
 	public void moveEditorToError() {
 		int errorCol = hasValidationError();
 		openEditor(getFocusedRow(),errorCol,false);		

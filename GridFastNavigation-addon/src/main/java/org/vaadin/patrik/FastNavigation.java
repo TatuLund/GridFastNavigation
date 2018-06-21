@@ -204,9 +204,9 @@ public class FastNavigation<T> extends AbstractExtension {
 			}
 			
 			@Override
-			public void forceValidate() {
+			public void forceValidate(boolean move) {
 				BinderValidationStatus<T> status = g.getEditor().getBinder().validate();
-				if (status.hasErrors()) getRPC().validationHasErrors();
+				if (status.hasErrors() && move) getRPC().validationHasErrors();
 			}
 
         }, FastNavigationServerRPC.class);
@@ -270,7 +270,7 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().rowValidation = enable;
     }
       
-    public boolean getrowValidation() {
+    public boolean getRowValidation() {
         return getState().rowValidation;
     }
 

@@ -117,8 +117,8 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
     	return focusTracker;
     }
     
-    public void requestValidate() {
-    	rpc.forceValidate();
+    public void requestValidate(boolean move) {
+    	rpc.forceValidate(move);
     }
 
     @OnStateChange("rowValidation")

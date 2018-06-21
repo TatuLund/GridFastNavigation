@@ -38,7 +38,9 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 	final List<DemoColumns> demoList;
 	final ListDataProvider<DemoColumns> demoData;
-
+	private FastNavigation<DemoColumns> nav;
+	private boolean moveSelection = false;
+	
 	private MessageLog messageLog;
 	private int lastEditedRow = 0;
 
@@ -62,10 +64,9 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 	private void initNavigation() {
 		
-		FastNavigation<DemoColumns> nav = new FastNavigation<>(this, false, true);
+		nav = new FastNavigation<>(this, false, true);
 		nav.setChangeColumnAfterLastRow(true);
 		nav.setOpenEditorWithSingleClick(true);
-		nav.setRowValidation(true);
 		
 		this.addColumnResizeListener(event -> {
 			if (this.getEditor().isOpen()) {
@@ -86,14 +87,6 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			}
 		});
 
-		Button btnAddPart = new Button("Add Part");
-		btnAddPart.setDescription("Add a new part");
-		btnAddPart.setIcon(VaadinIcons.PLUS_CIRCLE); // "Add Part");
-
-		btnAddPart.addClickListener(e -> {
-			addDemoRow();
-		});
-
 		DeleteButtonRenderer<DemoColumns> deleteButton = new DeleteButtonRenderer<DemoColumns>(clickEvent -> {
 			if (this.getEditor().isOpen())
 				this.getEditor().cancel();
@@ -102,7 +95,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			this.getDataProvider().refreshAll();
 		},VaadinIcons.TRASH.getHtml()+" Delete",VaadinIcons.CHECK.getHtml()+" Confirm");
 		deleteButton.setHtmlContentAllowed(true);
-		this.addColumn(action -> true,deleteButton).setCaption("Action").setWidth(120);
+		this.addColumn(action -> true,deleteButton).setCaption("Action").setWidth(120).setHidable(true);
 
 		// Open with F2
 		nav.addEditorOpenShortcut(KeyCode.F2);
@@ -118,8 +111,10 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		
 		// Row focus change
 		nav.addRowFocusListener(event -> {
-			if (event.getRow() >= 0) grid.select((DemoColumns) event.getItem());
-			else grid.deselectAll();
+			if (moveSelection) {
+				if (event.getRow() >= 0) grid.select((DemoColumns) event.getItem());
+				else grid.deselectAll();
+			}
 			messageLog.writeOutput("Focus moved to row " + event.getRow());
 		});
 		messageLog.writeOutput("Added row focus change listener");
@@ -208,13 +203,13 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 		// Col 5 Integer
 		Binding<DemoColumns, Integer> col5Binding = binder.forField(col5).withNullRepresentation("")
-				.withConverter(new StringToIntegerConverter("Must enter a number"))
+				.withConverter(new StringToIntegerConverter("Must enter a number")).withValidator(new IntegerRangeValidator("Input integer between 0 and 10",0,10))
 				.bind(DemoColumns::getCol5, DemoColumns::setCol5);
 		this.addColumn(DemoColumns::getCol5).setCaption("Integer (2)").setWidth(100).setEditorBinding(col5Binding);
 
 		// Col6 Integer(3)
 		Binding<DemoColumns, Integer> col6Binding = binder.forField(col6).withNullRepresentation("")
-				.withConverter(new StringToIntegerConverter("Must enter a number"))
+				.withConverter(new StringToIntegerConverter("Must enter a number")).withValidator(new IntegerRangeValidator("Input integer between 0 and 10",0,10))
 				.bind(DemoColumns::getCol6, DemoColumns::setCol6);
 		this.addColumn(DemoColumns::getCol6).setId("col6").setCaption("Col6").setWidth(100).setEditorBinding(col6Binding);
 
@@ -229,7 +224,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 				.withConverter(new LocalDateTimeToDateConverter(zoneOffset))
 				.bind(DemoColumns::getCol7, DemoColumns::setCol7);
 		this.addColumn(DemoColumns::getCol7).setCaption("Date Time").setWidth(180).setEditorBinding(col7Binding)
-				.setRenderer(new DateRenderer(dateTimeFormat));
+				.setRenderer(new DateRenderer(dateTimeFormat)).setHidable(true);
 
 		// col 8 Date
 		Binding<DemoColumns, Date> col8Binding = binder.forField(col8).withConverter(new LocalDateToDateConverter())
@@ -238,7 +233,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		SimpleDateFormat dateFormat = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT,
 				UI.getCurrent().getLocale());
 		this.addColumn(DemoColumns::getCol8).setCaption("Date").setWidth(120).setEditorBinding(col8Binding)
-				.setRenderer(new DateRenderer(dateFormat));
+				.setRenderer(new DateRenderer(dateFormat)).setHidable(true);
 
 		// Col 9 Boolean
 		Binding<DemoColumns, Boolean> col10Binding = binder.forField(col9).bind(DemoColumns::getCol9,
@@ -278,6 +273,10 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		this.getDataProvider().refreshAll();
 	}
 
+	public FastNavigation getNavigation() {
+		return nav;
+	}
+	
 	private void printChangedRow(int rowIndex, DemoColumns rowData) {
 		if (demoList.size() >= rowIndex) {
 			// DemoColumns rowData = demoList.get(rowIndex);

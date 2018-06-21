@@ -54,6 +54,11 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.3.0
+- Added preliminary support for hidden columns, fixes issue #71
+- Minor improvements in setRowValidation(true) mode
+- Updated demo
+
 ### Version 2.2.4
 - Fix bug: Clicking outside Grid when setRowValidation(true) closed editor
 
