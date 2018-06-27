@@ -2,6 +2,7 @@ package org.vaadin.patrik.events;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.components.grid.MultiSelectionModel;
 
 /**
@@ -16,13 +17,14 @@ public class EditorOpenEvent<T> extends Component.Event {
     private T item;
     private int[] disabledCols;
     private int offset = 0;
+    private Grid<T> grid;
     
     public EditorOpenEvent(Component source, int row, int col, T item) {
         super(source);
         rowIndex = row;
         colIndex = col;
         this.item = item;
-        Grid<T> grid = (Grid<T>) source;
+        grid = (Grid<T>) source;
         if (grid.getSelectionModel() instanceof MultiSelectionModel) offset = 1;
     }
 

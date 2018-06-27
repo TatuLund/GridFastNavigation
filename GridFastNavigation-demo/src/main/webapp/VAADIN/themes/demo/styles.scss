@@ -28,6 +28,10 @@ $v-grid-header-background-color: #20a020;
    	 	}
    	}
    
+   	.row-edit-disabled > td {
+   		pointer-events: none;
+   	}
+   
 	.my-background {
 		background-color: blue;
 		color: white;

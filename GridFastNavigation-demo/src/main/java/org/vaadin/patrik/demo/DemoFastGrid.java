@@ -23,7 +23,6 @@ import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
@@ -57,6 +56,11 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 		this.getEditor().setEnabled(true);
 		this.getEditor().setBuffered(false);
+			
+//		this.setStyleGenerator(item -> {
+//			if (item.getCol9()) return "row-edit-disabled"; 
+//			else return "";
+//		});
 		
 		bindColumnsToEditor();
 		
@@ -95,7 +99,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			this.getDataProvider().refreshAll();
 		},VaadinIcons.TRASH.getHtml()+" Delete",VaadinIcons.CHECK.getHtml()+" Confirm");
 		deleteButton.setHtmlContentAllowed(true);
-		this.addColumn(action -> true,deleteButton).setCaption("Action").setWidth(120).setHidable(true);
+		this.addColumn(action -> true,deleteButton).setCaption("Action").setWidth(120).setHidable(true).setHandleWidgetEvents(false);
 
 		// Open with F2
 		nav.addEditorOpenShortcut(KeyCode.F2);
@@ -129,7 +133,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 		// Listening to opening of editor
 		nav.addEditorOpenListener(event ->  {
-			int row = event.getRow();
+            int row = event.getRow();
 			lastEditedRow = row;
 			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumnIndex());
 		});

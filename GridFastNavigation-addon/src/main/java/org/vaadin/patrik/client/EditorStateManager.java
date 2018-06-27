@@ -176,6 +176,7 @@ public class EditorStateManager {
                 			if (allowTabRowChange) {
                 				targetCol = columnCount - 1;
                 				targetRow--;
+                				if (targetRow < 0) targetRow = 0;
                 			} else {
                 				targetCol = tabWrapping ? columnCount - 1 : 0;
                 			}
@@ -186,6 +187,7 @@ public class EditorStateManager {
                 			if(allowTabRowChange) {
                 				targetCol = 0;
                 				targetRow++;
+                				if (targetRow >= rowCount) targetRow = 0;
                 			} else {
                 				targetCol = tabWrapping ? 0 : columnCount - 1;
                 			}
@@ -1001,6 +1003,12 @@ public class EditorStateManager {
 	public void moveEditorToError() {
 		int errorCol = hasValidationError();
 		openEditor(getFocusedRow(),errorCol,false);		
+	}
+	
+	private boolean rowNotDisabled() {
+		boolean rowNotDisabled = false;
+		if (disabledColumns.size() < grid.getVisibleColumns().size()) rowNotDisabled = true;
+		return rowNotDisabled;
 	}
 
 }

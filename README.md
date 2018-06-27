@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.3.1
+- Fixed bug: Tabing out of bounds caused client side exception.
+
 ### Version 2.3.0
 - Added preliminary support for hidden columns, fixes issue #71
 - Minor improvements in setRowValidation(true) mode
