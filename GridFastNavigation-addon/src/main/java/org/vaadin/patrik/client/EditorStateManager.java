@@ -85,7 +85,7 @@ public class EditorStateManager {
         protected boolean handleOpenEvent(EditorDomEvent<Object> event) {
             
             if(isBusy()) return false;
-            
+
             int key = event.getDomEvent().getKeyCode();
             boolean shift = event.getDomEvent().getShiftKey();
             boolean open = false;
@@ -536,6 +536,11 @@ public class EditorStateManager {
                 
                 Widget editorWidget = getCurrentEditorWidget();
 
+                if (!hasEditableColumns()) {
+                    EditorWidgets.focus(editorWidget);                
+                	return;
+                }
+                
                 // Check required to avoid overwriting disabled editors
                 int currentCol = getFocusedCol();
                 if (!disabledColumns.contains(determineRealColumn(currentCol))) {
@@ -604,7 +609,6 @@ public class EditorStateManager {
                 // Make sure editor widget is in focus
                 EditorWidgets.focus(editorWidget);
                 
-                // XXX: this function can _conceivably_ get stuck if there are _no_ editable columns 
             }
         });
         lock();
@@ -1005,10 +1009,10 @@ public class EditorStateManager {
 		openEditor(getFocusedRow(),errorCol,false);		
 	}
 	
-	private boolean rowNotDisabled() {
-		boolean rowNotDisabled = false;
-		if (disabledColumns.size() < grid.getVisibleColumns().size()) rowNotDisabled = true;
-		return rowNotDisabled;
+	private boolean hasEditableColumns() {
+		boolean hasEditableColumns = false;
+		if (disabledColumns.size() < grid.getVisibleColumns().size()) hasEditableColumns = true;
+		return hasEditableColumns;
 	}
 
 }

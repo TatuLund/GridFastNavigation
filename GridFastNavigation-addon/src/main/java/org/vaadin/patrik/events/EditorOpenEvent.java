@@ -1,5 +1,8 @@
 package org.vaadin.patrik.events;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
@@ -15,7 +18,7 @@ public class EditorOpenEvent<T> extends Component.Event {
     private int rowIndex;
     private int colIndex;
     private T item;
-    private int[] disabledCols;
+    private Integer[] disabledCols;
     private int offset = 0;
     private Grid<T> grid;
     
@@ -51,10 +54,25 @@ public class EditorOpenEvent<T> extends Component.Event {
      * 
      * @param columns
      */
-    public void disableColumns(int... columns) {
+    public void disableColumns(Integer... columns) {
         disabledCols = columns;
     }
 
+    /**
+     * Set all columns disabled. Can be used for example if you want to conditionally
+     * disable editing of a row.
+     */
+    public void disableAllColumns() {
+    	List<Integer> disabled = new ArrayList<>();
+    	Integer i=0;
+    	for (Column<T, ?> col : grid.getColumns()) {
+    		disabled.add(i);
+    		i++;
+    	}
+    	Integer[] dis = disabled.toArray(new Integer[0]);
+    	disableColumns(dis);
+    }
+    
     /**
      * Returns the additional columns that should be disable when Editor opens (see: disableColumns).
      * This method is used internally. Note, if you have set columns non editable or disabled fields
@@ -62,7 +80,7 @@ public class EditorOpenEvent<T> extends Component.Event {
      * 
      * @return returns additional columns to be disabled 
      */
-    public int[] getDisabledColumns() {
+    public Integer[] getDisabledColumns() {
         return disabledCols;
     }
     

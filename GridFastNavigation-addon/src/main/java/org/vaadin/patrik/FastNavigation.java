@@ -177,7 +177,7 @@ public class FastNavigation<T> extends AbstractExtension {
                 		if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);
                     }
                 }
-                int[] disabled = ev.getDisabledColumns();
+                Integer[] disabled = ev.getDisabledColumns();
                 if (disabled != null) {
                     for (int i : disabled) {
                     	if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);

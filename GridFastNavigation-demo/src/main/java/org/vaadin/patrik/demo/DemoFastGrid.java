@@ -56,12 +56,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 		this.getEditor().setEnabled(true);
 		this.getEditor().setBuffered(false);
-			
-//		this.setStyleGenerator(item -> {
-//			if (item.getCol9()) return "row-edit-disabled"; 
-//			else return "";
-//		});
-		
+
 		bindColumnsToEditor();
 		
 	}
@@ -133,6 +128,8 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 		// Listening to opening of editor
 		nav.addEditorOpenListener(event ->  {
+// Uncomment to demonstrate conditional row editing			
+//			if (((DemoColumns) event.getItem()).getCol9()) event.disableAllColumns();
             int row = event.getRow();
 			lastEditedRow = row;
 			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumnIndex());
