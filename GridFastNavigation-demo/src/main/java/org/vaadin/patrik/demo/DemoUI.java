@@ -2,6 +2,7 @@ package org.vaadin.patrik.demo;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
@@ -16,6 +17,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @Push
+@PreserveOnRefresh
 @Theme("demo")
 @Title("GridFastNavigation Add-on Demo")
 @SuppressWarnings("serial")
@@ -81,9 +83,26 @@ public class DemoUI extends UI {
 			else rowOpenByTypingButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
 		});
 		rowOpenByTypingButton.setDescription("Toggle openEditorOnTyping");
+
+        Button disableGridEditButton = new Button();
+        disableGridEditButton.setIcon(VaadinIcons.PENCIL);
+		disableGridEditButton.setDescription("Toggle Grid Editing");
+		disableGridEditButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        disableGridEditButton.addClickListener(e->{
+        	if (demoGrid.getEditor().isEnabled()) {
+        		if (demoGrid.getEditor().isOpen()) {
+        			demoGrid.getEditor().cancel();
+        		}
+        		demoGrid.getEditor().setEnabled(false);
+        		disableGridEditButton.setStyleName(ValoTheme.BUTTON_QUIET);
+        	} else {
+        		demoGrid.getEditor().setEnabled(true);
+        		disableGridEditButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        	}
+        });		
 		
 		HorizontalLayout buttons = new HorizontalLayout();
-		buttons.addComponents(addButton,rowValidationButton,rowOpenClickButton,rowOpenByTypingButton);
+		buttons.addComponents(addButton,rowValidationButton,rowOpenClickButton,rowOpenByTypingButton,disableGridEditButton);
 		
 		layout.setMargin(true);
 		layout.setSpacing(true);
