@@ -525,7 +525,7 @@ public class EditorStateManager {
                 unlock();
                 
                 // Reset all editor widgets to enabled
-                for (int i = 0, l = grid.getColumns().size(); i < l; ++i) {
+                for (int i = 0, l = grid.getVisibleColumns().size(); i < l; ++i) {
                     EditorWidgets.enable(getEditorWidgetForColumn(i,false));
                 }
                 
@@ -573,7 +573,7 @@ public class EditorStateManager {
                     int origCol = currentCol;
                     {
                         // Try going right first
-                        while (disabledColumns.contains(determineRealColumn(++currentCol))) {}
+                        while (disabledColumns.contains(determineRealColumn(currentCol))) {currentCol++;}
                         if(currentCol < grid.getVisibleColumns().size()) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
@@ -585,7 +585,7 @@ public class EditorStateManager {
                         currentCol = origCol;
                         
                         // Try going left instead
-                        while(disabledColumns.contains(determineRealColumn(--currentCol))) {}
+                        while(disabledColumns.contains(determineRealColumn(currentCol))) {currentCol--;}
                         if(currentCol >= 0) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
@@ -744,13 +744,13 @@ public class EditorStateManager {
                 @Override
                 public void complete() {
                     // Reset all editor widgets to enabled
-                    for(int i = 0, l = grid.getColumns().size(); i < l; ++i) {
-                        EditorWidgets.enable(getEditorWidgetForColumn(i));
+                    for(int i = 0, l = grid.getVisibleColumns().size(); i < l; ++i) {
+                        EditorWidgets.enable(getEditorWidgetForColumn(i,false));
                     }
                     
                     // Then disable the ones that should be disabled
                     for (int column : disabledColumns) {
-                        EditorWidgets.disable(getEditorWidgetForColumn(column));
+                        EditorWidgets.disable(getEditorWidgetForColumn(column,false));
                     }
                 }
             });

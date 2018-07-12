@@ -55,6 +55,9 @@ Debugging client side code in the GridFastNavigation-demo project:
 ## Release notes
 
 ### Version 2.3.2
+- Fixed bug: Client side exception occurred when there were hidden columns (issue #74).
+
+### Version 2.3.2
 - Added convenience method disableAllColumns() in EditorOpenEvent (issue #27)
 - Fixed bug: Editor opening was jammed if there were no editable columns
 

@@ -94,7 +94,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			this.getDataProvider().refreshAll();
 		},VaadinIcons.TRASH.getHtml()+" Delete",VaadinIcons.CHECK.getHtml()+" Confirm");
 		deleteButton.setHtmlContentAllowed(true);
-		this.addColumn(action -> true,deleteButton).setCaption("Action").setWidth(120).setHidable(true).setHandleWidgetEvents(false);
+		this.addColumn(action -> true,deleteButton).setCaption("Action").setWidth(120).setHidable(true);
 
 		// Open with F2
 		nav.addEditorOpenShortcut(KeyCode.F2);
@@ -128,7 +128,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 		// Listening to opening of editor
 		nav.addEditorOpenListener(event ->  {
-// Uncomment to demonstrate conditional row editing			
+			// Uncomment to demonstrate conditional row editing			
 //			if (((DemoColumns) event.getItem()).getCol9()) event.disableAllColumns();
             int row = event.getRow();
 			lastEditedRow = row;
