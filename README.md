@@ -54,7 +54,7 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
-### Version 2.3.2
+### Version 2.3.3
 - Fixed bug: Client side exception occurred when there were hidden columns (issue #74).
 
 ### Version 2.3.2
