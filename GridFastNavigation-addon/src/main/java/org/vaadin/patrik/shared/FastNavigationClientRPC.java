@@ -15,4 +15,6 @@ public interface FastNavigationClientRPC extends ClientRpc {
     
     void validationHasErrors();
     
+    void setFocusedCell(int row, int col);
+    
 }

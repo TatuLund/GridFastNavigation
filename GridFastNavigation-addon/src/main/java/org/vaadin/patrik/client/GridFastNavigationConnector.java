@@ -52,6 +52,11 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     public void validationHasErrors() {
                     	editorManager.moveEditorToError();
                     }
+
+					@Override
+					public void setFocusedCell(int row, int col) {
+						GridViolators.setFocusedCell(grid,row,col);		
+					}
                     
                 });
 
@@ -188,6 +193,11 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
     @OnStateChange("hasClickOutListener") 
     void addClickOutListener() {
     	editorManager.addClickOutListener();
+    }
+
+    @OnStateChange("homeEndEnabled")
+    void setHomeEndEnabled() {
+    	editorManager.setHomeEndEnabled(getState().homeEndEnabled);
     }
     
     @OnStateChange({"hasFocusListener", "hasCellFocusListener", "hasRowFocusListener", "hasRowEditListener", "hasCellEditListener", "hasEditorOpenListener" })

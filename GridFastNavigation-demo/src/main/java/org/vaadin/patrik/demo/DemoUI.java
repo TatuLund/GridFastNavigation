@@ -11,20 +11,21 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @Push
-@PreserveOnRefresh
+//@PreserveOnRefresh
 @Theme("demo")
 @Title("GridFastNavigation Add-on Demo")
 @SuppressWarnings("serial")
 public class DemoUI extends UI {
 
 	@WebServlet(value = "/*", asyncSupported = true)
-	@VaadinServletConfiguration(productionMode = false, ui = DemoUI.class, widgetset = "org.vaadin.patrik.demo.DemoWidgetSet")
+	@VaadinServletConfiguration(productionMode = false, ui = DemoUI.class, heartbeatInterval=5, closeIdleSessions=true, widgetset = "org.vaadin.patrik.demo.DemoWidgetSet")
 	public static class Servlet extends VaadinServlet {
 	}
 
@@ -32,9 +33,21 @@ public class DemoUI extends UI {
 	}
 
 	@Override
+	public void detach() {
+        System.out.println("Detach called");                    		
+	}
+	
+	@Override
 	protected void init(VaadinRequest vaadinRequest) {
 		final VerticalLayout layout = new VerticalLayout();
 
+        addDetachListener(new DetachListener() {           
+            @Override
+            public void detach(DetachEvent event) {                    
+                    System.out.println("Detach Event = "+event.getConnector().getConnectorId());                    
+                }
+        });
+        
 		layout.setSizeFull();
 		
 		MessageGrid messageGrid = new MessageGrid();
@@ -99,10 +112,35 @@ public class DemoUI extends UI {
         		demoGrid.getEditor().setEnabled(true);
         		disableGridEditButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
         	}
-        });		
+        });
+                
+        Button moveSelectionButton = new Button();
+        moveSelectionButton.setIcon(VaadinIcons.BULLSEYE);
+        moveSelectionButton.setDescription("Toggle select follow");
+        moveSelectionButton.setStyleName(ValoTheme.BUTTON_QUIET);
+        moveSelectionButton.addClickListener(e->{
+        	if (demoGrid.moveSelection) {
+        		demoGrid.moveSelection = false;
+        		demoGrid.deselectAll();
+        		demoGrid.setSelectionMode(SelectionMode.NONE);
+        		moveSelectionButton.setStyleName(ValoTheme.BUTTON_QUIET);
+        	} else {
+        		demoGrid.moveSelection = true;
+        		demoGrid.setSelectionMode(SelectionMode.SINGLE);
+        		moveSelectionButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        	}
+        });
 		
-		HorizontalLayout buttons = new HorizontalLayout();
-		buttons.addComponents(addButton,rowValidationButton,rowOpenClickButton,rowOpenByTypingButton,disableGridEditButton);
+        Button resetFocusButton = new Button();
+        resetFocusButton.setIcon(VaadinIcons.CORNER_UPPER_LEFT);
+        resetFocusButton.setDescription("Reset focust to 0,1");
+        resetFocusButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        resetFocusButton.addClickListener(e->{
+        	demoGrid.resetFocus();
+        });
+
+        HorizontalLayout buttons = new HorizontalLayout();
+		buttons.addComponents(addButton,rowValidationButton,rowOpenClickButton,rowOpenByTypingButton,disableGridEditButton,moveSelectionButton,resetFocusButton);
 		
 		layout.setMargin(true);
 		layout.setSpacing(true);

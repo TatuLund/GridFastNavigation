@@ -54,6 +54,12 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.3.4
+- Fixed bug: Problem with sorting, edit event did not return right item (issue #76).
+- Improvement: Home/End key behavior can be disabled with setHomeEndEnabled(false) (issue #75)
+- New feature: Move focus programmatically with setFocusedCel(row,col) (issue #68)
+- Updated demo
+
 ### Version 2.3.3
 - Fixed bug: Client side exception occurred when there were hidden columns (issue #74).
 

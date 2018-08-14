@@ -38,7 +38,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 	final List<DemoColumns> demoList;
 	final ListDataProvider<DemoColumns> demoData;
 	private FastNavigation<DemoColumns> nav;
-	private boolean moveSelection = false;
+	public boolean moveSelection = false;
 	
 	private MessageLog messageLog;
 	private int lastEditedRow = 0;
@@ -75,6 +75,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		});		
 		
 		nav.addRowEditListener(event -> {
+			getDataProvider().refreshAll();
 			int rowIndex = event.getRowIndex();
 			if (rowIndex >= 0) {
 				printChangedRow(rowIndex,(DemoColumns) event.getItem());
@@ -250,11 +251,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			demoList.add(new DemoColumns());
 		}
 		demoData.refreshAll();
-		this.setSelectionMode(SelectionMode.SINGLE);
-		this.addSelectionListener(event -> {
-			if (event.isUserOriginated()) System.out.println("Selection event happens: "+event.getFirstSelectedItem().toString());
-			else System.out.println("Programmatic selection event happens: "+event.getFirstSelectedItem().toString());
-		});
+		this.setSelectionMode(SelectionMode.NONE);
 		this.addItemClickListener(event -> {
 			System.out.println("Item click event happens: "+event.getItem().toString());			
 		});
@@ -283,6 +280,10 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			// DemoColumns rowData = demoList.get(rowIndex);
 			messageLog.writeOutput("Row " + rowIndex + " changed to: " + rowData);
 		}
+	}
+
+	public void resetFocus() {
+		nav.setFocusedCell(0, 1);		
 	}
 
 }

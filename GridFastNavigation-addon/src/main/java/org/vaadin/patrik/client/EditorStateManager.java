@@ -246,14 +246,14 @@ public class EditorStateManager {
                    	}
                	}
                 
-               	if (validationError == -1 && Keys.isHomeKey(key)) {
+               	if (homeEndEnabled && validationError == -1 && Keys.isHomeKey(key)) {
                		saveContent();
                		targetRow = 0;
                		if (shift) targetCol = 0;
                    	move = true;
                	}
                 
-               	if (validationError == -1 && Keys.isEndKey(key)) {
+               	if (homeEndEnabled && validationError == -1 && Keys.isEndKey(key)) {
                		saveContent();
                		targetRow = rowCount-1;
                		if (shift) targetCol = columnCount-1;
@@ -379,6 +379,7 @@ public class EditorStateManager {
     private boolean saveWithCtrlS = false;
 	private boolean clickOutListenerAdded = false;
 	private boolean rowValidation = false;
+	private boolean homeEndEnabled = true;
 	private FastNavigationState state;
 	private GridFastNavigationConnector gridFastNavigationConnector;
 	
@@ -1013,6 +1014,10 @@ public class EditorStateManager {
 		boolean hasEditableColumns = false;
 		if (disabledColumns.size() < grid.getVisibleColumns().size()) hasEditableColumns = true;
 		return hasEditableColumns;
+	}
+
+	public void setHomeEndEnabled(boolean homeEndEnabled) {
+		this.homeEndEnabled = homeEndEnabled;		
 	}
 
 }

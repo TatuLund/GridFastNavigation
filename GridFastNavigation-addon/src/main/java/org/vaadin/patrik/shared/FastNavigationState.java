@@ -46,6 +46,8 @@ public class FastNavigationState extends SharedState {
     
     public boolean rowValidation = false;
     
+    public boolean homeEndEnabled = true;
+    
     public Set<Integer> openShortcuts = new HashSet<Integer>();
     
     public Set<Integer> closeShortcuts = new HashSet<Integer>();

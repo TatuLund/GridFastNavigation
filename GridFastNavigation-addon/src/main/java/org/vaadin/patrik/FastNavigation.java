@@ -60,10 +60,10 @@ public class FastNavigation<T> extends AbstractExtension {
     
     private final EventListenerList<EditorOpenListener, EditorOpenEvent<?>> editorOpenListeners = new EventListenerList<EditorOpenListener, EditorOpenEvent<?>>();
 
-    public interface EditorCloseListener extends Listener<EditorCloseEvent> {
+    public interface EditorCloseListener extends Listener<EditorCloseEvent<?>> {
     }
     
-    private final EventListenerList<EditorCloseListener, EditorCloseEvent> editorCloseListeners = new EventListenerList<EditorCloseListener, EditorCloseEvent>();
+    private final EventListenerList<EditorCloseListener, EditorCloseEvent<?>> editorCloseListeners = new EventListenerList<EditorCloseListener, EditorCloseEvent<?>>();
 
     public interface ClickOutListener extends Listener<ClickOutEvent> {
     }
@@ -84,7 +84,8 @@ public class FastNavigation<T> extends AbstractExtension {
     // Information about previously seen focused row
     private int lastFocusedRow = 0;
     private int lastFocusedCol = 0;
-
+    private T editedItem = null;
+    private T previousEditedItem = null;
 
     /**
      * Default constructor. Enter key changes the row.
@@ -133,13 +134,13 @@ public class FastNavigation<T> extends AbstractExtension {
         	
         	@Override
             public void rowUpdated(int rowIndex) {
-        		T item = getItemAt(rowIndex);
+        		T item = previousEditedItem; // getItemAt(rowIndex);
                 rowEditListeners.dispatch(new RowEditEvent<T>(g, rowIndex, item));
             }
 
             @Override
             public void cellUpdated(int rowIndex, int colIndex, String newData) {
-            	T item = getItemAt(rowIndex);
+            	T item = previousEditedItem; // getItemAt(rowIndex);
                 cellEditListeners.dispatch(new CellEditEvent<T>(g, rowIndex, colIndex, newData, item));
             }
 
@@ -163,6 +164,8 @@ public class FastNavigation<T> extends AbstractExtension {
             @Override
             public void editorOpened(int rowIndex, int colIndex, int lockId) {
             	T item = getItemAt(rowIndex);
+            	previousEditedItem = editedItem;
+            	editedItem = item;
                 EditorOpenEvent<T> ev = new EditorOpenEvent<>(g, rowIndex, colIndex, item);
                 editorOpenListeners.dispatch(ev);
                 // Update disabled columns or readonly fields status if changed dynamically
@@ -195,7 +198,7 @@ public class FastNavigation<T> extends AbstractExtension {
             @Override
             public void editorClosed(int rowIndex, int colIndex,
                     boolean wasCancelled) {
-                editorCloseListeners.dispatch(new EditorCloseEvent(g, rowIndex, colIndex, wasCancelled));
+                editorCloseListeners.dispatch(new EditorCloseEvent<T>(g, rowIndex, colIndex, wasCancelled));
             }
 
 			@Override
@@ -223,6 +226,10 @@ public class FastNavigation<T> extends AbstractExtension {
         return (FastNavigationState) super.getState();
     }
 
+    public void setFocusedCell(int row, int col) {
+    	getRPC().setFocusedCell(row, col);
+    }
+    
     /**
      * If set to true (default = true), editor opens with single mouse click.
      *
@@ -316,6 +323,21 @@ public class FastNavigation<T> extends AbstractExtension {
     }
 
     
+    /**
+     * If set to true (=default), home and end keys are used
+     * to move to first and last row, and shifted home and end
+     * to corners of the Grid.
+     * 
+     * @param enable Boolean value
+     */
+    public void setHomeEndEnabled(boolean enable) {
+        getState().homeEndEnabled = enable;
+    }
+    
+    public boolean getHomeEndEnabled() {
+        return getState().homeEndEnabled;
+    }
+
     //
     // Editor opening
     //

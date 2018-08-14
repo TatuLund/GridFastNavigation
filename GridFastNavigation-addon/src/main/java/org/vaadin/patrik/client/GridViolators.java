@@ -50,7 +50,11 @@ public class GridViolators {
     }-*/;        
     
     public static native final int getEditorColumn(Editor<?> editor) /*-{
-	return editor.@com.vaadin.client.widgets.Grid.Editor::focusedColumnIndexDOM;
-}-*/;
+		return editor.@com.vaadin.client.widgets.Grid.Editor::focusedColumnIndexDOM;
+	}-*/;
+    
+    public static native final void setFocusedCell(Grid<?> grid, int rowIndex, int columnIndexDOM) /*-{
+    	grid.@com.vaadin.client.widgets.Grid::focusCell(II)(rowIndex,columnIndexDOM);
+    }-*/;
 
 }
