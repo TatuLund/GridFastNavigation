@@ -9,6 +9,11 @@ import org.vaadin.patrik.shared.FastNavigationClientRPC;
 import org.vaadin.patrik.shared.FastNavigationServerRPC;
 import org.vaadin.patrik.shared.FastNavigationState;
 
+import com.google.gwt.animation.client.AnimationScheduler;
+import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ServerConnector;
@@ -35,7 +40,30 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         editorManager = new EditorStateManager(grid,getState());
         focusTracker = new FocusTracker(grid);
         editorManager.setConnector(this);
-        
+        AnimationCallback editorColumnWidthFix = new AnimationCallback() {
+            @Override
+            public void execute(double timestamp) {
+        		int cols = grid.getVisibleColumns().size();
+        		DivElement cellWrapper = GridViolators.getEditorCellWrapper(grid);
+            	for (int i=0;i<cols;i++) {
+            		Element element = (Element) cellWrapper.getChild(i);
+            		double width = grid.getVisibleColumns().get(i).getWidthActual();
+            		element.getStyle().setWidth(width, Style.Unit.PX);
+            	}
+            }
+        };
+        grid.addColumnVisibilityChangeHandler(event -> {
+        	if (grid.isEditorActive()) {
+        		GridViolators.redrawEditor(grid);
+        		AnimationScheduler.get().requestAnimationFrame(editorColumnWidthFix);
+        	}
+        });
+        grid.addColumnResizeHandler(event -> {
+        	if (grid.isEditorActive()) {
+        		AnimationScheduler.get().requestAnimationFrame(editorColumnWidthFix);
+        	}        	
+        });
+                
         registerRpc(FastNavigationClientRPC.class,
                 new FastNavigationClientRPC() {
                     @Override

@@ -2,7 +2,7 @@ package org.vaadin.patrik.client;
 
 import java.util.Map;
 
-
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.widgets.Grid;
 import com.vaadin.client.widgets.Grid.Column;
@@ -57,4 +57,13 @@ public class GridViolators {
     	grid.@com.vaadin.client.widgets.Grid::focusCell(II)(rowIndex,columnIndexDOM);
     }-*/;
 
+    public static native final void redrawEditor(Grid<?> grid) /*-{
+    	var editor = grid.@com.vaadin.client.widgets.Grid::getEditor()();
+    	editor.@com.vaadin.client.widgets.Grid.Editor::showOverlay()();
+    }-*/;
+
+    public static native final DivElement getEditorCellWrapper(Grid<?> grid) /*-{
+		var editor = grid.@com.vaadin.client.widgets.Grid::getEditor()();
+		return editor.@com.vaadin.client.widgets.Grid.Editor::cellWrapper;
+	}-*/;
 }

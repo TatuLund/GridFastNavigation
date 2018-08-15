@@ -33,11 +33,6 @@ public class DemoUI extends UI {
 	}
 
 	@Override
-	public void detach() {
-        System.out.println("Detach called");                    		
-	}
-	
-	@Override
 	protected void init(VaadinRequest vaadinRequest) {
 		final VerticalLayout layout = new VerticalLayout();
 

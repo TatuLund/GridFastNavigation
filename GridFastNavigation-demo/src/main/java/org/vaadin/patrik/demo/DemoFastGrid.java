@@ -67,13 +67,6 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.setChangeColumnAfterLastRow(true);
 		nav.setOpenEditorWithSingleClick(true);
 		
-		this.addColumnResizeListener(event -> {
-			if (this.getEditor().isOpen()) {
-				this.getEditor().cancel();
-				this.getEditor().editRow(lastEditedRow);
-			}
-		});		
-		
 		nav.addRowEditListener(event -> {
 			getDataProvider().refreshAll();
 			int rowIndex = event.getRowIndex();

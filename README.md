@@ -54,6 +54,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.3.5
+- Workaround for https://github.com/vaadin/framework/issues/8962
+- Workaround for https://github.com/vaadin/framework/issues/7276
+
 ### Version 2.3.4
 - Fixed bug: Problem with sorting, edit event did not return right item (issue #76).
 - Improvement: Home/End key behavior can be disabled with setHomeEndEnabled(false) (issue #75)
