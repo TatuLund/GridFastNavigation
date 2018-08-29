@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.3.6
+- Added fix to Editor not resized when browser window is being resized bug. See: https://github.com/vaadin/framework/issues/11148
+
 ### Version 2.3.5
 - Workaround for https://github.com/vaadin/framework/issues/8962
 - Workaround for https://github.com/vaadin/framework/issues/7276

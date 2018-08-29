@@ -23,6 +23,7 @@ import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.shared.ui.datefield.DateTimeResolution;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
@@ -73,7 +74,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			if (rowIndex >= 0) {
 				printChangedRow(rowIndex,(DemoColumns) event.getItem());
 			}			
-			if (((DemoColumns) event.getItem()).getCol9() == true) {
+			if (event.getItem() != null && ((DemoColumns) event.getItem()).getCol9() == true) {
 				this.getColumn("col6").getEditorBinding().getField().setReadOnly(true);
 			} else {
 				this.getColumn("col6").getEditorBinding().getField().setReadOnly(false);				

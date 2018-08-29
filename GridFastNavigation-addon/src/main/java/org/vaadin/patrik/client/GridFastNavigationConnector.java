@@ -14,6 +14,7 @@ import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ServerConnector;
@@ -44,6 +45,8 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
             @Override
             public void execute(double timestamp) {
         		int cols = grid.getVisibleColumns().size();
+        		DivElement editorOverlay = GridViolators.getEditorOverlay(grid);
+        		editorOverlay.getStyle().setWidth(grid.getOffsetWidth(), Style.Unit.PX);
         		DivElement cellWrapper = GridViolators.getEditorCellWrapper(grid);
             	for (int i=0;i<cols;i++) {
             		Element element = (Element) cellWrapper.getChild(i);
@@ -63,7 +66,12 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         		AnimationScheduler.get().requestAnimationFrame(editorColumnWidthFix);
         	}        	
         });
-                
+		Window.addResizeHandler(event -> {
+        	if (grid.isEditorActive()) {
+        		AnimationScheduler.get().requestAnimationFrame(editorColumnWidthFix);
+        	}
+		});
+        
         registerRpc(FastNavigationClientRPC.class,
                 new FastNavigationClientRPC() {
                     @Override

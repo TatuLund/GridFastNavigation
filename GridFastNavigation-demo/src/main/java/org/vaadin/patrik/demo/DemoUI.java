@@ -36,13 +36,6 @@ public class DemoUI extends UI {
 	protected void init(VaadinRequest vaadinRequest) {
 		final VerticalLayout layout = new VerticalLayout();
 
-        addDetachListener(new DetachListener() {           
-            @Override
-            public void detach(DetachEvent event) {                    
-                    System.out.println("Detach Event = "+event.getConnector().getConnectorId());                    
-                }
-        });
-        
 		layout.setSizeFull();
 		
 		MessageGrid messageGrid = new MessageGrid();
