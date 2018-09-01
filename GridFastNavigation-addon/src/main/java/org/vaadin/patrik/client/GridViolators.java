@@ -71,4 +71,9 @@ public class GridViolators {
 		var editor = grid.@com.vaadin.client.widgets.Grid::getEditor()();
 		return editor.@com.vaadin.client.widgets.Grid.Editor::editorOverlay;
 	}-*/;
+
+    public static native final DivElement getEditorErrorMessage(Grid<?> grid) /*-{
+		var editor = grid.@com.vaadin.client.widgets.Grid::getEditor()();
+		return editor.@com.vaadin.client.widgets.Grid.Editor::message;
+	}-*/;
 }

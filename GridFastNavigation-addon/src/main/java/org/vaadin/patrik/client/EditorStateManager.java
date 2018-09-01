@@ -13,6 +13,8 @@ import org.vaadin.patrik.shared.FastNavigationState;
 
 import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -161,7 +163,7 @@ public class EditorStateManager {
                 	saveContent();
 
                 	// If there is validation error, move to column where the error is
-                	if (validationError > -1) {
+                	if ((validationError > -1) && (validationError != currentCol)) {
                 		targetCol = validationError;
                 	} else {                 
                 	
@@ -267,6 +269,20 @@ public class EditorStateManager {
                        	triggerValueChange(event);
                        	openEditor(targetRow, targetCol);
                    	}
+               	} else {
+               		// Grid's Editors editor request callback has a bug, that it clears all error indications, not 
+               		// just the one being edited, this is ugly workaround to that.  
+               		List<Column<?, Object>> errorColumns = getErrorColumns();
+               		if (errorColumns.size() > 0) {
+               			Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+               				@Override
+               				public boolean execute() {
+               					DivElement message = GridViolators.getEditorErrorMessage(grid);
+               					grid.getEditor().setEditorError(message.getInnerText(), errorColumns);
+               					return false;
+               				}
+               			}, 500); // 500ms is experimentally found value, to ensure we put errors back after callback
+               		}
                	}
                
                	return move;
@@ -509,6 +525,22 @@ public class EditorStateManager {
         return validationError-hidden;
     }
             
+    private List<Column<?,Object>> getErrorColumns() {
+    	boolean first = true;
+    	List<Column<?,Object>> columns = new ArrayList<>();
+        for (int i = 0, l = grid.getColumns().size(); i < l; ++i) {
+        	Column<?,Object> column = grid.getColumn(i);
+        	if (grid.getEditor().isEditorColumnError(column)) {
+        		if (!first) {
+        			columns.add(column);        			
+        		} else {
+        			first = false;
+        		}
+        	}
+        }        
+        return columns;
+    }
+    
     //
     // Spinlocks
     //
