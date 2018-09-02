@@ -269,9 +269,9 @@ public class EditorStateManager {
                        	triggerValueChange(event);
                        	openEditor(targetRow, targetCol);
                    	}
-               	} else {
+               	} else if (rowValidation) {
                		// Grid's Editors editor request callback has a bug, that it clears all error indications, not 
-               		// just the one being edited, this is ugly workaround to that.  
+               		// just the one being edited, this is ugly and not perfect workaround to that.  
                		List<Column<?, Object>> errorColumns = getErrorColumns();
                		if (errorColumns.size() > 0) {
                			Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
@@ -279,6 +279,7 @@ public class EditorStateManager {
                				public boolean execute() {
                					DivElement message = GridViolators.getEditorErrorMessage(grid);
                					grid.getEditor().setEditorError(message.getInnerText(), errorColumns);
+               					setErrorColumns(errorColumns);
                					return false;
                				}
                			}, 500); // 500ms is experimentally found value, to ensure we put errors back after callback
@@ -539,6 +540,12 @@ public class EditorStateManager {
         	}
         }        
         return columns;
+    }
+
+    private void setErrorColumns(List<Column<?,Object>> columns) {
+    	for (Column<?,Object> col : columns) {
+    		grid.getEditor().setEditorColumnError(col, true);
+    	}
     }
     
     //
@@ -905,7 +912,7 @@ public class EditorStateManager {
         AnimationCallback validateCallback = new AnimationCallback() {
             @Override
             public void execute(double timestamp) {
-                gridFastNavigationConnector.requestValidate(true);        
+                gridFastNavigationConnector.requestValidate(true);
             }
         };
             	

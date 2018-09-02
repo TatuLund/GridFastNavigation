@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.3.8
+- Further improvement to row validation mode
+
 ### Version 2.3.7
 - Improvement to row validation mode
 
