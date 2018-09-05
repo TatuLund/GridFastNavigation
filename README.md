@@ -54,6 +54,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.3.9
+- Fix: Grid scroll bar width was not taken into account in Editor resizing
+
 ### Version 2.3.8
 - Further improvement to row validation mode
 

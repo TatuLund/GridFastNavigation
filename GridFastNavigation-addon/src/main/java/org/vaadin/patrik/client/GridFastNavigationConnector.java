@@ -13,9 +13,11 @@ import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.annotations.OnStateChange;
@@ -32,6 +34,30 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
     private EditorStateManager editorManager;
     private FocusTracker focusTracker;
     private FastNavigationServerRPC rpc;
+
+	// Return -1.0 if Grid has no vertical scroll bar otherwise its width
+	private double getVerticalScrollBarWidth() {
+		for (Element e : getGridParts("div")) {
+			if (e.getClassName().contains("v-grid-scroller-vertical")) {
+				if (BrowserInfo.get().isIE11() || BrowserInfo.get().isEdge()) { 
+					return e.getClientWidth();
+				} else {
+					return e.getOffsetWidth();					
+				}
+			}
+		}
+		return -1.0;
+	}
+	
+	// Get elements in Grid by tag name
+	private Element[] getGridParts(String elem) {
+		NodeList<Element> elems = grid.getElement().getElementsByTagName(elem);
+		Element[] ary = new Element[elems.getLength()];
+		for (int i = 0; i < ary.length; ++i) {
+			ary[i] = elems.getItem(i);
+		}
+		return ary;
+	}
     
     @Override
     @SuppressWarnings("unchecked")
@@ -41,12 +67,27 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         editorManager = new EditorStateManager(grid,getState());
         focusTracker = new FocusTracker(grid);
         editorManager.setConnector(this);
-        AnimationCallback editorColumnWidthFix = new AnimationCallback() {
+        AnimationCallback editorColumnAndWidthFix = new AnimationCallback() {
             @Override
             public void execute(double timestamp) {
         		int cols = grid.getVisibleColumns().size();
         		DivElement editorOverlay = GridViolators.getEditorOverlay(grid);
-        		editorOverlay.getStyle().setWidth(grid.getOffsetWidth(), Style.Unit.PX);
+        		Double scrollerWidth = getVerticalScrollBarWidth();
+        		Double gridWidth = (double) grid.getOffsetWidth();
+        		if (scrollerWidth > 0.0) gridWidth = gridWidth - scrollerWidth; 
+        		editorOverlay.getStyle().setWidth(gridWidth, Style.Unit.PX);
+        		DivElement cellWrapper = GridViolators.getEditorCellWrapper(grid);
+            	for (int i=0;i<cols;i++) {
+            		Element element = (Element) cellWrapper.getChild(i);
+            		double width = grid.getVisibleColumns().get(i).getWidthActual();
+            		element.getStyle().setWidth(width, Style.Unit.PX);
+            	}
+            }
+        };
+        AnimationCallback editorColumnWidthFix = new AnimationCallback() {
+            @Override
+            public void execute(double timestamp) {
+        		int cols = grid.getVisibleColumns().size();
         		DivElement cellWrapper = GridViolators.getEditorCellWrapper(grid);
             	for (int i=0;i<cols;i++) {
             		Element element = (Element) cellWrapper.getChild(i);
@@ -68,7 +109,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         });
 		Window.addResizeHandler(event -> {
         	if (grid.isEditorActive()) {
-        		AnimationScheduler.get().requestAnimationFrame(editorColumnWidthFix);
+        		AnimationScheduler.get().requestAnimationFrame(editorColumnAndWidthFix);
         	}
 		});
         
