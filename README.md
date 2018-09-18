@@ -1,3 +1,6 @@
+[![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/gridfastnavigation-add-on)
+[![Stars on Vaadin Directory](https://img.shields.io/vaadin-directory/star/gridfastnavigation-add-on.svg)](https://vaadin.com/directory/component/gridfastnavigation-add-on)
+
 # GridFastNavigation Add-on for Vaadin 8
 
 Do you like the Grid but would want it to appeal more to old Excel jockeys?
