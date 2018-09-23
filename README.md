@@ -17,6 +17,12 @@ editing experience.
 Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to
 https://vaadin.com/directory/component/gridfastnavigation-add-on
 
+## JavaDoc
+
+JavaDoc can be found online at
+
+https://vaadin.com/api/org.vaadin.patrik/GridFastNavigation/2.3.9/overview-summary.html
+
 ## Building and running demo
 
 git clone https://github.com/thinwire/GridFastNavigation.git
