@@ -6,7 +6,6 @@ import java.util.List;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.components.grid.MultiSelectionModel;
 
 /**
  * Event used to notify of editor being opened. Can be used
@@ -19,7 +18,6 @@ public class EditorOpenEvent<T> extends Component.Event {
     private int colIndex;
     private T item;
     private Integer[] disabledCols;
-    private int offset = 0;
     private Grid<T> grid;
     
     public EditorOpenEvent(Component source, int row, int col, T item) {
@@ -28,7 +26,6 @@ public class EditorOpenEvent<T> extends Component.Event {
         colIndex = col;
         this.item = item;
         grid = (Grid<T>) source;
-        if (grid.getSelectionModel() instanceof MultiSelectionModel) offset = 1;
     }
 
     /**
@@ -46,7 +43,7 @@ public class EditorOpenEvent<T> extends Component.Event {
      * @return Index of the column where editor was opened
      */
     public int getColumnIndex() {
-        return colIndex-offset;
+        return colIndex;
     }
     
     /**

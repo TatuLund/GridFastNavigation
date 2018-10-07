@@ -12,6 +12,7 @@ import org.vaadin.patrik.events.EventListenerList;
 import org.vaadin.patrik.events.Listener;
 import org.vaadin.patrik.events.RowEditEvent;
 import org.vaadin.patrik.events.RowFocusEvent;
+import org.vaadin.patrik.helper.OffsetHelper;
 import org.vaadin.patrik.shared.FastNavigationClientRPC;
 import org.vaadin.patrik.shared.FastNavigationServerRPC;
 import org.vaadin.patrik.shared.FastNavigationState;
@@ -26,6 +27,8 @@ import com.vaadin.ui.components.grid.MultiSelectionModel;
 public class FastNavigation<T> extends AbstractExtension {
 
     private static Logger _logger = Logger.getLogger("FastNavigation");
+    
+    private OffsetHelper offsetHelper = new OffsetHelper();
 
     private static Logger getLogger() {
         return _logger;
@@ -141,37 +144,38 @@ public class FastNavigation<T> extends AbstractExtension {
             @Override
             public void cellUpdated(int rowIndex, int colIndex, String newData) {
             	T item = previousEditedItem; // getItemAt(rowIndex);
-                cellEditListeners.dispatch(new CellEditEvent<T>(g, rowIndex, colIndex, newData, item));
+            	int offset = offsetHelper.calculateOffset(g);
+                cellEditListeners.dispatch(new CellEditEvent<T>(g, rowIndex, colIndex - offset, newData, item));
             }
 
             @Override
             public void focusUpdated(int rowIndex, int colIndex) {
             	T item = getItemAt(rowIndex);
+            	int offset = offsetHelper.calculateOffset(g);
                 if (hasRowFocusListener && rowIndex != lastFocusedRow) {
                     rowFocusListeners.dispatch(new RowFocusEvent<T>(g, rowIndex, item));
                 }
 
                 if (hasCellFocusListener && (rowIndex != lastFocusedRow || colIndex != lastFocusedCol)) {
-                    cellFocusListeners.dispatch(new CellFocusEvent<T>(g, rowIndex, colIndex,
+                    cellFocusListeners.dispatch(new CellFocusEvent<T>(g, rowIndex, colIndex - offset,
                             lastFocusedRow == rowIndex,
-                            lastFocusedCol == colIndex, item));
+                            lastFocusedCol == colIndex - offset, item));
                 }
                 
                 lastFocusedRow = rowIndex;
-                lastFocusedCol = colIndex;
+                lastFocusedCol = colIndex - offset;
             }
 
             @Override
             public void editorOpened(int rowIndex, int colIndex, int lockId) {
             	T item = getItemAt(rowIndex);
+            	int offset = offsetHelper.calculateOffset(g);
             	previousEditedItem = editedItem;
             	editedItem = item;
-                EditorOpenEvent<T> ev = new EditorOpenEvent<>(g, rowIndex, colIndex, item);
+                EditorOpenEvent<T> ev = new EditorOpenEvent<>(g, rowIndex, colIndex - offset, item);
                 editorOpenListeners.dispatch(ev);
                 // Update disabled columns or readonly fields status if changed dynamically
                 ArrayList<Integer> disabledColumns = new ArrayList<Integer>();
-                int offset = 0;
-                if (g.getSelectionModel() instanceof MultiSelectionModel) offset = 1;
                 for (int i=0;i<g.getColumns().size();i++) {
                 	if (!g.getColumns().get(i).isEditable()) {
                 		if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);
@@ -506,5 +510,18 @@ public class FastNavigation<T> extends AbstractExtension {
         
         getState().hasClickOutListener = true;
     }
+
+	public OffsetHelper getOffsetHelper() {
+		return this.offsetHelper;
+	}
+
+	/**
+	 * Use OffsetHelper to overwrite the calculation for internal offset of columns. 
+	 * 
+	 * @param offsetHelper 
+	 */
+	public void setOffsetHelper(OffsetHelper offsetHelper) {
+		this.offsetHelper = offsetHelper;
+	}
 
 }
