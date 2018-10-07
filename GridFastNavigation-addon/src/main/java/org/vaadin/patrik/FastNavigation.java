@@ -20,9 +20,18 @@ import org.vaadin.patrik.shared.FastNavigationState;
 import com.vaadin.data.BinderValidationStatus;
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.ui.Grid;
-import com.vaadin.ui.components.grid.MultiSelectionModel;
 
-
+/**
+ * GridFastNavigation is a compnent extension for Vaadin Grid, which uses the
+ * unbuffered editing mode and alters its keyboard controls to provide a faster
+ * and advanced editing experience. This extension provides also number of other
+ * improvements to Grid's unbuffered editors and features some bug fixes and
+ * workarounds.
+ * 
+ * @author Tatu Lund
+ *
+ * @param <T> Bean type of the Grid
+ */
 @SuppressWarnings("serial")
 public class FastNavigation<T> extends AbstractExtension {
 
@@ -34,40 +43,87 @@ public class FastNavigation<T> extends AbstractExtension {
         return _logger;
     }
 
+    private Grid<T> grid = null;
+    
     //
     // Event interfaces
     //
 
+    /**
+     * RowEditListener is used for observing {@link RowEditEvent}, which is emitted when item has been edited.
+     * 
+     * @see RowEditEvent
+     * @see FastNavigation#addRowEditListener(RowEditListener)
+     */
     public interface RowEditListener extends Listener<RowEditEvent<?>> {
     }
     
     private final EventListenerList<RowEditListener, RowEditEvent<?>> rowEditListeners = new EventListenerList<RowEditListener, RowEditEvent<?>>();
 
+    /**
+     * CellEditListener is used for observing {@link CellEditEvent}, which is emitted when item has been edited.
+     * 
+     * @see CellEditEvent
+     * @see FastNavigation#addCellEditListener(CellEditListener)
+     */
     public interface CellEditListener extends Listener<CellEditEvent<?>> {
     }
     
     private final EventListenerList<CellEditListener, CellEditEvent<?>> cellEditListeners = new EventListenerList<CellEditListener, CellEditEvent<?>>();
 
+    /**
+     * CellFocusListener is used for observing {@link CellFocusEvent}, which is emitted when focused cell changes
+     * 
+     * @see CellFocusEvent
+     * @see FastNavigation#addCellFocusListener(CellFocusListener)
+     */
     public interface CellFocusListener extends Listener<CellFocusEvent<?>> {
     }
     
     private final EventListenerList<CellFocusListener, CellFocusEvent<?>> cellFocusListeners = new EventListenerList<CellFocusListener, CellFocusEvent<?>>();
 
+    /**
+     * RowFocusListener is used for observing {@link RowFocusEvent}, which is emitted when focused row changes
+     * 
+     * @see RowFocusEvent
+     * @see FastNavigation#addRowFocusListener(RowFocusListener)
+     * 
+     */
     public interface RowFocusListener extends Listener<RowFocusEvent<?>> {
     }
     
     private final EventListenerList<RowFocusListener, RowFocusEvent<?>> rowFocusListeners = new EventListenerList<RowFocusListener, RowFocusEvent<?>>();
 
+    /**
+     * EditorOpenListener is used for observing {@link EditorOpenEvent}, which is emitted when Editor has been opened.
+     * Note: Editor is closed and opened when it is moved to a new orw
+     * 
+     * @see EditorOpenEvent 
+     * @see FastNavigation#addEditorOpenListener(EditorOpenListener)
+     */
     public interface EditorOpenListener extends Listener<EditorOpenEvent<?>> {
     }
     
     private final EventListenerList<EditorOpenListener, EditorOpenEvent<?>> editorOpenListeners = new EventListenerList<EditorOpenListener, EditorOpenEvent<?>>();
 
+    /**
+     * EditorOpenListener is used for observing {@link EditorCloseEvent}, which is emitted when Editor has been closed.
+     * Note: Editor is closed and opened when it is moved to a new orw
+     *
+     * @see EditorCloseEvent
+     * @see FastNavigation#addEditorCloseListener(EditorCloseListener)
+     */
     public interface EditorCloseListener extends Listener<EditorCloseEvent<?>> {
     }
     
     private final EventListenerList<EditorCloseListener, EditorCloseEvent<?>> editorCloseListeners = new EventListenerList<EditorCloseListener, EditorCloseEvent<?>>();
 
+    /**
+     * ClickOutListener is used for observing {@link ClickOutEvent} which is simulated blur event, and emitted when user clicks outside of the Grid
+     * 
+     * @see ClickOutEvent
+     * @see FastNavigation#addClickOutListener(ClickOutListener)
+     */
     public interface ClickOutListener extends Listener<ClickOutEvent> {
     }
     
@@ -120,10 +176,12 @@ public class FastNavigation<T> extends AbstractExtension {
     	setupFastNavigation(g,changeColumnOnEnter,dispatchEditEventOnBlur);
     }
     
+    // Internal implementation of the constructor
     private void setupFastNavigation(final Grid<T> g, boolean changeColumnOnEnter, boolean dispatchEditEventOnBlur) {
     	getState().changeColumnOnEnter = changeColumnOnEnter;
-    	getState().dispatchEditEventOnBlur = dispatchEditEventOnBlur;    	
-        g.getEditor().setBuffered(false);
+    	getState().dispatchEditEventOnBlur = dispatchEditEventOnBlur;
+    	grid = g;
+        grid.getEditor().setBuffered(false);
         
         registerRpc(new FastNavigationServerRPC() {
 
@@ -138,14 +196,14 @@ public class FastNavigation<T> extends AbstractExtension {
         	@Override
             public void rowUpdated(int rowIndex) {
         		T item = previousEditedItem; // getItemAt(rowIndex);
-                rowEditListeners.dispatch(new RowEditEvent<T>(g, rowIndex, item));
+                rowEditListeners.dispatch(new RowEditEvent<T>(grid, rowIndex, item));
             }
 
             @Override
             public void cellUpdated(int rowIndex, int colIndex, String newData) {
             	T item = previousEditedItem; // getItemAt(rowIndex);
             	int offset = offsetHelper.calculateOffset(g);
-                cellEditListeners.dispatch(new CellEditEvent<T>(g, rowIndex, colIndex - offset, newData, item));
+                cellEditListeners.dispatch(new CellEditEvent<T>(grid, rowIndex, colIndex - offset, newData, item));
             }
 
             @Override
@@ -153,11 +211,11 @@ public class FastNavigation<T> extends AbstractExtension {
             	T item = getItemAt(rowIndex);
             	int offset = offsetHelper.calculateOffset(g);
                 if (hasRowFocusListener && rowIndex != lastFocusedRow) {
-                    rowFocusListeners.dispatch(new RowFocusEvent<T>(g, rowIndex, item));
+                    rowFocusListeners.dispatch(new RowFocusEvent<T>(grid, rowIndex, item));
                 }
 
                 if (hasCellFocusListener && (rowIndex != lastFocusedRow || colIndex != lastFocusedCol)) {
-                    cellFocusListeners.dispatch(new CellFocusEvent<T>(g, rowIndex, colIndex - offset,
+                    cellFocusListeners.dispatch(new CellFocusEvent<T>(grid, rowIndex, colIndex - offset,
                             lastFocusedRow == rowIndex,
                             lastFocusedCol == colIndex - offset, item));
                 }
@@ -169,17 +227,17 @@ public class FastNavigation<T> extends AbstractExtension {
             @Override
             public void editorOpened(int rowIndex, int colIndex, int lockId) {
             	T item = getItemAt(rowIndex);
-            	int offset = offsetHelper.calculateOffset(g);
+            	int offset = offsetHelper.calculateOffset(grid);
             	previousEditedItem = editedItem;
             	editedItem = item;
-                EditorOpenEvent<T> ev = new EditorOpenEvent<>(g, rowIndex, colIndex - offset, item);
+                EditorOpenEvent<T> ev = new EditorOpenEvent<>(grid, rowIndex, colIndex - offset, item);
                 editorOpenListeners.dispatch(ev);
                 // Update disabled columns or readonly fields status if changed dynamically
                 ArrayList<Integer> disabledColumns = new ArrayList<Integer>();
                 for (int i=0;i<g.getColumns().size();i++) {
-                	if (!g.getColumns().get(i).isEditable()) {
+                	if (!grid.getColumns().get(i).isEditable()) {
                 		if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);
-                	} else if ((g.getColumns().get(i).getEditorBinding() != null) && 
+                	} else if ((grid.getColumns().get(i).getEditorBinding() != null) && 
                 			g.getColumns().get(i).getEditorBinding().getField().isReadOnly()) {
                 		if (!disabledColumns.contains(i)) disabledColumns.add(i+offset);
                     }
@@ -202,23 +260,23 @@ public class FastNavigation<T> extends AbstractExtension {
             @Override
             public void editorClosed(int rowIndex, int colIndex,
                     boolean wasCancelled) {
-                editorCloseListeners.dispatch(new EditorCloseEvent<T>(g, rowIndex, colIndex, wasCancelled));
+                editorCloseListeners.dispatch(new EditorCloseEvent<T>(grid, rowIndex, colIndex, wasCancelled));
             }
 
 			@Override
 			public void clickOut() {
-				clickOutListeners.dispatch(new ClickOutEvent(g));
+				clickOutListeners.dispatch(new ClickOutEvent(grid));
 			}
 			
 			@Override
 			public void forceValidate(boolean move) {
-				BinderValidationStatus<T> status = g.getEditor().getBinder().validate();
+				BinderValidationStatus<T> status = grid.getEditor().getBinder().validate();
 				if (status.hasErrors() && move) getRPC().validationHasErrors();
 			}
 
         }, FastNavigationServerRPC.class);
 
-        extend(g);
+        extend(grid);
     }
 
     private FastNavigationClientRPC getRPC() {
@@ -230,7 +288,15 @@ public class FastNavigation<T> extends AbstractExtension {
         return (FastNavigationState) super.getState();
     }
 
+    /**
+     * Set focused cell programmatically and scrolls Grid to target if focus was changed
+     * 
+     * @param row Target row
+     * @param col Target column
+     * @throws IllegalArgumentException if row or column is not in acceptable range
+     */
     public void setFocusedCell(int row, int col) {
+    	if (col < 0 || col > grid.getColumns().size() || row < 0 || row > grid.getDataCommunicator().getDataProviderSize()) throw new IllegalArgumentException("Target row or column out of boundaries");
     	getRPC().setFocusedCell(row, col);
     }
     
@@ -247,6 +313,10 @@ public class FastNavigation<T> extends AbstractExtension {
       	getState().openEditorWithSingleClick = enable;
     }
     
+    /**
+     * 
+     * @return true if Editor is set to open with single click
+     */
     public boolean getOpenEditorWithSingleClick() {
         return getState().openEditorWithSingleClick;
     }
@@ -259,9 +329,14 @@ public class FastNavigation<T> extends AbstractExtension {
      * @param enable Boolean value
      */
     public void setChangeColumnAfterLastRow(boolean enable) {
+    	if (getState().changeColumnOnEnter) throw new IllegalStateException("Cannot set change column after last row if enter is set to change column");
         getState().changeColumnAfterLastRow = enable;
     }
 
+    /**
+     * 
+     * @return true if column is set to change after last row
+     */
     public boolean getChangeColumnAfterLastRow() {
         return getState().changeColumnAfterLastRow;
     }
@@ -280,7 +355,11 @@ public class FastNavigation<T> extends AbstractExtension {
     public void setRowValidation(boolean enable) {
         getState().rowValidation = enable;
     }
-      
+
+    /**
+     * 
+     * @return true if row validation mode is set on
+     */
     public boolean getRowValidation() {
         return getState().rowValidation;
     }
@@ -296,6 +375,10 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().allowTabRowChange = enable;
     }
       
+    /**
+     * 
+     * @return true if tabbing on last column changes the row
+     */
     public boolean getAllowTabToChangeRow() {
         return getState().allowTabRowChange;
     }
@@ -309,6 +392,10 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().selectTextOnEditorOpen = enable;
     }
 
+    /**
+     * 
+     * @return true if text in field is set to be selected when the Editor is being opened
+     */
     public boolean getSelectTextOnEditorOpen() {
         return getState().selectTextOnEditorOpen;
     }
@@ -322,6 +409,10 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().allowArrowRowChange = enable;
     }
     
+    /**
+     * 
+     * @return true if the arrow keys up and down are set to change the row
+     */
     public boolean getAllowArrowToChangeRow() {
         return getState().allowArrowRowChange;
     }
@@ -338,6 +429,10 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().homeEndEnabled = enable;
     }
     
+    /**
+     * 
+     * @return true if home and end keys are enabled
+     */
     public boolean getHomeEndEnabled() {
         return getState().homeEndEnabled;
     }
@@ -358,6 +453,10 @@ public class FastNavigation<T> extends AbstractExtension {
     }
 
 
+    /**
+     * 
+     * @return true if Editor is set to be opened by pressing any key
+     */
     public boolean getOpenEditorOnTyping() {
         return getState().openEditorOnType;
     }
@@ -430,6 +529,8 @@ public class FastNavigation<T> extends AbstractExtension {
      * Register row edit listener, which is triggered when cell value is being 
      * changed. Useful to hook e.g. database commit on edit.
      * 
+     * @see RowEditEvent
+     * 
      * @param listener
      *            an RowEditListener instance
      */
@@ -438,6 +539,15 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().hasRowEditListener = true;
     }
 
+    /**
+     * Register cell edit listener, which is triggered when cell value is being 
+     * changed. Useful to hook e.g. database commit on edit.
+     * 
+     * @see CellEditEvent
+     * 
+     * @param listener
+     *            an CellEditListener instance
+     */
     public void addCellEditListener(CellEditListener listener) {
         cellEditListeners.addListener(listener);
         getState().hasCellEditListener = true;
@@ -445,7 +555,9 @@ public class FastNavigation<T> extends AbstractExtension {
 
     /**
      * Register cell focus listener, which is triggered when focus has 
-     * changed. 
+     * changed.
+     * 
+     * @see CellFocusEvent
      * 
      * @param listener
      *            an CellFocusListener instance
@@ -461,6 +573,8 @@ public class FastNavigation<T> extends AbstractExtension {
     /**
      * Register row focus listener, which is triggered when row has 
      * changed. 
+     * 
+     * @see RowFocusEvent
      * 
      * @param listener
      *            an RowFocusListener instance
@@ -479,8 +593,10 @@ public class FastNavigation<T> extends AbstractExtension {
      * adding this listener will cause the Grid to become disabled until the
      * server has processed the event.
      * 
+     * @see EditorOpenEvent
+     * 
      * @param listener
-     *            an EditorListener instance
+     *            an EditorOpenListener instance
      */
     public void addEditorOpenListener(EditorOpenListener listener) {
         editorOpenListeners.addListener(listener);
@@ -490,6 +606,8 @@ public class FastNavigation<T> extends AbstractExtension {
 
     /**
      * Register editor close listener, which is emitted each time editor is being closed.
+     * 
+     * @see EditorCloseEvent
      * 
      * @param listener an EditorCloseListener instance
      */
@@ -502,6 +620,8 @@ public class FastNavigation<T> extends AbstractExtension {
     /**
      * Register click out listener, which is emitted when user clicks outside the
      * grid. This is not true blur event, since it is triggered by mouse only 
+     * 
+     * @see ClickOutEvent
      * 
      * @param listener a ClickOutListener instance
      */
@@ -516,9 +636,9 @@ public class FastNavigation<T> extends AbstractExtension {
 	}
 
 	/**
-	 * Use OffsetHelper to overwrite the calculation for internal offset of columns. 
+	 * Use {@link OffsetHelper} to overwrite the calculation for internal offset of columns. 
 	 * 
-	 * @param offsetHelper 
+	 * @param offsetHelper OffsetHelper instance to be used instead of the default implementation
 	 */
 	public void setOffsetHelper(OffsetHelper offsetHelper) {
 		this.offsetHelper = offsetHelper;

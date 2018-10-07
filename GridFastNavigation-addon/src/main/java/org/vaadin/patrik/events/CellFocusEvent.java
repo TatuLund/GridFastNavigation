@@ -31,6 +31,8 @@ public class CellFocusEvent<T> extends Component.Event {
     
     /**
      * Return true if the row was changed from the previously known value
+     * 
+     * @return boolean value
      */
     public boolean wasRowChanged() {
         return rowChanged;
@@ -38,6 +40,8 @@ public class CellFocusEvent<T> extends Component.Event {
     
     /**
      * Get currently focused column index
+	 *
+     * @return integer value
      */
     public int getColumnIndex() {
         return col;
@@ -45,6 +49,8 @@ public class CellFocusEvent<T> extends Component.Event {
       
     /**
      * Return true if the column was changed from the previously known value
+	 *
+     * @return integer value
      */
     public boolean wasColumnChanged() {
         return colChanged;

@@ -63,6 +63,11 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.3.10
+- Improvement: issue #82 add helper to deal with custom selection models that change internal column calculation
+- Added fault checkign to setFocusedCel due issue #77 and setChangeColumnOnEnter methods
+- Improved JavaDocs 
+
 ### Version 2.3.9
 - Fix: Grid scroll bar width was not taken into account in Editor resizing
 

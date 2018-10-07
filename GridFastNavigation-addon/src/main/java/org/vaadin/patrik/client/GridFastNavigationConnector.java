@@ -1,5 +1,7 @@
 package org.vaadin.patrik.client;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.vaadin.patrik.FastNavigation;
@@ -11,6 +13,7 @@ import org.vaadin.patrik.shared.FastNavigationState;
 
 import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
@@ -19,12 +22,20 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.ComponentConnector;
+import com.vaadin.client.ConnectorMap;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.annotations.OnStateChange;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
+import com.vaadin.client.widget.grid.EditorHandler;
+import com.vaadin.client.widget.grid.EditorHandler.EditorRequest;
 import com.vaadin.client.widgets.Grid;
+import com.vaadin.client.widgets.Grid.Column;
 import com.vaadin.client.widgets.Grid.Editor;
 import com.vaadin.shared.ui.Connect;
+import com.vaadin.shared.ui.grid.editor.EditorClientRpc;
+import com.vaadin.shared.ui.grid.editor.EditorServerRpc;
+
+import elemental.json.JsonObject;
 
 @SuppressWarnings("serial")
 @Connect(FastNavigation.class)
@@ -34,7 +45,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
     private EditorStateManager editorManager;
     private FocusTracker focusTracker;
     private FastNavigationServerRPC rpc;
-
+  
 	// Return -1.0 if Grid has no vertical scroll bar otherwise its width
 	private double getVerticalScrollBarWidth() {
 		for (Element e : getGridParts("div")) {

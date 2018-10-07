@@ -49,7 +49,7 @@ public class EditorOpenEvent<T> extends Component.Event {
     /**
      * Set additional columns that should be disable when Editor opens 
      * 
-     * @param columns
+     * @param columns Columns to be set disabled
      */
     public void disableColumns(Integer... columns) {
         disabledCols = columns;

@@ -1,6 +1,7 @@
 package org.vaadin.patrik.client;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,16 +29,24 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.ComponentConnector;
+import com.vaadin.client.ConnectorMap;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.FocusUtil;
 import com.vaadin.client.ui.VOverlay;
 import com.vaadin.client.widget.grid.DefaultEditorEventHandler;
+import com.vaadin.client.widget.grid.EditorHandler;
 import com.vaadin.client.widget.grid.EventCellReference;
+import com.vaadin.client.widget.grid.EditorHandler.EditorRequest;
 import com.vaadin.client.widgets.Grid;
 import com.vaadin.client.widgets.Grid.Column;
 import com.vaadin.client.widgets.Grid.Editor;
 import com.vaadin.client.widgets.Grid.EditorDomEvent;
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.shared.ui.grid.editor.EditorClientRpc;
+import com.vaadin.shared.ui.grid.editor.EditorServerRpc;
+
+import elemental.json.JsonObject;
 
 public class EditorStateManager {
 
@@ -69,7 +78,7 @@ public class EditorStateManager {
     // Custom editor open/close/move behavior
     //
     
-    private class CustomEditorHandler extends DefaultEditorEventHandler<Object> {
+    private class CustomEditorEventHandler extends DefaultEditorEventHandler<Object> {
         
 		//
         // Editor event handler - this receives an unfiltered event stream from the browser and
@@ -366,6 +375,7 @@ public class EditorStateManager {
         }
     }
 
+
     //
     // EditorStateManager
     //
@@ -407,8 +417,8 @@ public class EditorStateManager {
     	Keys.setEnterBehavior(state.changeColumnOnEnter);
         grid = ((Grid<Object>) g);
         editor = grid.getEditor();
-        editor.setEventHandler(new CustomEditorHandler());
-        
+        editor.setEventHandler(new CustomEditorEventHandler());
+
         externalLocks = new RPCLock();
         
         // Create modality curtain
@@ -932,7 +942,7 @@ public class EditorStateManager {
             } else {
                 editor.editRow(row,col);
                 waitForEditorReady();
-                // No need to trigger event if editor just moved
+                // No need to trigger event if editor just moved to other column
             }
         }
         // Trigger deferred row validation due timing issue 

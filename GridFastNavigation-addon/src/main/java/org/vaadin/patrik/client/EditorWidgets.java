@@ -45,10 +45,10 @@ public class EditorWidgets {
         String getValue(T widget);
 
         /**
-         * Set the value of the ditor widget
+         * Set the value of the Editor widget
          *  
          * @param widget The editor widget
-         * @param value
+         * @param value Value as string
          */
         void setValue(T widget, String value);
 
@@ -101,6 +101,7 @@ public class EditorWidgets {
     /**
      * Register a new widget handler. Purpose
      *  
+     * @param <T> Type of the widget 
      * @param clazz Class name of the editor widget to be registered
      * @param handler The handler, implements WidgetHandler interface
      */

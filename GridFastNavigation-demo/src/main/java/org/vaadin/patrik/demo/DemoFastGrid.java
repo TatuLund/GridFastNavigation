@@ -277,7 +277,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 	}
 
 	public void resetFocus() {
-		nav.setFocusedCell(0, 1);		
+		nav.setFocusedCell(0, 1);
 	}
 
 }
