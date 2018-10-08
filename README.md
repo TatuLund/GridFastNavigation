@@ -21,7 +21,7 @@ https://vaadin.com/directory/component/gridfastnavigation-add-on
 
 JavaDoc can be found online at
 
-https://vaadin.com/api/org.vaadin.patrik/GridFastNavigation/2.3.9/overview-summary.html
+https://vaadin.com/api/org.vaadin.patrik/GridFastNavigation/2.3.10/overview-summary.html
 
 ## Building and running demo
 
