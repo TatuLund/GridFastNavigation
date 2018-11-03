@@ -2,6 +2,13 @@ package org.vaadin.patrik.events;
 
 import com.vaadin.ui.Component;
 
+/**
+ * RowFocusEvent is emitted when focused row is changed in the Grid
+ * 
+ * @see org.vaadin.patrik.FastNavigation#addRowFocusListener(org.vaadin.patrik.FastNavigation.RowFocusListener)
+ *
+ * @param <T> Bean type of the Grid where {@link org.vaadin.patrik.FastNavigation} is being used
+ */
 @SuppressWarnings("serial")
 public class RowFocusEvent<T> extends Component.Event {
 

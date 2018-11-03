@@ -250,6 +250,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			System.out.println("Item click event happens: "+event.getItem().toString());			
 		});
 		this.setSizeFull();
+		nav.setFocusedCell(2, 2, true);
 	}
 
 	// Add a blank row to the grid and tell the grid to refresh itself showing
@@ -277,7 +278,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 	}
 
 	public void resetFocus() {
-		nav.setFocusedCell(0, 1);
+		nav.setFocusedCell(0, 1, true);
 	}
 
 }

@@ -6,9 +6,12 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ui.VCheckBox;
+import com.vaadin.client.ui.VColorPicker;
 import com.vaadin.client.ui.VComboBox;
+import com.vaadin.client.ui.VNativeSelect;
 import com.vaadin.client.ui.VPopupCalendar;
 import com.vaadin.client.ui.VPopupTimeCalendar;
+import com.vaadin.client.ui.VTextArea;
 import com.vaadin.client.ui.VTextField;
 
 public class EditorWidgets {
@@ -163,6 +166,100 @@ public class EditorWidgets {
             }
         });
 
+        registerHandler(VTextArea.class, new WidgetHandler<VTextArea>() {
+            @Override
+            public void selectAll(VTextArea widget) {
+                if (widget.isEnabled()) {
+                    widget.selectAll();
+                }
+            }
+
+            @Override
+            public String getValue(VTextArea widget) {
+                return widget.getValue();
+            }
+
+            @Override
+            public void setValue(VTextArea widget, String value) {
+                widget.setValue(value);                
+                widget.getElement().blur();
+                widget.getElement().focus();
+            }
+
+            public void focus(VTextArea widget) {
+                if (widget.isEnabled()) {
+                    widget.getElement().blur();
+                    widget.getElement().focus();
+                }
+            }
+
+            @Override
+            public void enable(VTextArea widget) {
+                widget.setEnabled(true);
+                widget.setReadOnly(false);
+            }
+
+            @Override
+            public void disable(VTextArea widget) {
+                widget.setEnabled(false);
+                widget.setReadOnly(true);
+            }
+
+            @Override
+            public boolean isUpDownNavAllowed(VTextArea widget) {
+                return false;
+            }
+            
+            @Override
+            public boolean isReadOnly(VTextArea widget) {
+            	return widget.isReadOnly();
+            }
+        });
+
+        registerHandler(VNativeSelect.class, new WidgetHandler<VNativeSelect>() {
+            @Override
+            public void selectAll(VNativeSelect widget) {
+            }
+
+            @Override
+            public String getValue(VNativeSelect widget) {
+                return widget.getListBox().getSelectedValue();
+            }
+
+            @Override
+            public void setValue(VNativeSelect widget, String value) {
+                widget.setSelectedItem(value);
+            }
+
+            @Override
+            public void focus(VNativeSelect widget) {
+                if (widget.getListBox().isEnabled() ) {
+                    widget.getElement().blur();
+                    widget.focus();
+                }
+            }
+
+            @Override
+            public void enable(VNativeSelect widget) {
+            	widget.getListBox().setEnabled(true);
+            }
+
+            @Override
+            public void disable(VNativeSelect widget) {
+            	widget.getListBox().setEnabled(false);
+            }
+
+            @Override
+            public boolean isUpDownNavAllowed(VNativeSelect widget) {
+                return false;
+            }
+
+            @Override
+            public boolean isReadOnly(VNativeSelect widget) {
+            	return !widget.getListBox().isEnabled();
+            }
+        });
+
         registerHandler(VComboBox.class, new WidgetHandler<VComboBox>() {
             @Override
             public void selectAll(VComboBox widget) {
@@ -212,6 +309,50 @@ public class EditorWidgets {
             }
         });
 
+        registerHandler(VColorPicker.class, new WidgetHandler<VColorPicker>() {
+            @Override
+            public void selectAll(VColorPicker widget) {
+            }
+
+            @Override
+            public String getValue(VColorPicker widget) {
+                return widget.getColor();
+            }
+
+            @Override
+            public void setValue(VColorPicker widget, String value) {
+                widget.setColor(value);
+            }
+
+            @Override
+            public void focus(VColorPicker widget) {
+                if (widget.isEnabled()) {
+                    widget.getElement().blur();
+                    widget.getElement().focus();
+                }
+            }
+
+            @Override
+            public void enable(VColorPicker widget) {
+            	widget.setEnabled(true);
+            }
+
+            @Override
+            public void disable(VColorPicker widget) {
+            	widget.setEnabled(false);
+            }
+
+            @Override
+            public boolean isUpDownNavAllowed(VColorPicker widget) {
+                return false;
+            }
+
+            @Override
+            public boolean isReadOnly(VColorPicker widget) {
+            	return !widget.isEnabled();
+            }
+        });
+
         registerHandler(VCheckBox.class, new WidgetHandler<VCheckBox>() {
             @Override
             public String getValue(VCheckBox widget) {
@@ -258,7 +399,7 @@ public class EditorWidgets {
 
             @Override
             public boolean isReadOnly(VCheckBox widget) {
-            	return widget.isEnabled();
+            	return !widget.isEnabled();
             }
         });
 

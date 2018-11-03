@@ -2,6 +2,13 @@ package org.vaadin.patrik.events;
 
 import com.vaadin.ui.Component;
 
+/**
+ * RowEditEvent is emitted when value in the Editor has been changed
+ * 
+ * @see org.vaadin.patrik.FastNavigation#addRowEditListener(org.vaadin.patrik.FastNavigation.RowEditListener)
+ *
+ * @param <T> Bean type of the Grid where {@link org.vaadin.patrik.FastNavigation} is being used
+ */
 @SuppressWarnings("serial")
 public class RowEditEvent<T> extends Component.Event {
 

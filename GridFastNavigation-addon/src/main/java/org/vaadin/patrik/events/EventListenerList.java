@@ -4,6 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Used in {@link org.vaadin.patrik.FastNavigation} for listener maintenance
+ *
+ * @param <LISTENER> Listener type
+ * @param <EVENT> Event type
+ */
 public class EventListenerList<LISTENER extends Listener<EVENT>, EVENT> implements Serializable {
     private final List<LISTENER> listeners;
     

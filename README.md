@@ -63,6 +63,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.4.0
+- Added support for NativeSelect, ColorPicker and TextArea
+- Improved setFocusedCell(..) to address issue #77
+
 ### Version 2.3.10
 - Improvement: issue #82 add helper to deal with custom selection models that change internal column calculation
 - Added fault checkign to setFocusedCel due issue #77 and setChangeColumnOnEnter methods

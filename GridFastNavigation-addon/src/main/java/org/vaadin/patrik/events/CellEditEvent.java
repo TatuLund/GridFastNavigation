@@ -3,6 +3,13 @@ package org.vaadin.patrik.events;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 
+/**
+ * CellEditEvent is emitted when value in the Editor has been changed
+ * 
+ * @see org.vaadin.patrik.FastNavigation#addCellEditListener(org.vaadin.patrik.FastNavigation.CellEditListener)
+ *
+ * @param <T> Bean type of the Grid where {@link org.vaadin.patrik.FastNavigation} is being used
+ */
 @SuppressWarnings("serial")
 public class CellEditEvent<T> extends Component.Event {
 

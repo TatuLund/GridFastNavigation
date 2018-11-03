@@ -10,6 +10,10 @@ import com.vaadin.ui.Grid.Column;
 /**
  * Event used to notify of editor being opened. Can be used
  * to disable some columns (in other words: make them read-only)  
+ * 
+ * @see org.vaadin.patrik.FastNavigation#addEditorOpenListener(org.vaadin.patrik.FastNavigation.EditorOpenListener)
+ *
+ * @param <T> Bean type of the Grid where {@link org.vaadin.patrik.FastNavigation} is being used
  */
 @SuppressWarnings("serial")
 public class EditorOpenEvent<T> extends Component.Event {

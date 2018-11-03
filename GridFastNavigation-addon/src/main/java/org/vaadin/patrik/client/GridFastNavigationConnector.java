@@ -142,10 +142,23 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                     }
 
 					@Override
-					public void setFocusedCell(int row, int col) {
-						GridViolators.setFocusedCell(grid,row,col);		
-					}
-                    
+					public void setFocusedCell(int row, int col, boolean wait) {
+						Scheduler.get().scheduleFinally(new Scheduler.ScheduledCommand() {							
+							@Override
+							public void execute() {
+								if (wait) {
+									Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
+										@Override
+										public boolean execute() {
+											if (grid.isWorkPending()) return true;
+											else return false;
+										}
+									}, 100);							
+								}
+								GridViolators.setFocusedCell(grid,row,col);		
+							}
+						});
+					}                    
                 });
 
         editorManager.addListener(new EditorListener() {

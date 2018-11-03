@@ -22,7 +22,7 @@ import com.vaadin.server.AbstractExtension;
 import com.vaadin.ui.Grid;
 
 /**
- * GridFastNavigation is a compnent extension for Vaadin Grid, which uses the
+ * GridFastNavigation is a component extension for Vaadin Grid, which uses the
  * unbuffered editing mode and alters its keyboard controls to provide a faster
  * and advanced editing experience. This extension provides also number of other
  * improvements to Grid's unbuffered editors and features some bug fixes and
@@ -288,16 +288,33 @@ public class FastNavigation<T> extends AbstractExtension {
         return (FastNavigationState) super.getState();
     }
 
+    
     /**
      * Set focused cell programmatically and scrolls Grid to target if focus was changed
+     * 
+     * Note: This method works correctly only after Grid has been fully rendered, since
+     * otherwise target cell might not be in the DOM yet.
      * 
      * @param row Target row
      * @param col Target column
      * @throws IllegalArgumentException if row or column is not in acceptable range
      */
     public void setFocusedCell(int row, int col) {
+    	setFocusedCell(row,col,false);
+    }
+    
+    /**
+     * Set focused cell programmatically and scrolls Grid to target if focus was changed.
+     * The method attempts to wait until Gird is rendered if wait is set to true.
+     * 
+     * @param row Target row
+     * @param col Target column
+     * @param wait Wait until Grid is ready before setting the focused cell
+     * @throws IllegalArgumentException if row or column is not in acceptable range
+     */
+    public void setFocusedCell(int row, int col, boolean wait) {
     	if (col < 0 || col > grid.getColumns().size() || row < 0 || row > grid.getDataCommunicator().getDataProviderSize()) throw new IllegalArgumentException("Target row or column out of boundaries");
-    	getRPC().setFocusedCell(row, col);
+    	getRPC().setFocusedCell(row, col, wait);
     }
     
     /**
@@ -462,7 +479,7 @@ public class FastNavigation<T> extends AbstractExtension {
     }
 
     /**
-     * Editor opening extra shortcuts
+     * Add extra Editor opening shortcut
      * 
      * @param code The keycode
      */
@@ -470,16 +487,24 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().openShortcuts.add(code);
     }
 
+    /**
+     * Remove Editor opening shortcut 
+     * 
+     * @param code The keycode
+     */
     public void removeEditorOpenShortcut(int code) {
         getState().openShortcuts.remove(code);
     }
 
+    /**
+     * Remove all extra Editor opening shortcuts
+     */
     public void clearEditorOpenShortcuts() {
         getState().openShortcuts.clear();
     }
 
     /**
-     * Editor close/cancel extra shortcuts
+     * Add Editor close/cancel extra shortcut
      * 
      * @param code The keycode
      */
@@ -487,16 +512,24 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().closeShortcuts.add(code);
     }
 
+    /**
+     * Remove Editor close/cancel extra shortcut 
+     * 
+     * @param code The keycode
+     */
     public void removeEditorCloseShortcut(int code) {
         getState().closeShortcuts.remove(code);
     }
 
-    public void clearEditorCloseShortcut(int code) {
+    /**
+     * Remove all extra Editor close/cancel shortcuts
+     */
+    public void clearEditorCloseShortcuts() {
         getState().closeShortcuts.clear();
     }
 
     /**
-     * Editor save extra shortcuts
+     * Add Editor save extra shortcut
      * 
      * @param code The keycode
      */
@@ -504,11 +537,19 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().saveShortcuts.add(code);
     }
 
+    /**
+     * Remove Editor save extra shortcut
+     * 
+     * @param code The keycode
+     */
     public void removeSaveCloseShortcut(int code) {
         getState().saveShortcuts.remove(code);
     }
 
-    public void clearSaveCloseShortcut(int code) {
+    /**
+     * Remove all extra Editor save shortcuts
+     */
+    public void clearSaveCloseShortcuts() {
         getState().saveShortcuts.clear();
     }
 
@@ -631,6 +672,13 @@ public class FastNavigation<T> extends AbstractExtension {
         getState().hasClickOutListener = true;
     }
 
+    /**
+     * Get the current OffsetHelper
+     * 
+     * @see FastNavigation#setOffsetHelper(OffsetHelper)
+     * 
+     * @return OffsetHelper 
+     */
 	public OffsetHelper getOffsetHelper() {
 		return this.offsetHelper;
 	}

@@ -4,6 +4,13 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.components.grid.MultiSelectionModel;
 
+/**
+ * EditorCloseEvent is emitted when Editor is closed
+ * 
+ * @see org.vaadin.patrik.FastNavigation#addEditorCloseListener(org.vaadin.patrik.FastNavigation.EditorCloseListener)
+ *
+ * @param <T> Bean type of the Grid where {@link org.vaadin.patrik.FastNavigation} is being used
+ */
 @SuppressWarnings("serial")
 public class EditorCloseEvent<T>  extends Component.Event {
 

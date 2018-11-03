@@ -3,6 +3,15 @@ package org.vaadin.patrik.events;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 
+/**
+ * CellFocusEvent is emitted when focused cell is changed in the Grid
+ *  
+ * @see org.vaadin.patrik.FastNavigation#addCellFocusListener(org.vaadin.patrik.FastNavigation.CellFocusListener)
+ * @see org.vaadin.patrik.FastNavigation#setFocusedCell(int, int)
+ * @see org.vaadin.patrik.FastNavigation#setFocusedCell(int, int, boolean)
+ *
+ * @param <T> Bean type of the Grid where {@link org.vaadin.patrik.FastNavigation} is being used
+ */
 @SuppressWarnings("serial")
 public class CellFocusEvent<T> extends Component.Event {
 
