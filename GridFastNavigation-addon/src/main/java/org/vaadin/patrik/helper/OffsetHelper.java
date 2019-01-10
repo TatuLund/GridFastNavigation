@@ -4,10 +4,12 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.components.grid.GridSelectionModel;
 import com.vaadin.ui.components.grid.MultiSelectionModel;
 
+import java.io.Serializable;
+
 /**
  * Helps in calculation the offset for the columns in an EditorOpenEvent.
  */
-public class OffsetHelper {
+public class OffsetHelper implements Serializable {
 
 	/**
 	 * Calculates offset needed e.g. in multiselect mode it needs to be 1. Override this
