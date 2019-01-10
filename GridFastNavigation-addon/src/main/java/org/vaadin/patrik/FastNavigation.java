@@ -121,6 +121,8 @@ public class FastNavigation<T> extends AbstractExtension {
     /**
      * ClickOutListener is used for observing {@link ClickOutEvent} which is simulated blur event, and emitted when user clicks outside of the Grid
      * 
+     * @since 2.1.8
+     * 
      * @see ClickOutEvent
      * @see FastNavigation#addClickOutListener(ClickOutListener)
      */
@@ -295,6 +297,8 @@ public class FastNavigation<T> extends AbstractExtension {
      * Note: This method works correctly only after Grid has been fully rendered, since
      * otherwise target cell might not be in the DOM yet.
      * 
+     * @since 2.3.4
+     * 
      * @param row Target row
      * @param col Target column
      * @throws IllegalArgumentException if row or column is not in acceptable range
@@ -306,6 +310,8 @@ public class FastNavigation<T> extends AbstractExtension {
     /**
      * Set focused cell programmatically and scrolls Grid to target if focus was changed.
      * The method attempts to wait until Gird is rendered if wait is set to true.
+     * 
+     * @since 2.4.0
      * 
      * @param row Target row
      * @param col Target column
@@ -367,6 +373,8 @@ public class FastNavigation<T> extends AbstractExtension {
      * whole row, and closing of editor is not possible if the validation error indicator is on.
      * Also FastNavigation will not jump to first error column.
      * 
+     * @since 2.2.2
+     * 
      * @param enable Boolean value
      */
     public void setRowValidation(boolean enable) {
@@ -374,6 +382,9 @@ public class FastNavigation<T> extends AbstractExtension {
     }
 
     /**
+     * Get status of row validation
+     * 
+     * @since 2.2.2
      * 
      * @return true if row validation mode is set on
      */
@@ -439,6 +450,8 @@ public class FastNavigation<T> extends AbstractExtension {
      * If set to true (=default), home and end keys are used
      * to move to first and last row, and shifted home and end
      * to corners of the Grid.
+     * 
+     * @since 2.3.4
      * 
      * @param enable Boolean value
      */
@@ -556,6 +569,8 @@ public class FastNavigation<T> extends AbstractExtension {
     /**
      * Turn on saving by CTRL+S key combination
      * 
+     * @since 2.2.11
+     * 
      * @param enable Boolean value, true = CTRL+S saving enabled
      */
     public void setSaveWithCtrlS(boolean enable) {
@@ -662,6 +677,8 @@ public class FastNavigation<T> extends AbstractExtension {
      * Register click out listener, which is emitted when user clicks outside the
      * grid. This is not true blur event, since it is triggered by mouse only 
      * 
+     * @since 2.1.8
+     * 
      * @see ClickOutEvent
      * 
      * @param listener a ClickOutListener instance
@@ -675,6 +692,8 @@ public class FastNavigation<T> extends AbstractExtension {
     /**
      * Get the current OffsetHelper
      * 
+     * @since 2.3.10
+     * 
      * @see FastNavigation#setOffsetHelper(OffsetHelper)
      * 
      * @return OffsetHelper 
@@ -685,6 +704,8 @@ public class FastNavigation<T> extends AbstractExtension {
 
 	/**
 	 * Use {@link OffsetHelper} to overwrite the calculation for internal offset of columns. 
+	 * 
+	 * @since 2.3.10
 	 * 
 	 * @param offsetHelper OffsetHelper instance to be used instead of the default implementation
 	 */

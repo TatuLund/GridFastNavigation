@@ -62,6 +62,8 @@ public class EditorOpenEvent<T> extends Component.Event {
     /**
      * Set all columns disabled. Can be used for example if you want to conditionally
      * disable editing of a row.
+     * 
+     * @since 2.3.2
      */
     public void disableAllColumns() {
     	List<Integer> disabled = new ArrayList<>();

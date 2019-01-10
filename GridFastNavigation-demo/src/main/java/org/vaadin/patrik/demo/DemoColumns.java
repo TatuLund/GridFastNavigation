@@ -30,7 +30,7 @@ public class DemoColumns
         col7  = new Date();
         col8 = new Date();
         col9 = false;
-        col10 = "Medium";
+        col10 = "medium";
 
         row++;
 	}

@@ -68,6 +68,8 @@ public class CellFocusEvent<T> extends Component.Event {
     /**
      * Get item which where focus is from underlying datasource
      * 
+     * @since 2.1.5
+     * 
      * @return item where focus is, null if focus in Header/Footer 
      */
 	public T getItem() {

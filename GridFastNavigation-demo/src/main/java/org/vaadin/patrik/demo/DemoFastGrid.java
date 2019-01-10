@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.vaadin.grid.cellrenderers.action.DeleteButtonRenderer;
 import org.vaadin.patrik.FastNavigation;
@@ -170,10 +171,14 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		CheckBox col9 = new CheckBox();
 		col9.setDescription("Selecting this will disable Col6");
 		ComboBox<String> col10 = new ComboBox<>();
-		String[] options =
-		{ "Soft", "Medium", "Hard" };
-
-		col10.setDataProvider(new ListDataProvider<String>(Arrays.asList(options)));
+        List<String> items = new ArrayList<>(Arrays.asList("small", "medium", "large"));
+        col10.setNewItemProvider(value -> {
+            items.add(value);
+            return Optional.ofNullable(value);
+        });
+        col10.setEmptySelectionCaption("unsized");
+        
+		col10.setDataProvider(new ListDataProvider<String>(items));
 
 		Binder<DemoColumns> binder = this.getEditor().getBinder();
 
@@ -181,7 +186,8 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		Binding<DemoColumns, String> col1Binding = binder.forField(col1).asRequired("Empty value not accepted").bind(DemoColumns::getCol1,
 				DemoColumns::setCol1);
 		this.addColumn(DemoColumns::getCol1).setCaption("Col1").setExpandRatio(1).setEditorBinding(col1Binding);
-
+		col1Binding.setReadOnly(true);
+		
 		// Col2 non-editable string
 		this.addColumn(DemoColumns::getCol2).setCaption("No Edits").setWidth(150);
 
@@ -202,7 +208,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 				.withConverter(new StringToIntegerConverter("Must enter a number")).withValidator(new IntegerRangeValidator("Input integer between 0 and 10",0,10))
 				.bind(DemoColumns::getCol5, DemoColumns::setCol5);
 		this.addColumn(DemoColumns::getCol5).setCaption("Integer (2)").setWidth(100).setEditorBinding(col5Binding);
-
+		
 		// Col6 Integer(3)
 		Binding<DemoColumns, Integer> col6Binding = binder.forField(col6).withNullRepresentation("")
 				.withConverter(new StringToIntegerConverter("Must enter a number")).withValidator(new IntegerRangeValidator("Input integer between 0 and 10",0,10))
@@ -245,12 +251,12 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			demoList.add(new DemoColumns());
 		}
 		demoData.refreshAll();
-		this.setSelectionMode(SelectionMode.NONE);
 		this.addItemClickListener(event -> {
 			System.out.println("Item click event happens: "+event.getItem().toString());			
 		});
 		this.setSizeFull();
-		nav.setFocusedCell(2, 2, true);
+//		nav.setFocusedCell(2, 2, true);
+		this.select(demoList.get(2));
 	}
 
 	// Add a blank row to the grid and tell the grid to refresh itself showing

@@ -33,6 +33,8 @@ public class RowEditEvent<T> extends Component.Event {
     /**
      * Get item which was edited from underlying datasource
      * 
+     * @since 2.1.4
+     * 
      * @return Item which is edited
      */
 	public T getItem() {

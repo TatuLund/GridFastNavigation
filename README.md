@@ -63,6 +63,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.4.1
+- Made OffsetHelper serializable, to address issue #86
+- Fixed JavaDocs
+
 ### Version 2.4.0
 - Added support for NativeSelect, ColorPicker and TextArea
 - Improved setFocusedCell(..) to address issue #77
