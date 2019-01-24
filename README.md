@@ -21,7 +21,7 @@ https://vaadin.com/directory/component/gridfastnavigation-add-on
 
 JavaDoc can be found online at
 
-https://vaadin.com/api/org.vaadin.patrik/GridFastNavigation/2.3.10/overview-summary.html
+https://vaadin.com/directory/component/gridfastnavigation-add-on/api
 
 ## Building and running demo
 
@@ -62,6 +62,9 @@ Debugging client side code in the GridFastNavigation-demo project:
   - You can access Java-sources and set breakpoints inside Chrome if you enable source maps from inspector settings.
  
 ## Release notes
+
+### Version 2.4.2
+- Fixed bug: In edit events item and row index were not correct or in sync in certain corner cases
 
 ### Version 2.4.1
 - Made OffsetHelper serializable, to address issue #86

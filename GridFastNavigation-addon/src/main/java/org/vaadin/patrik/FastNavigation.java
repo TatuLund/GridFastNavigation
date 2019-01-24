@@ -146,7 +146,9 @@ public class FastNavigation<T> extends AbstractExtension {
     private int lastFocusedRow = 0;
     private int lastFocusedCol = 0;
     private T editedItem = null;
+    private int editedRow = -1;
     private T previousEditedItem = null;
+    private int previousEditedRow = -1;
 
     /**
      * Default constructor. Enter key changes the row.
@@ -196,16 +198,30 @@ public class FastNavigation<T> extends AbstractExtension {
         	}
         	
         	@Override
-            public void rowUpdated(int rowIndex) {
-        		T item = previousEditedItem; // getItemAt(rowIndex);
-                rowEditListeners.dispatch(new RowEditEvent<T>(grid, rowIndex, item));
+            public void rowUpdated(int rowIndex, boolean moved) {
+            	T item = null;
+            	int row = rowIndex;
+            	if (!moved) {
+            		item = getItemAt(rowIndex);
+            	} else {
+            		item = previousEditedItem;
+            		row = previousEditedRow;
+            	}
+                rowEditListeners.dispatch(new RowEditEvent<T>(grid, row, item));
             }
 
             @Override
-            public void cellUpdated(int rowIndex, int colIndex, String newData) {
-            	T item = previousEditedItem; // getItemAt(rowIndex);
+            public void cellUpdated(int rowIndex, int colIndex, String newData, boolean moved) {
+            	T item = null;
+            	int row = rowIndex;
+            	if (!moved) {
+            		item = getItemAt(rowIndex);
+            	} else {
+            		item = previousEditedItem;
+            		row = previousEditedRow;
+            	}
             	int offset = offsetHelper.calculateOffset(g);
-                cellEditListeners.dispatch(new CellEditEvent<T>(grid, rowIndex, colIndex - offset, newData, item));
+                cellEditListeners.dispatch(new CellEditEvent<T>(grid, row, colIndex - offset, newData, item));
             }
 
             @Override
@@ -231,7 +247,9 @@ public class FastNavigation<T> extends AbstractExtension {
             	T item = getItemAt(rowIndex);
             	int offset = offsetHelper.calculateOffset(grid);
             	previousEditedItem = editedItem;
+            	previousEditedRow = editedRow;
             	editedItem = item;
+            	editedRow = rowIndex;
                 EditorOpenEvent<T> ev = new EditorOpenEvent<>(grid, rowIndex, colIndex - offset, item);
                 editorOpenListeners.dispatch(ev);
                 // Update disabled columns or readonly fields status if changed dynamically

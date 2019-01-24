@@ -183,12 +183,12 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
             @Override
             public void dataChanged(Grid<Object> grid, Editor<Object> editor,
                     Widget widget, String newContent,
-                    int row, int col) {
+                    int row, int col, boolean moved) {
                 if(getState().hasCellEditListener) {
-                    rpc.cellUpdated(row, col, newContent);
+                    rpc.cellUpdated(row, col, newContent, moved);
                 }
                 if(getState().hasRowEditListener) {
-                    rpc.rowUpdated(row);
+                    rpc.rowUpdated(row, moved);
                 }
             }
 
@@ -205,7 +205,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
             @Override
             public void focusMoved(int currentRow, int currentCol, int lastRow,
                     int lastCol) {
-            	editorManager.notifyIfDataChanged(lastRow, lastCol);
+            	editorManager.notifyIfDataChanged(lastRow, lastCol, lastRow != currentRow);
             	editorManager.saveOldContent(currentCol);
                 if(getState().hasFocusListener) {
                     rpc.focusUpdated(currentRow, currentCol);

@@ -81,7 +81,20 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 				this.getColumn("col6").getEditorBinding().getField().setReadOnly(false);				
 			}
 		});
-
+//		If you want to update Grid item values in Grid and get the updated values
+//		shown Editor needs to be closed and reopened 
+//		nav.addCellEditListener(event -> {
+//			int row = event.getRowIndex();
+//			if (event.getColumnIndex() == 5) {
+//				this.getEditor().save();
+//				this.getEditor().cancel();
+//				DemoColumns item = (DemoColumns) event.getItem();
+//				item.setCol6(item.getCol5()+item.getCol6());
+//				this.getDataProvider().refreshItem(item);
+//				this.getEditor().editRow(row);
+//			}			
+//		});
+		
 		DeleteButtonRenderer<DemoColumns> deleteButton = new DeleteButtonRenderer<DemoColumns>(clickEvent -> {
 			if (this.getEditor().isOpen())
 				this.getEditor().cancel();
@@ -186,7 +199,6 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		Binding<DemoColumns, String> col1Binding = binder.forField(col1).asRequired("Empty value not accepted").bind(DemoColumns::getCol1,
 				DemoColumns::setCol1);
 		this.addColumn(DemoColumns::getCol1).setCaption("Col1").setExpandRatio(1).setEditorBinding(col1Binding);
-		col1Binding.setReadOnly(true);
 		
 		// Col2 non-editable string
 		this.addColumn(DemoColumns::getCol2).setCaption("No Edits").setWidth(150);
@@ -269,6 +281,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			getEditor().cancel();
 		}
 		demoList.add(new DemoColumns());
+		this.recalculateColumnWidths();
 		this.getDataProvider().refreshAll();
 	}
 
