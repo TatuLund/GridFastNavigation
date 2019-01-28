@@ -79,6 +79,13 @@ public final class Keys {
     	return false;
     }
     
+    
+    public static boolean isSpaceKey(int keycode) {
+    	if (keycode == KeyCodes.KEY_SPACE) {
+    		return true;
+    	}
+    	return false;
+    }
 
     /**
      * Test if keycode is one of the alpha numeric keys [0-9a-zA-Z]

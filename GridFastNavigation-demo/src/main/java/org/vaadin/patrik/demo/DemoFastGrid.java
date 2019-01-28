@@ -16,6 +16,7 @@ import org.vaadin.patrik.FastNavigation;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.Binder.Binding;
+import com.vaadin.data.ValueProvider;
 import com.vaadin.data.converter.LocalDateTimeToDateConverter;
 import com.vaadin.data.converter.LocalDateToDateConverter;
 import com.vaadin.data.converter.StringToFloatConverter;
@@ -25,6 +26,7 @@ import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.datefield.DateTimeResolution;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
@@ -60,7 +62,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		this.getEditor().setBuffered(false);
 
 		bindColumnsToEditor();
-		
+	
 	}
 
 	private void initNavigation() {
@@ -157,18 +159,6 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		});
 	}
 
-	private void addDemoRow() {
-		// its an unbuffered editor so canceling doesn't lose data just
-		// closes the
-		// editor.
-		if (this.getEditor().isOpen())
-			this.getEditor().cancel();
-
-		DemoColumns part = new DemoColumns();
-		demoList.add(part);
-		this.getDataProvider().refreshAll();
-	}
-
 	/**
 	 * We bind each column to a field (shared by all rows) so that we can edit
 	 * each cell.
@@ -258,7 +248,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		Binding<DemoColumns, String> col11Binding = binder.forField(col10).bind(DemoColumns::getCol10,
 				DemoColumns::setCol10);
 		this.addColumn(DemoColumns::getCol10).setCaption("Combobox").setWidth(150).setEditorBinding(col11Binding);
-		
+
 		for (int i = 0; i < 5; ++i) {
 			demoList.add(new DemoColumns());
 		}
@@ -278,7 +268,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		// the
 		// editor.
 		if (getEditor().isOpen()) {
-			getEditor().cancel();
+			this.getEditor().cancel();
 		}
 		demoList.add(new DemoColumns());
 		this.recalculateColumnWidths();

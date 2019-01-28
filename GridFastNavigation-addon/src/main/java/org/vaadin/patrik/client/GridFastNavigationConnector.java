@@ -1,7 +1,5 @@
 package org.vaadin.patrik.client;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.vaadin.patrik.FastNavigation;
@@ -22,20 +20,12 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.ComponentConnector;
-import com.vaadin.client.ConnectorMap;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.annotations.OnStateChange;
 import com.vaadin.client.extensions.AbstractExtensionConnector;
-import com.vaadin.client.widget.grid.EditorHandler;
-import com.vaadin.client.widget.grid.EditorHandler.EditorRequest;
 import com.vaadin.client.widgets.Grid;
-import com.vaadin.client.widgets.Grid.Column;
 import com.vaadin.client.widgets.Grid.Editor;
 import com.vaadin.shared.ui.Connect;
-import com.vaadin.shared.ui.grid.editor.EditorClientRpc;
-import com.vaadin.shared.ui.grid.editor.EditorServerRpc;
-
-import elemental.json.JsonObject;
 
 @SuppressWarnings("serial")
 @Connect(FastNavigation.class)
@@ -158,6 +148,11 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
 								GridViolators.setFocusedCell(grid,row,col);		
 							}
 						});
+					}
+
+					@Override
+					public void closeEditor() {
+						editorManager.closeEditor(true);
 					}                    
                 });
 

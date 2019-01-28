@@ -63,6 +63,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.4.3
+- Added feature: shift+space will select / deselect the row when editor is open, see issue #90
+
 ### Version 2.4.2
 - Fixed bug: In edit events item and row index were not correct or in sync in certain corner cases
 

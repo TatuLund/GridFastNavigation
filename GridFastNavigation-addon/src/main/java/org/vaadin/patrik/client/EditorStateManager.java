@@ -158,7 +158,19 @@ public class EditorStateManager {
                 int targetCol = currentCol;
                 int targetRow = currentRow;
             	int validationError = hasValidationError();
-                
+
+            	
+               	if (Keys.isSpaceKey(key) && shift) {
+               		Object item = grid.getDataSource().getRow(currentRow);
+               		if (grid.isSelected(item)) {
+               			grid.deselect(item);
+               		} else {
+               			grid.select(item);               			
+               		}
+                   	event.getDomEvent().preventDefault();                    
+            		return false;
+               	}               	
+            	
                 if (Keys.isColumnChangeKey(key)) {
                 	saveContent();
 
@@ -274,14 +286,11 @@ public class EditorStateManager {
                		// just the one being edited, this is ugly and not perfect workaround to that.  
                		List<Column<?, Object>> errorColumns = getErrorColumns();
                		if (errorColumns.size() > 0) {
-               			Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
-               				@Override
-               				public boolean execute() {
-               					DivElement message = GridViolators.getEditorErrorMessage(grid);
-               					grid.getEditor().setEditorError(message.getInnerText(), errorColumns);
-               					setErrorColumns(errorColumns);
-               					return false;
-               				}
+               			Scheduler.get().scheduleFixedDelay(() -> {
+             				DivElement message = GridViolators.getEditorErrorMessage(grid);
+               				grid.getEditor().setEditorError(message.getInnerText(), errorColumns);
+               				setErrorColumns(errorColumns);
+               				return false;
                			}, 500); // 500ms is experimentally found value, to ensure we put errors back after callback
                		}
                	}
@@ -334,8 +343,6 @@ public class EditorStateManager {
                 } else {
                 	closeEditor(true);
                 }
-                // Ensure modality curtain is removed. If ESC was hold when Editor opened, it was probably closed too fast
-                unlock();
             }
             
             return close;
@@ -455,34 +462,31 @@ public class EditorStateManager {
 
 	public void addClickOutListener() {
 		if (!clickOutListenerAdded) {
-			Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-				@Override
-				public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-					EventTarget eventTarget = event.getNativeEvent().getEventTarget();
-					if (Element.is(eventTarget) && VOverlay.getOverlayContainer(gridFastNavigationConnector.getConnection()).isOrHasChild(eventTarget.cast())) {
-						return;
-					}
-					if ((event.getTypeInt() == Event.ONMOUSEDOWN)) {
-						int x1 = grid.getAbsoluteLeft();
-						int y1 = grid.getAbsoluteTop();
-						int y2 = y1 + grid.getOffsetHeight();
-						int x2 = x1 + grid.getOffsetWidth();                    
-						Event nativeEvent = Event.as(event.getNativeEvent());
-						int ex = nativeEvent.getClientX();
-						int ey = nativeEvent.getClientY();
-						if (!((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
-							if (state.dispatchEditEventOnBlur && isEditorOpen() && (hasValidationError() == -1)) {
-								saveContent();
-								Element focusedElement = WidgetUtil.getFocusedElement();
-								Widget editorWidget = getCurrentEditorWidget();
-								if (editorWidget.getElement().isOrHasChild(focusedElement)) {
-									focusedElement.blur();
-									focusedElement.focus();
-								}
-								closeEditor(false);
+			Event.addNativePreviewHandler(event -> {
+				EventTarget eventTarget = event.getNativeEvent().getEventTarget();
+				if (Element.is(eventTarget) && VOverlay.getOverlayContainer(gridFastNavigationConnector.getConnection()).isOrHasChild(eventTarget.cast())) {
+					return;
+				}
+				if ((event.getTypeInt() == Event.ONMOUSEDOWN)) {
+					int x1 = grid.getAbsoluteLeft();
+					int y1 = grid.getAbsoluteTop();
+					int y2 = y1 + grid.getOffsetHeight();
+					int x2 = x1 + grid.getOffsetWidth();                    
+					Event nativeEvent = Event.as(event.getNativeEvent());
+					int ex = nativeEvent.getClientX();
+					int ey = nativeEvent.getClientY();
+					if (!((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
+						if (state.dispatchEditEventOnBlur && isEditorOpen() && (hasValidationError() == -1)) {
+							saveContent();
+							Element focusedElement = WidgetUtil.getFocusedElement();
+							Widget editorWidget = getCurrentEditorWidget();
+							if (editorWidget.getElement().isOrHasChild(focusedElement)) {
+								focusedElement.blur();
+								focusedElement.focus();
 							}
-							notifyClickOut();
+							closeEditor(false);
 						}
+						notifyClickOut();
 					}
 				}
 			});
@@ -502,7 +506,7 @@ public class EditorStateManager {
     }
 
     // Remove the input-blocking curtain
-    private void unlock() {
+    void unlock() {
         try {
             grid.getElement().removeChild(curtain);
         } catch (Exception ignore) {
@@ -959,6 +963,8 @@ public class EditorStateManager {
 
         notifyEditorClosed(row, col, cancel);
         FocusUtil.setFocus(grid, true);
+        // Ensure modality curtain is removed. If ESC was hold when Editor opened, it was probably closed too fast
+        unlock();
     }
 
     //
