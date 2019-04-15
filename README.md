@@ -63,6 +63,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.4.4
+- Fixed CellFocusEvent#wasRowChanged() and CellFocusEvent#wasColumnChanged() to work correctly 
+
 ### Version 2.4.3
 - Added feature: shift+space will select / deselect the row when editor is open, see issue #90
 

@@ -234,8 +234,8 @@ public class FastNavigation<T> extends AbstractExtension {
 
                 if (hasCellFocusListener && (rowIndex != lastFocusedRow || colIndex != lastFocusedCol)) {
                     cellFocusListeners.dispatch(new CellFocusEvent<T>(grid, rowIndex, colIndex - offset,
-                            lastFocusedRow == rowIndex,
-                            lastFocusedCol == colIndex - offset, item));
+                            lastFocusedRow != rowIndex,
+                            lastFocusedCol != colIndex - offset, item));
                 }
                 
                 lastFocusedRow = rowIndex;

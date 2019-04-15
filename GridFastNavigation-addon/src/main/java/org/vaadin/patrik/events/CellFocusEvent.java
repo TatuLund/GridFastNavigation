@@ -26,6 +26,8 @@ public class CellFocusEvent<T> extends Component.Event {
         this.row = row;
         this.col = col;
         this.item = item;
+        this.rowChanged = rowChanged;
+        this.colChanged = colChanged;
         Grid<T> grid = (Grid<T>) source;
     }
 

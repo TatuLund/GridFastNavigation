@@ -133,7 +133,13 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addCellFocusListener(event -> {
 			int row = event.getRow();
 			int col = event.getColumnIndex();
-			messageLog.writeOutput("Focus moved to cell [" + row + ", " + col + " ]");
+			messageLog.writeOutput("Focus moved to cell [" + row + ", " + col + " ]");			
+			if (event.wasRowChanged() && this.getEditor().isOpen()) {
+				this.getEditor().cancel();
+				messageLog.writeOutput("Row was changed");
+				nav.setFocusedCell(row, 1);
+				this.getEditor().editRow(row);
+			}
 		});
 		messageLog.writeOutput("Added cell focus change listener");
 
