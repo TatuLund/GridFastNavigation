@@ -59,7 +59,7 @@ public class EditorStateManager {
                 int col, boolean cancel);
 
         void dataChanged(Grid<Object> grid, Editor<Object> editor,
-                Widget widget, String newContent, int row,
+                Widget widget, String newContent, String oldContent, int row,
                 int col, boolean moved);
 
         void clickOut(Grid<Object> grid);
@@ -734,11 +734,11 @@ public class EditorStateManager {
         }
     }
 
-    private void notifyDataChanged(String newContent,
+    private void notifyDataChanged(String newContent, String oldContent,
             int row, int col, boolean moved) {
         for (EditorListener l : editorListeners) {
             l.dataChanged(grid, editor, getCurrentEditorWidget(),
-                    newContent, row, col, moved);
+                    newContent, oldContent, row, col, moved);
         }
     }
 
@@ -899,7 +899,7 @@ public class EditorStateManager {
     public void notifyIfDataChanged(int row, int col, boolean moved) {
     	if (isEditorOpen()) {
     		if ((oldContent != null) && !oldContent.equals(newContent)) {
-    			notifyDataChanged(newContent,row,col, moved);
+    			notifyDataChanged(newContent,oldContent,row,col, moved);
     		}
     	}
     }
@@ -956,7 +956,7 @@ public class EditorStateManager {
        		resetContent();
         } else {
             if ((oldContent != null) && !oldContent.equals(newContent)) {
-            	notifyDataChanged(newContent,row,col,false);
+            	notifyDataChanged(newContent,oldContent,row,col,false);
             }
             editor.cancel();
         }

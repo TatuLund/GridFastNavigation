@@ -211,7 +211,7 @@ public class FastNavigation<T> extends AbstractExtension {
             }
 
             @Override
-            public void cellUpdated(int rowIndex, int colIndex, String newData, boolean moved) {
+            public void cellUpdated(int rowIndex, int colIndex, String newData, String oldData, boolean moved) {
             	T item = null;
             	int row = rowIndex;
             	if (!moved) {
@@ -221,7 +221,7 @@ public class FastNavigation<T> extends AbstractExtension {
             		row = previousEditedRow;
             	}
             	int offset = offsetHelper.calculateOffset(g);
-                cellEditListeners.dispatch(new CellEditEvent<T>(grid, row, colIndex - offset, newData, item));
+                cellEditListeners.dispatch(new CellEditEvent<T>(grid, row, colIndex - offset, newData, oldData, item));
             }
 
             @Override

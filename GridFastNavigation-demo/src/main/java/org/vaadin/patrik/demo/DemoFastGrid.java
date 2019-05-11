@@ -83,7 +83,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 				this.getColumn("col6").getEditorBinding().getField().setReadOnly(false);				
 			}
 		});
-//		If you want to update Grid item values in Grid and get the updated values
+//		If you want to update Grid item values programmatically in Grid and get the updated values
 //		shown Editor needs to be closed and reopened 
 //		nav.addCellEditListener(event -> {
 //			int row = event.getRowIndex();
@@ -96,6 +96,9 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 //				this.getEditor().editRow(row);
 //			}			
 //		});
+		nav.addCellEditListener(event -> {
+			messageLog.writeOutput("Changed '" + event.getOldData() + "' -> '" + event.getNewData()+ "'");			
+		});
 		
 		DeleteButtonRenderer<DemoColumns> deleteButton = new DeleteButtonRenderer<DemoColumns>(clickEvent -> {
 			if (this.getEditor().isOpen())

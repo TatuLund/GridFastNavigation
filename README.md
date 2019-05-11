@@ -63,6 +63,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.4.5
+- Fixed missing implementation of CellEditEvent#getOldData(), see issue #91
+
 ### Version 2.4.4
 - Fixed CellFocusEvent#wasRowChanged() and CellFocusEvent#wasColumnChanged() to work correctly 
 

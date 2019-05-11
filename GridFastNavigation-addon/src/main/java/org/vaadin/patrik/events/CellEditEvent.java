@@ -20,11 +20,12 @@ public class CellEditEvent<T> extends Component.Event {
     private String newData;
     private T item;
     
-    public CellEditEvent(Component source, Integer rowIndex, Integer colIndex, String newData, T item) {
+    public CellEditEvent(Component source, Integer rowIndex, Integer colIndex, String newData, String oldData, T item) {
         super(source);
         this.rowIndex = rowIndex;
         this.colIndex = colIndex;
         this.newData = newData;
+        this.oldData = oldData;
         this.item = item;
         Grid<T> grid = (Grid<T>) source;
     }

@@ -11,7 +11,7 @@ public interface FastNavigationServerRPC extends ServerRpc {
     
     void rowUpdated(int rowIndex, boolean moved);
 
-    void cellUpdated(int rowIndex, int colIndex, String newData, boolean moved);
+    void cellUpdated(int rowIndex, int colIndex, String newData, String oldData, boolean moved);
     
     void editorOpened(int rowIndex, int colIndex, int lockId);
     
