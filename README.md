@@ -9,6 +9,8 @@ GridFastNavigation is a compnent extension for Vaadin Grid, which uses the
 unbuffered editing mode and alters its keyboard controls to provide a faster
 editing experience.
 
+## Forked by Alexander Guril
+
 ## Online demo
 [Todo](...)
 
