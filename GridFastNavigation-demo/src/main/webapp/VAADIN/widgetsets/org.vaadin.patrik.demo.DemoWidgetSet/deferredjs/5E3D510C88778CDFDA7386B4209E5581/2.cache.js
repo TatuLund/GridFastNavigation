@@ -1,0 +1,1 @@
+$wnd.org_vaadin_patrik_demo_DemoWidgetSet.runAsyncCallback2('Fnb(2038,1,JFe);_._b=function SGc(){Dhc((!vhc&&(vhc=new Lhc),vhc),this.a.d)};nze(Eh)(2);\n//# sourceURL=org.vaadin.patrik.demo.DemoWidgetSet-2.js\n')
