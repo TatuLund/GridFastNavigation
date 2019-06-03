@@ -370,7 +370,7 @@ public class FastNavigation<T> extends AbstractExtension {
      * @param enable Boolean value
      */
     public void setChangeColumnAfterLastRow(boolean enable) {
-    	if (getState().changeColumnOnEnter) throw new IllegalStateException("Cannot set change column after last row if enter is set to change column");
+    	//if (getState().changeColumnOnEnter) throw new IllegalStateException("Cannot set change column after last row if enter is set to change column");
         getState().changeColumnAfterLastRow = enable;
     }
 
