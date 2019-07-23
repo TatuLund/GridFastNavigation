@@ -99,6 +99,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addCellEditListener(event -> {
 			messageLog.writeOutput("Changed '" + event.getOldData() + "' -> '" + event.getNewData()+ "'");			
 		});
+		nav.enableEditorSelecedStyle(true);
 		
 		DeleteButtonRenderer<DemoColumns> deleteButton = new DeleteButtonRenderer<DemoColumns>(clickEvent -> {
 			if (this.getEditor().isOpen())

@@ -407,6 +407,7 @@ public class EditorStateManager {
 	private boolean homeEndEnabled = true;
 	private FastNavigationState state;
 	private GridFastNavigationConnector gridFastNavigationConnector;
+	private boolean enableSelectedStyle;
 	
     @SuppressWarnings("unchecked")
     public EditorStateManager(Grid<?> g, FastNavigationState state) {
@@ -920,7 +921,7 @@ public class EditorStateManager {
                 gridFastNavigationConnector.requestValidate(true);
             }
         };
-            	
+        
     	if (!editor.isEnabled()) return;
         if (GridViolators.isEditorReallyClosed(editor)) {
             editor.editRow(row,col);
@@ -939,6 +940,13 @@ public class EditorStateManager {
                 waitForEditorReady();
                 // No need to trigger event if editor just moved to other column
             }
+        }
+        if (enableSelectedStyle) {
+        	if (grid.isSelected(grid.getDataSource().getRow(row))) {
+        		GridViolators.getEditorCellWrapper(grid).addClassName("v-grid-editor-selected");
+        	} else {
+        		GridViolators.getEditorCellWrapper(grid).removeClassName("v-grid-editor-selected");        	
+        	}
         }
         // Trigger deferred row validation due timing issue 
         if (validate && rowValidation) AnimationScheduler.get().requestAnimationFrame(validateCallback);
@@ -1064,6 +1072,10 @@ public class EditorStateManager {
 
 	public void setHomeEndEnabled(boolean homeEndEnabled) {
 		this.homeEndEnabled = homeEndEnabled;		
+	}
+
+	public void enableSelectedStyle(boolean enableSelectedStyle) {
+		this.enableSelectedStyle = enableSelectedStyle;		
 	}
 
 }

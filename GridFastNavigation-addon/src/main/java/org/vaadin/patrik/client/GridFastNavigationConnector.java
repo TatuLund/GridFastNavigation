@@ -257,6 +257,11 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         editorManager.setOpenEditorByTyping(getState().openEditorOnType);
     }
 
+    @OnStateChange("enableSelectedStyle")
+    void updateEditorSelectedStyleName() {
+    	editorManager.enableSelectedStyle(getState().enableSelectedStyle);
+    }
+    
     @OnStateChange("selectTextOnEditorOpen")
     void updateSelectAll() {
         editorManager.setSelectTextOnFocus(getState().selectTextOnEditorOpen);

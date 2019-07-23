@@ -26,6 +26,12 @@ $v-grid-header-background-color: #20a020;
    			color: black !important;
    			background: yellow !important;
    	 	}
+		.v-grid-editor-selected {
+			div {
+   				color: black !important;
+				background: yellow !important;
+			}
+		}
    	}
    
    	.row-edit-disabled > td {
@@ -37,7 +43,7 @@ $v-grid-header-background-color: #20a020;
 		color: white;
 		font-weight: bold;
 	}
-	
+		
 	// You can also customize your component for the demo
 	// app, but remember that these styles are not part of
 	// the component. To include built-in CSS for your component,

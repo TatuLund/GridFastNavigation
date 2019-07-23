@@ -32,7 +32,6 @@ public class DemoUI extends UI {
 	@Override
 	protected void init(VaadinRequest vaadinRequest) {
 		final VerticalLayout layout = new VerticalLayout();
-
 		layout.setSizeFull();
 		
 		MessageGrid messageGrid = new MessageGrid();

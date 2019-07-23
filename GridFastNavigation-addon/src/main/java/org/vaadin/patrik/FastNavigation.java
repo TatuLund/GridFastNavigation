@@ -227,19 +227,20 @@ public class FastNavigation<T> extends AbstractExtension {
             @Override
             public void focusUpdated(int rowIndex, int colIndex) {
             	T item = getItemAt(rowIndex);
-            	int offset = offsetHelper.calculateOffset(g);
+            	int offset = offsetHelper.calculateOffset(g); 
+            	colIndex = colIndex - offset; // apply offset based on selection mode
                 if (hasRowFocusListener && rowIndex != lastFocusedRow) {
                     rowFocusListeners.dispatch(new RowFocusEvent<T>(grid, rowIndex, item));
                 }
 
                 if (hasCellFocusListener && (rowIndex != lastFocusedRow || colIndex != lastFocusedCol)) {
-                    cellFocusListeners.dispatch(new CellFocusEvent<T>(grid, rowIndex, colIndex - offset,
+                    cellFocusListeners.dispatch(new CellFocusEvent<T>(grid, rowIndex, colIndex,
                             lastFocusedRow != rowIndex,
-                            lastFocusedCol != colIndex - offset, item));
+                            lastFocusedCol != colIndex, item));
                 }
                 
                 lastFocusedRow = rowIndex;
-                lastFocusedCol = colIndex - offset;
+                lastFocusedCol = colIndex;
             }
 
             @Override
@@ -323,6 +324,21 @@ public class FastNavigation<T> extends AbstractExtension {
      */
     public void setFocusedCell(int row, int col) {
     	setFocusedCell(row,col,false);
+    }
+    
+    
+    /**
+     * If enabled Editor on the row that has been selected will be augmented with
+     * v-grid-editor-selected class name for additional styling.
+     *
+     * Note: This feature has been added to Vaadin 8.9 and no need to use with it
+     *
+     * @since 2.4.6
+     *
+     * @param enabled If true, then editor on selected row will have -selected style
+     */
+    public void enableEditorSelecedStyle(boolean enabled) {
+    	getState().enableSelectedStyle = enabled;
     }
     
     /**
