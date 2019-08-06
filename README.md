@@ -63,6 +63,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.4.7
+- Fixed editor cell resizing logic to work also with multiselect mode.
+
 ### Version 2.4.6
 - Added option to enable selected style in Editor on selected row
 - Fixed bug in cell focus event not triggered when moving left in multiselect Grid, fixes issue #95
