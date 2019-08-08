@@ -513,11 +513,21 @@ public class EditorWidgets {
         // TODO: support more widget types!
     }
 
-    private static <T> WidgetHandler<?> getHandler(Class<T> cls) {
-        if (widgetHandlers.containsKey(cls)) {
-            return widgetHandlers.get(cls);
+    private static <T> WidgetHandler<?> getHandler(Class<?> widgetClass) {
+        if (widgetHandlers.containsKey(widgetClass)) {
+            return widgetHandlers.get(widgetClass);
         } else {
-            logger.warning("Unhandled widget type " + cls.getSimpleName());
+        	for (Class<?> key : widgetHandlers.keySet()) {
+        		// Note: GWT does not support isAssignableFrom
+        		Class<?> cls = widgetClass;
+        		while (cls.getSuperclass() != null) {
+        			if (cls.getSuperclass() == key) {
+        	            return widgetHandlers.get(key);
+        			}
+        			cls = cls.getSuperclass();
+        		}
+        	}
+            logger.warning("Unhandled widget type " + widgetClass.getSimpleName());
         }
         return null;
     }

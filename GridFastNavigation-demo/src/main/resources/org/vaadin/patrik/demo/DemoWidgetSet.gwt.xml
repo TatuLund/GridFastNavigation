@@ -12,4 +12,8 @@
     <inherits name="org.vaadin.grid.cellrenderers.RenderersCollectionWidgetSet" />
 
     <inherits name="org.vaadin.patrik.GridFastNavigationWidgetSet" />
+
+    <inherits name="org.vaadin.ui.NumberFieldWidgetset" />
+
+    <inherits name="org.vaadin.prefixcombobox.WidgetSet" />
 </module>

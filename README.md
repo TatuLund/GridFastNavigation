@@ -63,6 +63,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.4.8
+- Add-on also now supports custom editor widgets extending the base set of editors
+
 ### Version 2.4.7
 - Fixed editor cell resizing logic to work also with multiselect mode.
 

@@ -9,7 +9,7 @@ public class DemoColumns
 	private String col1;
 	private String col2;
 	private Integer col3;
-	private Float col4;
+	private Double col4;
 	private Integer col5;
 	private Integer col6;
 	private Date col7; // datetime
@@ -24,7 +24,7 @@ public class DemoColumns
         col1 = "string 1 " + row;
         col2 = "string 2 " + row;
         col3 = rand.nextInt(row + 10);
-        col4 = (float)rand.nextInt(row + 10);
+        col4 = (double)rand.nextInt(row + 10);
         col5 = rand.nextInt(row + 10);
         col6 = rand.nextInt(row + 10);
         col7  = new Date();
@@ -60,11 +60,11 @@ public class DemoColumns
 	{
 		this.col3 = col3;
 	}
-	public Float getCol4()
+	public Double getCol4()
 	{
 		return col4;
 	}
-	public void setCol4(Float col4)
+	public void setCol4(Double col4)
 	{
 		this.col4 = col4;
 	}

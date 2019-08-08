@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.patrik</groupId>
 	<artifactId>GridFastNavigation-demo</artifactId>
 	<packaging>war</packaging>
-	<version>2.4.7</version>
+	<version>2.4.8</version>
 	<name>GridFastNavigation Add-on Demo</name>
 
 	<properties>
@@ -94,6 +94,16 @@
 			<groupId>com.vaadin</groupId>
 			<artifactId>grid-renderers-collection-addon</artifactId>
 			<version>2.2.10</version>
+		</dependency>
+		<dependency>
+   			<groupId>org.vaadin.ui</groupId>
+   			<artifactId>numberfield</artifactId>
+   			<version>0.2.0</version>
+		</dependency>
+		<dependency>
+   			<groupId>org.vaadin</groupId>
+   			<artifactId>prefixcombobox</artifactId>
+   			<version>1.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>

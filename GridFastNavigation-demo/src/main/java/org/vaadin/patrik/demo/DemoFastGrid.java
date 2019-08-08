@@ -13,6 +13,8 @@ import java.util.Optional;
 
 import org.vaadin.grid.cellrenderers.action.DeleteButtonRenderer;
 import org.vaadin.patrik.FastNavigation;
+import org.vaadin.prefixcombobox.PrefixComboBox;
+import org.vaadin.ui.NumberField;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.Binder.Binding;
@@ -138,12 +140,12 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			int row = event.getRow();
 			int col = event.getColumnIndex();
 			messageLog.writeOutput("Focus moved to cell [" + row + ", " + col + " ]");			
-			if (event.wasRowChanged() && this.getEditor().isOpen()) {
-				this.getEditor().cancel();
-				messageLog.writeOutput("Row was changed");
-				nav.setFocusedCell(row, 1);
-				this.getEditor().editRow(row);
-			}
+//			if (event.wasRowChanged() && this.getEditor().isOpen()) {
+//				this.getEditor().cancel();
+//				messageLog.writeOutput("Row was changed");
+//				nav.setFocusedCell(row, 1);
+//				this.getEditor().editRow(row);
+//			}
 		});
 		messageLog.writeOutput("Added cell focus change listener");
 
@@ -176,14 +178,14 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 	private void bindColumnsToEditor() {
 		TextField col1 = new TextField();
 		TextField col3 = new TextField();
-		TextField col4 = new TextField();
+		NumberField col4 = new NumberField();
 		TextField col5 = new TextField();
 		TextField col6 = new TextField();
 		DateTimeField col7 = new DateTimeField();
 		DateField col8 = new DateField();
 		CheckBox col9 = new CheckBox();
 		col9.setDescription("Selecting this will disable Col6");
-		ComboBox<String> col10 = new ComboBox<>();
+		PrefixComboBox<String> col10 = new PrefixComboBox<>();
         List<String> items = new ArrayList<>(Arrays.asList("small", "medium", "large"));
         col10.setNewItemProvider(value -> {
             items.add(value);
@@ -210,8 +212,9 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		this.addColumn(DemoColumns::getCol3).setCaption("Integer").setWidth(150).setEditorBinding(col3Binding);
 
 		// Col4 Float
-		Binding<DemoColumns, Float> col4Binding = binder.forField(col4).withNullRepresentation("")
-				.withConverter(new StringToFloatConverter("Must enter a number"))
+		Binding<DemoColumns, Double> col4Binding = binder.forField(col4).withNullRepresentation("")
+				.withConverter(col4.getConverter("Must enter a number"))
+//				.withConverter(new StringToFloatConverter("Must enter a number"))
 				.bind(DemoColumns::getCol4, DemoColumns::setCol4);
 		this.addColumn(DemoColumns::getCol4).setCaption("Float").setWidth(100).setEditorBinding(col4Binding);
 
