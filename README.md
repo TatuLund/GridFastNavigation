@@ -63,6 +63,11 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.5.0
+- Fixed typo in method name, fixes issue #97
+- Fixed hidden column compensation logic, fixes issue #96
+- Codebase maintenance
+
 ### Version 2.4.8
 - Add-on also now supports custom editor widgets extending the base set of editors
 

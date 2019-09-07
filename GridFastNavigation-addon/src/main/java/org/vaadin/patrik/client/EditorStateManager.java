@@ -183,7 +183,7 @@ public class EditorStateManager {
                 		// Remember to skip disabled columns, take into account hidden columns
                 		do {
                 			targetCol += colDelta;
-                		} while (disabledColumns.contains(determineRealColumn(targetCol)) && targetCol < columnCount && targetCol > -1);
+                		} while (isDisabledColumn(targetCol) && targetCol < columnCount && targetCol > -1);
                     
                 		// Test if we need to move up
                 		if (targetCol < 0) {
@@ -242,7 +242,7 @@ public class EditorStateManager {
                             // Remember to skip disabled columns
                             do {
                                 targetCol++;
-                            } while (disabledColumns.contains(determineRealColumn(targetCol)) && targetCol < columnCount);
+                            } while (isDisabledColumn(targetCol) && targetCol < columnCount);
                             move = true;
                             // If we were on last column do nothing
                             if (targetCol >= columnCount) {
@@ -420,7 +420,24 @@ public class EditorStateManager {
 
         externalLocks = new RPCLock();
         
-        // Create modality curtain
+        createModalityCurtain();
+
+        grid.addDomHandler(event -> {
+        	if (isBusy()) {
+        		NativeEvent e = event.getNativeEvent();
+                queueKey(e.getKeyCode(), e.getShiftKey());
+                    
+                event.stopPropagation();
+                event.preventDefault();
+            }
+        }, KeyDownEvent.getType());
+
+        if (state.dispatchEditEventOnBlur) addClickOutListener();
+                    
+    }
+
+	private void createModalityCurtain() {
+		// Create modality curtain
         curtain = Document.get().createDivElement();
         curtain.setClassName("v-grid-editor-curtain");
         curtain.getStyle().setBackgroundColor("#777");
@@ -433,50 +450,28 @@ public class EditorStateManager {
         curtain.getStyle().setZIndex(90000);
         
         DOM.sinkEvents(curtain, Event.MOUSEEVENTS | Event.KEYEVENTS | Event.FOCUSEVENTS);
-        DOM.setEventListener(curtain, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-                if ((event.getTypeInt() & Event.ONKEYDOWN) > 0) {
-                    queueKey(event.getKeyCode(), event.getShiftKey());
-                    event.stopPropagation();
-                    event.preventDefault();
-                }
-            }
+        DOM.setEventListener(curtain, event -> {
+        	if ((event.getTypeInt() & Event.ONKEYDOWN) > 0) {
+        		queueKey(event.getKeyCode(), event.getShiftKey());
+                event.stopPropagation();
+                event.preventDefault();
+        	}
         });
-
-        grid.addDomHandler(new KeyDownHandler() {
-            @Override
-            public void onKeyDown(KeyDownEvent event) {
-                if(isBusy()) {
-                    NativeEvent e = event.getNativeEvent();
-                    queueKey(e.getKeyCode(), e.getShiftKey());
-                    
-                    event.stopPropagation();
-                    event.preventDefault();
-                }
-            }
-        }, KeyDownEvent.getType());
-
-        if (state.dispatchEditEventOnBlur) addClickOutListener();
-                    
-    }
+	}
 
 	public void addClickOutListener() {
 		if (!clickOutListenerAdded) {
 			Event.addNativePreviewHandler(event -> {
 				EventTarget eventTarget = event.getNativeEvent().getEventTarget();
 				if (Element.is(eventTarget) && VOverlay.getOverlayContainer(gridFastNavigationConnector.getConnection()).isOrHasChild(eventTarget.cast())) {
+					// If the click happened e.g. in ComboBox popup extending outside Grid we need to skip
 					return;
 				}
 				if ((event.getTypeInt() == Event.ONMOUSEDOWN)) {
-					int x1 = grid.getAbsoluteLeft();
-					int y1 = grid.getAbsoluteTop();
-					int y2 = y1 + grid.getOffsetHeight();
-					int x2 = x1 + grid.getOffsetWidth();                    
 					Event nativeEvent = Event.as(event.getNativeEvent());
 					int ex = nativeEvent.getClientX();
 					int ey = nativeEvent.getClientY();
-					if (!((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
+					if (clickHappenedOutsideGrid(ex, ey)) {
 						if (state.dispatchEditEventOnBlur && isEditorOpen() && (hasValidationError() == -1)) {
 							saveContent();
 							Element focusedElement = WidgetUtil.getFocusedElement();
@@ -493,6 +488,18 @@ public class EditorStateManager {
 			});
 			clickOutListenerAdded = true;
 		}
+	}
+
+	private boolean clickHappenedOutsideGrid(int ex, int ey) {
+		int x1 = grid.getAbsoluteLeft();
+		int y1 = grid.getAbsoluteTop();
+		int y2 = y1 + grid.getOffsetHeight();
+		int x2 = x1 + grid.getOffsetWidth();
+		boolean clickHappenedOutsideGrid = false;
+		if (!((x1 < ex && ex < x2) && (y1 < ey && ey < y2))) {
+			clickHappenedOutsideGrid = true;
+		}
+		return clickHappenedOutsideGrid;
 	}
     
     private boolean isBusy() {
@@ -589,7 +596,7 @@ public class EditorStateManager {
                 
                 // Check required to avoid overwriting disabled editors
                 int currentCol = getFocusedCol();
-                if (!disabledColumns.contains(determineRealColumn(currentCol))) {
+                if (!isDisabledColumn(currentCol)) {
                 
                     // Handle possible value reset of editor widget
                 	saveOldContent();
@@ -619,7 +626,7 @@ public class EditorStateManager {
                     int origCol = currentCol;
                     {
                         // Try going right first
-                        while (disabledColumns.contains(determineRealColumn(currentCol))) {currentCol++;}
+                        while (isDisabledColumn(currentCol)) {currentCol++;}
                         if(currentCol < grid.getVisibleColumns().size()) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
@@ -631,7 +638,7 @@ public class EditorStateManager {
                         currentCol = origCol;
                         
                         // Try going left instead
-                        while(disabledColumns.contains(determineRealColumn(currentCol))) {currentCol--;}
+                        while (isDisabledColumn(currentCol)) {currentCol--;}
                         if(currentCol >= 0) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
@@ -1013,7 +1020,7 @@ public class EditorStateManager {
     }
 
     // Calculate the internal index of the column including the hidden columns
-    private int determineRealColumn(int index) {
+    private int determineInternalColumnIndex(int index) {
     	int columnCount = grid.getColumns().size();
     	int j=0;
     	int i=0;
@@ -1021,11 +1028,11 @@ public class EditorStateManager {
     		while (grid.getColumn(i).isHidden()) i++;
     		return i;
     	} 
-    	while (i<index && j<columnCount) {
+    	while (i<index && j<(columnCount-1)) {
     		if (!grid.getColumn(j).isHidden()) {
     			i++;
     		}
-    		j++;
+            j++;
     	}
     	return j;
     }
@@ -1036,7 +1043,7 @@ public class EditorStateManager {
     
     private Widget getEditorWidgetForColumn(int index, boolean compensate) {
     	int i = 0;
-    	if (compensate) i = determineRealColumn(index);
+    	if (compensate) i = determineInternalColumnIndex(index);
     	else i = index;
         Column<?, Object> column = grid.getColumn(i);
         Map<Column<?, ?>, Widget> editorColumnToWidgetMap = GridViolators
@@ -1078,4 +1085,14 @@ public class EditorStateManager {
 		this.enableSelectedStyle = enableSelectedStyle;		
 	}
 
+    private boolean isDisabledColumn(int targetCol) {
+    	int internalColumn = determineInternalColumnIndex(targetCol);        	
+    	if (!grid.getColumns().get(internalColumn).isHidden()) {
+    		return disabledColumns.contains(internalColumn);
+    	} else {
+    		// if column is hidden check is skipped
+    		return false;
+    	}
+    }
+    
 }

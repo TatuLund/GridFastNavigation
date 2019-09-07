@@ -101,7 +101,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addCellEditListener(event -> {
 			messageLog.writeOutput("Changed '" + event.getOldData() + "' -> '" + event.getNewData()+ "'");			
 		});
-		nav.enableEditorSelecedStyle(true);
+		nav.enableEditorSelectedStyle(true);
 		
 		DeleteButtonRenderer<DemoColumns> deleteButton = new DeleteButtonRenderer<DemoColumns>(clickEvent -> {
 			if (this.getEditor().isOpen())
@@ -203,7 +203,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		this.addColumn(DemoColumns::getCol1).setCaption("Col1").setExpandRatio(1).setEditorBinding(col1Binding);
 		
 		// Col2 non-editable string
-		this.addColumn(DemoColumns::getCol2).setCaption("No Edits").setWidth(150);
+		this.addColumn(DemoColumns::getCol2).setCaption("No Edits").setHidable(true).setWidth(150);
 
 		// Col3 Integer
 		Binding<DemoColumns, Integer> col3Binding = binder.forField(col3).withNullRepresentation("")

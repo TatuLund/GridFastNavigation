@@ -337,7 +337,7 @@ public class FastNavigation<T> extends AbstractExtension {
      *
      * @param enabled If true, then editor on selected row will have -selected style
      */
-    public void enableEditorSelecedStyle(boolean enabled) {
+    public void enableEditorSelectedStyle(boolean enabled) {
     	getState().enableSelectedStyle = enabled;
     }
     
