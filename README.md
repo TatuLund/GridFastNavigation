@@ -63,6 +63,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.5.1
+- Grid froze when last column was not editable, fixes issue #98
+
 ### Version 2.5.0
 - Fixed typo in method name, fixes issue #97
 - Fixed hidden column compensation logic, fixes issue #96
