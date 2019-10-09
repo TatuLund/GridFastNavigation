@@ -626,7 +626,7 @@ public class EditorStateManager {
                     int origCol = currentCol;
                     {
                         // Try going right first
-                        while (isDisabledColumn(currentCol)) {currentCol++;}
+                        while (isDisabledColumn(currentCol) && currentCol < grid.getVisibleColumns().size()) {currentCol++;}
                         if(currentCol < grid.getVisibleColumns().size()) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
@@ -638,7 +638,7 @@ public class EditorStateManager {
                         currentCol = origCol;
                         
                         // Try going left instead
-                        while (isDisabledColumn(currentCol)) {currentCol--;}
+                        while (isDisabledColumn(currentCol) && currentCol > -1) {currentCol--;}
                         if(currentCol >= 0) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
