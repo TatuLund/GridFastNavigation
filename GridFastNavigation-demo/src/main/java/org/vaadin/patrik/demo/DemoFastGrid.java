@@ -111,7 +111,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			this.getDataProvider().refreshAll();
 		},VaadinIcons.TRASH.getHtml()+" Delete",VaadinIcons.CHECK.getHtml()+" Confirm");
 		deleteButton.setHtmlContentAllowed(true);
-		this.addColumn(action -> true,deleteButton).setCaption("Action").setWidth(120).setHidable(true);
+		this.addColumn(action -> true,deleteButton).setId("delete").setCaption("Action").setWidth(120).setHidable(true);
 
 		// Open with F2
 		nav.addEditorOpenShortcut(KeyCode.F2);
@@ -200,35 +200,35 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		// Col1 simple string
 		Binding<DemoColumns, String> col1Binding = binder.forField(col1).asRequired("Empty value not accepted").bind(DemoColumns::getCol1,
 				DemoColumns::setCol1);
-		this.addColumn(DemoColumns::getCol1).setCaption("Col1").setExpandRatio(1).setEditorBinding(col1Binding);
+		this.addColumn(DemoColumns::getCol1).setCaption("Col1").setExpandRatio(1).setEditorBinding(col1Binding);	
 		
 		// Col2 non-editable string
-		this.addColumn(DemoColumns::getCol2).setCaption("No Edits").setHidable(true).setWidth(150);
+		this.addColumn(DemoColumns::getCol2).setCaption("No Edits").setId("noedit").setHidable(true).setWidth(150);
 
 		// Col3 Integer
 		Binding<DemoColumns, Integer> col3Binding = binder.forField(col3).withNullRepresentation("")
 				.withConverter(new StringToIntegerConverter("Must enter a number")).withValidator(new IntegerRangeValidator("Input integer between 0 and 10",0,10))
 				.bind(DemoColumns::getCol3, DemoColumns::setCol3);
-		this.addColumn(DemoColumns::getCol3).setCaption("Integer").setWidth(150).setEditorBinding(col3Binding);
+		this.addColumn(DemoColumns::getCol3).setCaption("Integer").setHidable(true).setWidth(150).setEditorBinding(col3Binding);
 
 		// Col4 Float
 		Binding<DemoColumns, Double> col4Binding = binder.forField(col4).withNullRepresentation("")
 				.withConverter(col4.getConverter("Must enter a number"))
 //				.withConverter(new StringToFloatConverter("Must enter a number"))
 				.bind(DemoColumns::getCol4, DemoColumns::setCol4);
-		this.addColumn(DemoColumns::getCol4).setCaption("Float").setWidth(100).setEditorBinding(col4Binding);
+		this.addColumn(DemoColumns::getCol4).setCaption("Float").setHidable(true).setWidth(100).setEditorBinding(col4Binding);
 
 		// Col 5 Integer
 		Binding<DemoColumns, Integer> col5Binding = binder.forField(col5).withNullRepresentation("")
 				.withConverter(new StringToIntegerConverter("Must enter a number")).withValidator(new IntegerRangeValidator("Input integer between 0 and 10",0,10))
 				.bind(DemoColumns::getCol5, DemoColumns::setCol5);
-		this.addColumn(DemoColumns::getCol5).setCaption("Integer (2)").setWidth(100).setEditorBinding(col5Binding);
+		this.addColumn(DemoColumns::getCol5).setCaption("Integer (2)").setHidable(true).setWidth(100).setEditorBinding(col5Binding);
 		
 		// Col6 Integer(3)
 		Binding<DemoColumns, Integer> col6Binding = binder.forField(col6).withNullRepresentation("")
 				.withConverter(new StringToIntegerConverter("Must enter a number")).withValidator(new IntegerRangeValidator("Input integer between 0 and 10",0,10))
 				.bind(DemoColumns::getCol6, DemoColumns::setCol6);
-		this.addColumn(DemoColumns::getCol6).setId("col6").setCaption("Col6").setWidth(100).setEditorBinding(col6Binding);
+		this.addColumn(DemoColumns::getCol6).setId("col6").setCaption("Col6").setHidable(true).setWidth(100).setEditorBinding(col6Binding);
 
 		// Col 7 DateTime
 		// Need a zoneoffset for datetimefield
@@ -255,12 +255,12 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		// Col 9 Boolean
 		Binding<DemoColumns, Boolean> col10Binding = binder.forField(col9).bind(DemoColumns::getCol9,
 				DemoColumns::setCol9);
-		this.addColumn(DemoColumns::getCol9).setCaption("Boolean").setWidth(150).setEditorBinding(col10Binding);
+		this.addColumn(DemoColumns::getCol9).setCaption("Boolean").setHidable(true).setWidth(150).setEditorBinding(col10Binding);
 
 		// Col 10 Combobox.
 		Binding<DemoColumns, String> col11Binding = binder.forField(col10).bind(DemoColumns::getCol10,
 				DemoColumns::setCol10);
-		this.addColumn(DemoColumns::getCol10).setCaption("Combobox").setWidth(150).setEditorBinding(col11Binding);
+		this.addColumn(DemoColumns::getCol10).setCaption("Combobox").setHidable(true).setWidth(150).setEditorBinding(col11Binding);
 
 		for (int i = 0; i < 5; ++i) {
 			demoList.add(new DemoColumns());
@@ -272,6 +272,22 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		this.setSizeFull();
 //		nav.setFocusedCell(2, 2, true);
 		this.select(demoList.get(2));
+		
+		this.appendHeaderRow();
+		for (Column<DemoColumns, ?> col : this.getColumns()) {
+			if (col.getId() == null || (col.getId() != null && !(col.getId().equals("noedit") || col.getId().equals("delete")))) {
+				CheckBox editable = new CheckBox();
+				editable.setValue(true);
+				editable.addValueChangeListener(event -> {
+					if (event.getValue()) {
+						col.setEditable(true);
+					} else {
+						col.setEditable(false);
+					}
+				});
+				this.getHeaderRow(1).getCell(col).setComponent(editable);
+			}
+		}
 	}
 
 	// Add a blank row to the grid and tell the grid to refresh itself showing
