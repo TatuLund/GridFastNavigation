@@ -63,6 +63,10 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.5.2
+- Added method to open Editor at row X in column Y
+- Fix: Disabled column styles were not applied dynamically
+
 ### Version 2.5.1
 - Grid froze when last column was not editable, fixes issue #98
 

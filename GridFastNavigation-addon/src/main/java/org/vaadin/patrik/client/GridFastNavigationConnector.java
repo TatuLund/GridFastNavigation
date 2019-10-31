@@ -157,6 +157,16 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
 					@Override
 					public void closeEditor() {
 						editorManager.closeEditor(true);
+					}
+
+					@Override
+					public void editRow(int rowIndex, int columnIndexDOM) {
+						editorManager.openEditor(rowIndex, columnIndexDOM);
+//						grid.getEditor().editRow(rowIndex, columnIndexDOM);						
+//		                editorManager.clearDisabledColumns();
+//		                if(getState().hasEditorOpenListener) {
+//		                    rpc.editorOpened(rowIndex, columnIndexDOM, -1);
+//		                }
 					}                    
                 });
 

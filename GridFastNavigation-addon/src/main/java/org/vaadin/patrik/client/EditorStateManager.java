@@ -585,6 +585,9 @@ public class EditorStateManager {
                 // Then disable the ones that should be disabled
                 for (int column : disabledColumns) {
                     EditorWidgets.disable(getEditorWidgetForColumn(column,false));
+            		Element el = (Element) GridViolators.getEditorCellWrapper(grid).getChild(column);
+            		el.addClassName("not-editable");
+            		el.addClassName("v-grid-cell");
                 }
                 
                 Widget editorWidget = getCurrentEditorWidget();

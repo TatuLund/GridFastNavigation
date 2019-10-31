@@ -18,5 +18,7 @@ public interface FastNavigationClientRPC extends ClientRpc {
     void setFocusedCell(int row, int col, boolean wait);
     
     void closeEditor();
-    
+
+    void editRow(int rowIndex, int columnIndexDOM);
+
 }

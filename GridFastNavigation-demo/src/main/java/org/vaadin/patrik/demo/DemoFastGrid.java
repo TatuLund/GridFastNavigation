@@ -65,6 +65,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 		bindColumnsToEditor();
 	
+//		nav.editRow(1, 3);
 	}
 
 	private void initNavigation() {
@@ -153,9 +154,11 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addEditorOpenListener(event ->  {
 			// Uncomment to demonstrate conditional row editing			
 //			if (((DemoColumns) event.getItem()).getCol9()) event.disableAllColumns();
+			// Or				
+//			event.disableColumns(9);
             int row = event.getRow();
 			lastEditedRow = row;
-			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumnIndex());
+			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumnIndex());			
 		});
 		messageLog.writeOutput("Added editor open listener");
 
@@ -279,10 +282,12 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 				CheckBox editable = new CheckBox();
 				editable.setValue(true);
 				editable.addValueChangeListener(event -> {
-					if (event.getValue()) {
-						col.setEditable(true);
-					} else {
-						col.setEditable(false);
+					if (!getEditor().isOpen()) {
+						if (event.getValue()) {
+							col.setEditable(true);
+						} else {
+							col.setEditable(false);
+						}
 					}
 				});
 				this.getHeaderRow(1).getCell(col).setComponent(editable);
@@ -317,6 +322,10 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 
 	public void resetFocus() {
 		nav.setFocusedCell(0, 1, true);
+	}
+
+	public void openEditor() {
+		nav.editRow(1, 3);		
 	}
 
 }

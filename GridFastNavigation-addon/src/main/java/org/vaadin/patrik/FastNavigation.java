@@ -747,4 +747,16 @@ public class FastNavigation<T> extends AbstractExtension {
 		this.offsetHelper = offsetHelper;
 	}
 
+	/**
+	 * Open editor on row rowIndex
+	 * 
+	 * @since 2.5.2
+	 * 
+	 * @param rowIndex Row to edit
+	 * @param columnIndex Target column, if disabled will skip to next enabled
+	 */
+	public void editRow(int rowIndex, int columnIndex) {
+    	getRPC().editRow(rowIndex, columnIndex);		
+	}
+	
 }

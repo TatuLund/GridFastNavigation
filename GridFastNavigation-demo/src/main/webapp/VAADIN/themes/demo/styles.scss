@@ -21,6 +21,29 @@ $v-grid-header-background-color: #20a020;
 		background-repeat: no-repeat;
 	}
 	
+
+	.v-grid-row.red > td {
+		color: red;
+	}
+
+	.v-grid-editor-cells {
+		.not-editable.v-grid-cell {
+    		color: white !important;
+			.v-textfield {
+				display: none;
+			}
+			.v-datefield {
+				display: none;
+			}
+			.v-checkbox {
+				display: none;
+			}		
+			.v-filterselect {
+				display: none;
+			}
+		}		
+	}
+		
 	.v-grid {
 		.v-grid-row-selected > td {
    			color: black !important;

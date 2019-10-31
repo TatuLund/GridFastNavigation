@@ -123,8 +123,16 @@ public class DemoUI extends UI {
         	demoGrid.resetFocus();
         });
 
+        Button openEditorButton = new Button();
+        openEditorButton.setIcon(VaadinIcons.INPUT);
+        openEditorButton.setDescription("Reset focust to 0,1");
+        openEditorButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        openEditorButton.addClickListener(e->{
+        	demoGrid.openEditor();
+        });
+        
         HorizontalLayout buttons = new HorizontalLayout();
-		buttons.addComponents(addButton,rowValidationButton,rowOpenClickButton,rowOpenByTypingButton,disableGridEditButton,moveSelectionButton,resetFocusButton);
+		buttons.addComponents(addButton,rowValidationButton,rowOpenClickButton,rowOpenByTypingButton,disableGridEditButton,moveSelectionButton,resetFocusButton,openEditorButton);
 		
 		layout.setMargin(true);
 		layout.setSpacing(true);
