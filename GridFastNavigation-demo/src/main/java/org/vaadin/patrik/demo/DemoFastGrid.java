@@ -102,7 +102,8 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addCellEditListener(event -> {
 			messageLog.writeOutput("Changed '" + event.getOldData() + "' -> '" + event.getNewData()+ "'");			
 		});
-		nav.enableEditorSelectedStyle(true);
+		// Obsolete in Vaadin 8.9+
+//		nav.enableEditorSelectedStyle(true);
 		
 		DeleteButtonRenderer<DemoColumns> deleteButton = new DeleteButtonRenderer<DemoColumns>(clickEvent -> {
 			if (this.getEditor().isOpen())
@@ -288,6 +289,8 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 						} else {
 							col.setEditable(false);
 						}
+					} else if (event.isUserOriginated()) {
+						editable.setValue(!editable.getValue());
 					}
 				});
 				this.getHeaderRow(1).getCell(col).setComponent(editable);

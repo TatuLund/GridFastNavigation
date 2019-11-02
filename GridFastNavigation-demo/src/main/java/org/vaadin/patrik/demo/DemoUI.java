@@ -81,6 +81,14 @@ public class DemoUI extends UI {
 		});
 		rowOpenByTypingButton.setDescription("Toggle openEditorOnTyping");
 
+        Button openEditorButton = new Button();
+        openEditorButton.setIcon(VaadinIcons.INPUT);
+        openEditorButton.setDescription("Open editor at 1,3");
+        openEditorButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
+        openEditorButton.addClickListener(e->{
+        	demoGrid.openEditor();
+        });
+        		
         Button disableGridEditButton = new Button();
         disableGridEditButton.setIcon(VaadinIcons.PENCIL);
 		disableGridEditButton.setDescription("Toggle Grid Editing");
@@ -91,9 +99,11 @@ public class DemoUI extends UI {
         			demoGrid.getEditor().cancel();
         		}
         		demoGrid.getEditor().setEnabled(false);
+        		openEditorButton.setEnabled(false);
         		disableGridEditButton.setStyleName(ValoTheme.BUTTON_QUIET);
         	} else {
         		demoGrid.getEditor().setEnabled(true);
+        		openEditorButton.setEnabled(true);
         		disableGridEditButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
         	}
         });
@@ -123,14 +133,6 @@ public class DemoUI extends UI {
         	demoGrid.resetFocus();
         });
 
-        Button openEditorButton = new Button();
-        openEditorButton.setIcon(VaadinIcons.INPUT);
-        openEditorButton.setDescription("Reset focust to 0,1");
-        openEditorButton.setStyleName(ValoTheme.BUTTON_FRIENDLY);
-        openEditorButton.addClickListener(e->{
-        	demoGrid.openEditor();
-        });
-        
         HorizontalLayout buttons = new HorizontalLayout();
 		buttons.addComponents(addButton,rowValidationButton,rowOpenClickButton,rowOpenByTypingButton,disableGridEditButton,moveSelectionButton,resetFocusButton,openEditorButton);
 		

@@ -384,6 +384,7 @@ public class FastNavigation<T> extends AbstractExtension {
      * if enter key is set to change column instead of row.
      * 
      * @param enable Boolean value
+     * @throws IllegalStateException if enter key is set to change column instead of row.
      */
     public void setChangeColumnAfterLastRow(boolean enable) {
     	if (getState().changeColumnOnEnter) throw new IllegalStateException("Cannot set change column after last row if enter is set to change column");
@@ -754,8 +755,17 @@ public class FastNavigation<T> extends AbstractExtension {
 	 * 
 	 * @param rowIndex Row to edit
 	 * @param columnIndex Target column, if disabled will skip to next enabled
+     * @throws IllegalArgumentException if rowIndex or columnIndex is not in acceptable range
+     * @throws IllegalStateException if editor is not enabled
 	 */
 	public void editRow(int rowIndex, int columnIndex) {
+		if (columnIndex > grid.getColumns().size() || columnIndex < 0) {
+			throw new IllegalArgumentException("Column index "+columnIndex+" is not withing boundaries");
+		} else if (rowIndex > grid.getDataCommunicator().getDataProviderSize() || rowIndex < 0) {
+			throw new IllegalArgumentException("Row index "+rowIndex+" is not withing boundaries");			
+		} else if (!grid.getEditor().isEnabled()) {
+			throw new IllegalStateException("Editor is not enabled, cannot open");
+		}
     	getRPC().editRow(rowIndex, columnIndex);		
 	}
 	

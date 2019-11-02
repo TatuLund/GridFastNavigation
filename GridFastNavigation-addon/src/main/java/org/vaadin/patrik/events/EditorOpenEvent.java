@@ -57,6 +57,11 @@ public class EditorOpenEvent<T> extends Component.Event {
      */
     public void disableColumns(Integer... columns) {
         disabledCols = columns;
+        for (int col : disabledCols) {
+        	if (col < 0 || col > grid.getColumns().size()) {
+        		throw new IllegalArgumentException("Column index "+col+" out of bounds");
+        	}
+        }
     }
 
     /**
