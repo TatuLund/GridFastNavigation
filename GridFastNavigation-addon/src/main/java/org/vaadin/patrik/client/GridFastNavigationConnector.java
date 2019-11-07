@@ -161,7 +161,9 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
 
 					@Override
 					public void editRow(int rowIndex, int columnIndexDOM) {
-						editorManager.openEditor(rowIndex, columnIndexDOM);
+	                    Scheduler.get().scheduleDeferred(() -> {
+	                    	editorManager.openEditor(rowIndex, columnIndexDOM);
+	                    });
 					}                    
                 });
 

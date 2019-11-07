@@ -310,6 +310,8 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		demoList.add(new DemoColumns());
 		this.recalculateColumnWidths();
 		this.getDataProvider().refreshAll();
+		int row = this.getDataCommunicator().getDataProviderSize()-1;
+		nav.editRow(row,0);
 	}
 
 	public FastNavigation getNavigation() {
