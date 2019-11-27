@@ -36,8 +36,7 @@ public class DemoUI extends UI {
 		
 		MessageGrid messageGrid = new MessageGrid();
 		DemoFastGrid demoGrid = new DemoFastGrid(messageGrid);
-	
-		
+			
 		Button clearButton = new Button("Clear");
 		clearButton.addClickListener(e ->  {
 			messageGrid.clear();

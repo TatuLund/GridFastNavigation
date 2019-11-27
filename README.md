@@ -63,6 +63,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.5.5
+- Fixed NPE in when using Frozen columns.
+
 ### Version 2.5.4
 - Fixed timing issue if editRow(row,col) was called during Grid is updating after dataProvider.refreshAll()
 

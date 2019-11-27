@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.vaadin.grid.cellrenderers.action.DeleteButtonRenderer;
 import org.vaadin.patrik.FastNavigation;
@@ -18,19 +17,14 @@ import org.vaadin.ui.NumberField;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.Binder.Binding;
-import com.vaadin.data.ValueProvider;
 import com.vaadin.data.converter.LocalDateTimeToDateConverter;
 import com.vaadin.data.converter.LocalDateToDateConverter;
-import com.vaadin.data.converter.StringToFloatConverter;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.datefield.DateTimeResolution;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.DateTimeField;
 import com.vaadin.ui.Grid;
@@ -156,7 +150,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			// Uncomment to demonstrate conditional row editing			
 //			if (((DemoColumns) event.getItem()).getCol9()) event.disableAllColumns();
 			// Or				
-//			event.disableColumns(9);
+//			event.disableColumns(1);
             int row = event.getRow();
 			lastEditedRow = row;
 			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumnIndex());			
@@ -191,10 +185,10 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		col9.setDescription("Selecting this will disable Col6");
 		PrefixComboBox<String> col10 = new PrefixComboBox<>();
         List<String> items = new ArrayList<>(Arrays.asList("small", "medium", "large"));
-        col10.setNewItemProvider(value -> {
-            items.add(value);
-            return Optional.ofNullable(value);
-        });
+//        col10.setNewItemProvider(value -> {
+//            items.add(value);
+//            return Optional.ofNullable(value);
+//        });
         col10.setEmptySelectionCaption("unsized");
         
 		col10.setDataProvider(new ListDataProvider<String>(items));

@@ -25,9 +25,9 @@ $v-grid-header-background-color: #20a020;
 	.v-grid-row.red > td {
 		color: red;
 	}
-
+	
 	.v-grid-editor-cells {
-		.not-editable.v-grid-cell {
+		.not-editable {
     		color: white !important;
 			.v-textfield {
 				display: none;
@@ -43,7 +43,7 @@ $v-grid-header-background-color: #20a020;
 			}
 		}		
 	}
-		
+			
 	.v-grid {
 		.v-grid-row-selected > td {
    			color: black !important;
