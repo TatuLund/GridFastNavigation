@@ -63,6 +63,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.5.6
+- Fixed column sizing issues in when using Frozen columns.
+
 ### Version 2.5.5
 - Fixed NPE in when using Frozen columns.
 

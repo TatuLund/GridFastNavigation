@@ -270,6 +270,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		this.setSizeFull();
 //		nav.setFocusedCell(2, 2, true);
 		this.select(demoList.get(2));
+//		this.setFrozenColumnCount(2);
 		
 		this.appendHeaderRow();
 		for (Column<DemoColumns, ?> col : this.getColumns()) {

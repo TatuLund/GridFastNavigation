@@ -585,7 +585,13 @@ public class EditorStateManager {
                 // Then disable the ones that should be disabled
                 for (int column : disabledColumns) {
                     EditorWidgets.disable(getEditorWidgetForColumn(column,false));
-            		Element el = (Element) GridViolators.getEditorCellWrapper(grid).getChild(column);
+                    Element el = null;
+                    int frozenColumns = grid.getFrozenColumnCount();
+                    if (column < frozenColumns) {
+                    	el = (Element) GridViolators.getFrozenCellWrapper(grid).getChild(column);
+            		} else {
+                    	el = (Element) GridViolators.getEditorCellWrapper(grid).getChild(column);            			
+            		}
             		if (el != null) {
             			el.addClassName("not-editable");
             		}

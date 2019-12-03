@@ -16,6 +16,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.BrowserInfo;
@@ -59,7 +60,44 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
 		}
 		return ary;
 	}
-    
+
+	private void doEditorScrollOffsetFix() {
+		try {
+			DivElement cellWrapper = GridViolators.getEditorCellWrapper(grid);
+			if (cellWrapper == null) return; 
+    		DivElement frozenCellWrapper = GridViolators.getFrozenCellWrapper(grid);
+    		int offset = 0;
+    		if (grid.getSelectionColumn().isPresent()) offset = 1;
+			double scrollLeft = grid.getScrollLeft();
+			int row = grid.getEditor().getRow();
+			TableRowElement rowElement = grid.getEscalator().getBody().getRowElement(row);
+			int rowLeft = Math.abs(rowElement.getAbsoluteLeft());
+			int editorLeft = Math.abs(cellWrapper.getAbsoluteLeft());
+			int frozenColumns = grid.getFrozenColumnCount();
+        	int frozenWidth = 0;
+        	for (int i=0;i<frozenColumns;i++) {
+        		Element element = (Element) frozenCellWrapper.getChild(i);
+        		if (element == null) break;
+        		double width = grid.getVisibleColumns().get(i+offset).getWidthActual();
+        		frozenWidth += width;
+        	}
+			if (scrollLeft > 0 && frozenColumns > 0) {
+				cellWrapper.getStyle().setLeft((frozenWidth - scrollLeft),
+						Style.Unit.PX);				
+			} else {
+				if (editorLeft != rowLeft) {
+					cellWrapper.getStyle().setLeft(editorLeft - (scrollLeft + rowLeft),
+						Style.Unit.PX);
+				}
+			}
+        } catch (IllegalStateException e) {
+            // IllegalStateException may occur if user has scrolled Grid so
+            // that Escalator has updated, and row under Editor is no longer
+            // there
+		} catch (IndexOutOfBoundsException e) {
+		}        
+	}
+	
     @Override
     @SuppressWarnings("unchecked")
     protected void extend(ServerConnector target) {
@@ -75,32 +113,72 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         		int offset = 0;
         		if (grid.getSelectionColumn().isPresent()) offset = 1;
         		DivElement editorOverlay = GridViolators.getEditorOverlay(grid);
+        		if (editorOverlay == null) return;
+        		DivElement frozenCellWrapper = GridViolators.getFrozenCellWrapper(grid);
         		Double scrollerWidth = getVerticalScrollBarWidth();
         		Double gridWidth = (double) grid.getOffsetWidth();
         		if (scrollerWidth > 0.0) gridWidth = gridWidth - scrollerWidth; 
         		editorOverlay.getStyle().setWidth(gridWidth, Style.Unit.PX);
         		DivElement cellWrapper = GridViolators.getEditorCellWrapper(grid);
+        		int frozenColumns = grid.getFrozenColumnCount();
             	for (int i=0;i<cols;i++) {
             		Element element = (Element) cellWrapper.getChild(i);
-            		double width = grid.getVisibleColumns().get(i+offset).getWidthActual();
+            		if (element == null) break;
+            		double width = grid.getVisibleColumns().get(i+offset+frozenColumns).getWidthActual();
             		element.getStyle().setWidth(width, Style.Unit.PX);
+            	}
+            	int frozenWidth = 0;
+            	for (int i=0;i<frozenColumns;i++) {
+            		Element element = (Element) frozenCellWrapper.getChild(i);
+            		if (element == null) break;
+            		double width = grid.getVisibleColumns().get(i+offset).getWidthActual();
+            		frozenWidth += width;
+            		element.getStyle().setWidth(width, Style.Unit.PX);
+            	}
+            	if (frozenColumns > 0) {
+    				cellWrapper.getStyle().setLeft((frozenWidth - grid.getScrollLeft()),
+    						Style.Unit.PX);				
             	}
             }
         };
         AnimationCallback editorColumnWidthFix = new AnimationCallback() {
             @Override
             public void execute(double timestamp) {
+        		DivElement cellWrapper = GridViolators.getEditorCellWrapper(grid);
+        		if (cellWrapper == null) return;
+        		DivElement frozenCellWrapper = GridViolators.getFrozenCellWrapper(grid);
         		int cols = grid.getVisibleColumns().size();
         		int offset = 0;
         		if (grid.getSelectionColumn().isPresent()) offset = 1;
-        		DivElement cellWrapper = GridViolators.getEditorCellWrapper(grid);
+        		int frozenColumns = grid.getFrozenColumnCount();
             	for (int i=0;i<cols;i++) {
             		Element element = (Element) cellWrapper.getChild(i);
-            		double width = grid.getVisibleColumns().get(i+offset).getWidthActual();
+            		if (element == null) break;
+            		double width = grid.getVisibleColumns().get(i+offset+frozenColumns).getWidthActual();
             		element.getStyle().setWidth(width, Style.Unit.PX);
+            	}
+            	int frozenWidth = 0;
+            	for (int i=0;i<frozenColumns;i++) {
+            		Element element = (Element) frozenCellWrapper.getChild(i);
+            		if (element == null) break;
+            		double width = grid.getVisibleColumns().get(i+offset).getWidthActual();
+            		frozenWidth += width;
+            		element.getStyle().setWidth(width, Style.Unit.PX);
+            	}
+            	if (frozenColumns > 0) {
+    				cellWrapper.getStyle().setLeft((frozenWidth - grid.getScrollLeft()),
+    						Style.Unit.PX);				
             	}
             }
         };
+
+        grid.addScrollHandler(event -> {
+        	if (grid.isEditorActive()) {
+        		Scheduler.get().scheduleFinally(() -> {
+            		doEditorScrollOffsetFix();        			
+        		});
+        	}        					        	
+        });        
         grid.addColumnVisibilityChangeHandler(event -> {
         	if (grid.isEditorActive()) {
         		GridViolators.redrawEditor(grid);
@@ -175,6 +253,9 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
                 if(getState().hasEditorOpenListener) {
                     rpc.editorOpened(row, col, lockId);
                 }
+        		Scheduler.get().scheduleFinally(() -> {
+            		doEditorScrollOffsetFix();        			
+        		});
             }
 
             @Override

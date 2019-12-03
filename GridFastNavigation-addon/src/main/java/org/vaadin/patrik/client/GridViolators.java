@@ -72,6 +72,11 @@ public class GridViolators {
 		return editor.@com.vaadin.client.widgets.Grid.Editor::editorOverlay;
 	}-*/;
 
+    public static native final DivElement getFrozenCellWrapper(Grid<?> grid) /*-{
+		var editor = grid.@com.vaadin.client.widgets.Grid::getEditor()();
+		return editor.@com.vaadin.client.widgets.Grid.Editor::frozenCellWrapper;
+	}-*/;
+
     public static native final DivElement getEditorErrorMessage(Grid<?> grid) /*-{
 		var editor = grid.@com.vaadin.client.widgets.Grid::getEditor()();
 		return editor.@com.vaadin.client.widgets.Grid.Editor::message;
