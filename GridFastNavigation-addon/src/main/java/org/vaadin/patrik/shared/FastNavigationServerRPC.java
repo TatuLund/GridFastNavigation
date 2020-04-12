@@ -7,14 +7,14 @@ import com.vaadin.shared.communication.ServerRpc;
  */
 public interface FastNavigationServerRPC extends ServerRpc {
     
-    void focusUpdated(int rowIndex, int colIndex);
+    void focusUpdated(int rowIndex, int colIndex, boolean isUserOriginated);
     
     void rowUpdated(int rowIndex, boolean moved);
 
     void cellUpdated(int rowIndex, int colIndex, String newData, String oldData, boolean moved);
     
-    void editorOpened(int rowIndex, int colIndex, int lockId);
-    
+    void editorOpened(int rowIndex, int colIndex, int lockId, int keyCode, boolean isUserOriginated);
+
     void editorClosed(int rowIndex, int colIndex, boolean wasCancelled);
     
     void clickOut();

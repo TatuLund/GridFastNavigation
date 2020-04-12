@@ -53,7 +53,7 @@ public class EditorStateManager {
     public interface EditorListener {
 
         void editorOpened(Grid<Object> grid, Editor<Object> editor,
-                int row, int col, int lockId);
+                int row, int col, int lockId, int keyCode, boolean isUserOriginated);
 
         void editorClosed(Grid<Object> grid, Editor<Object> editor, int row,
                 int col, boolean cancel);
@@ -112,7 +112,7 @@ public class EditorStateManager {
             if (open) {
                 final EventCellReference<?> cell = event.getCell();
                 event.getDomEvent().preventDefault();
-                openEditor(cell.getRowIndex(), cell.getColumnIndexDOM());
+                openEditor(cell.getRowIndex(), cell.getColumnIndexDOM(), key, true);
             }
             
             return open;
@@ -134,9 +134,9 @@ public class EditorStateManager {
             	saveContent();
             	int errorCol = hasValidationError();
             	if (errorCol > -1) {
-            		openEditor(cell.getRowIndex(), errorCol);
+            		openEditor(cell.getRowIndex(), errorCol, -1, true);
             	} else {
-            		openEditor(cell.getRowIndex(), cell.getColumnIndexDOM());
+            		openEditor(cell.getRowIndex(), cell.getColumnIndexDOM(), -1, true);
             	}
                 return true;
             }
@@ -210,7 +210,7 @@ public class EditorStateManager {
                     move = true;
                 }
                 
-                if (validationError == -1 && Keys.isRowChangeKey(key)) {
+                if (validationError == -1 && Keys.isRowChangeKey(key) && !Keys.isModifierKey(e)) {
                 	saveContent();
                 	int rowDelta = shift ? -1 : 1;
                     
@@ -279,7 +279,7 @@ public class EditorStateManager {
                   
                    	if (currentCol != targetCol || currentRow != targetRow) {
                        	triggerValueChange(event);
-                       	openEditor(targetRow, targetCol);
+                       	openEditor(targetRow, targetCol, e.getKeyCode(), true);
                    	}
                	} else if (rowValidation) {
                		// Grid's Editors editor request callback has a bug, that it clears all error indications, not 
@@ -640,7 +640,7 @@ public class EditorStateManager {
                         if(currentCol < grid.getVisibleColumns().size()) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
-                            openEditor(getFocusedRow(), currentCol);
+                            openEditor(getFocusedRow(), currentCol, -1, true);
                             return;
                         }
                         
@@ -652,7 +652,7 @@ public class EditorStateManager {
                         if(currentCol >= 0) {
                             // Move editor focus here
                             editorWidget = getEditorWidgetForColumn(currentCol);
-                            openEditor(getFocusedRow(), currentCol);
+                            openEditor(getFocusedRow(), currentCol, -1, true);
                             return;
                         }
                         
@@ -736,13 +736,13 @@ public class EditorStateManager {
         editorListeners.add(listener);
     }
 
-    private void notifyEditorOpened(int row, int col) {
+    private void notifyEditorOpened(int row, int col, int keyCode, boolean isUserOriginated) {
         int lock = 0;
         if(useExternalLocking) {
             lock = externalLocks.requestLock();
         }
         for (EditorListener l : editorListeners) {
-            l.editorOpened(grid, editor, row, col, lock);
+            l.editorOpened(grid, editor, row, col, lock, keyCode, isUserOriginated);
         }
     }
 
@@ -925,13 +925,13 @@ public class EditorStateManager {
     
     // Request opening the editor. This function should be used internally instead
     // of the direct editor.editRow() calls.
-    public void openEditor(int row, int col) {
-    	openEditor(row,col,true);
+    public void openEditor(int row, int col, int keyCode, boolean isUserOriginated) {
+    	openEditor(row, col, true, keyCode, isUserOriginated);
     }
     
     // Request opening the editor. This function should be used internally instead
     // of the direct editor.editRow() calls.
-    public void openEditor(int row, int col, boolean validate) {
+    public void openEditor(int row, int col, boolean validate, int keyCode, boolean isUserOriginated) {
         AnimationCallback validateCallback = new AnimationCallback() {
             @Override
             public void execute(double timestamp) {
@@ -943,7 +943,7 @@ public class EditorStateManager {
         if (GridViolators.isEditorReallyClosed(editor)) {
             editor.editRow(row,col);
             waitForEditorOpen();
-            notifyEditorOpened(row,col);
+            notifyEditorOpened(row, col, keyCode, isUserOriginated);
         } else {
             int oldRow = getFocusedRow();
 
@@ -951,7 +951,8 @@ public class EditorStateManager {
                 notifyEditorClosed(oldRow, col, false);
                 editor.editRow(row,col);
                 waitForEditorOpen();
-                notifyEditorOpened(row,col); // Trigger event after the editor has opened
+                // Trigger event after the editor has opened
+                notifyEditorOpened(row, col, keyCode, isUserOriginated);
             } else {
                 editor.editRow(row,col);
                 waitForEditorReady();
@@ -1078,7 +1079,7 @@ public class EditorStateManager {
 	
 	public void moveEditorToError() {
 		int errorCol = hasValidationError();
-		openEditor(getFocusedRow(),errorCol,false);		
+		openEditor(getFocusedRow(), errorCol, false, -1, true);		
 	}
 	
 	private boolean hasEditableColumns() {

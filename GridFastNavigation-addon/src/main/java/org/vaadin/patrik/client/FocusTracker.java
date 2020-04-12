@@ -15,7 +15,7 @@ public class FocusTracker {
 
     public interface FocusListener {
         public void focusMoved(int currentRow, int currentCol, int lastRow,
-                int lastCol);
+                int lastCol, boolean isUserOriginated);
     }
 
     private List<FocusListener> listeners;
@@ -26,6 +26,7 @@ public class FocusTracker {
     private int lastCol;
     private boolean run;
 	protected AnimationHandle handle;
+	private boolean isUserOriginated = true;
 
     public FocusTracker(Grid<?> g) {
         this.grid = g;
@@ -57,11 +58,16 @@ public class FocusTracker {
     	currentCol = -1;
         notifyFocusMoved();
     }
-    
+
+    public void wasProgrammatic() {
+    	isUserOriginated = false;
+    }
+
     private void notifyFocusMoved() {
         for (FocusListener l : listeners) {
-            l.focusMoved(currentRow, currentCol, lastRow, lastCol);
+            l.focusMoved(currentRow, currentCol, lastRow, lastCol, isUserOriginated);
         }
+        isUserOriginated = true;
     }
     
     public void addListener(FocusListener l) {

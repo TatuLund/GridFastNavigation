@@ -227,6 +227,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
 										}
 									}, 100);							
 								}
+								focusTracker.wasProgrammatic();
 								GridViolators.setFocusedCell(grid,row,col);		
 							}
 						});
@@ -240,7 +241,7 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
 					@Override
 					public void editRow(int rowIndex, int columnIndexDOM) {
 	                    Scheduler.get().scheduleDeferred(() -> {
-	                    	editorManager.openEditor(rowIndex, columnIndexDOM);
+	                    	editorManager.openEditor(rowIndex, columnIndexDOM, -1, false);
 	                    });
 					}                    
                 });
@@ -248,10 +249,10 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         editorManager.addListener(new EditorListener() {
             @Override
             public void editorOpened(Grid<Object> grid, Editor<Object> editor,
-                    int row, int col, int lockId) {
+                    int row, int col, int lockId, int keyCode, boolean isUserOriginated) {
                 editorManager.clearDisabledColumns();
                 if(getState().hasEditorOpenListener) {
-                    rpc.editorOpened(row, col, lockId);
+                    rpc.editorOpened(row, col, lockId, keyCode, isUserOriginated);
                 }
         		Scheduler.get().scheduleFinally(() -> {
             		doEditorScrollOffsetFix();        			
@@ -291,11 +292,11 @@ public class GridFastNavigationConnector extends AbstractExtensionConnector {
         focusTracker.addListener(new FocusListener() {
             @Override
             public void focusMoved(int currentRow, int currentCol, int lastRow,
-                    int lastCol) {
+                    int lastCol, boolean isUserOriginated) {
             	editorManager.notifyIfDataChanged(lastRow, lastCol, lastRow != currentRow);
             	editorManager.saveOldContent(currentCol);
                 if(getState().hasFocusListener) {
-                    rpc.focusUpdated(currentRow, currentCol);
+                    rpc.focusUpdated(currentRow, currentCol, isUserOriginated);
                 }
             }
         });

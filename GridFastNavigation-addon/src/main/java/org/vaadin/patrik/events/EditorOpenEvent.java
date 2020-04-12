@@ -23,15 +23,30 @@ public class EditorOpenEvent<T> extends Component.Event {
     private T item;
     private Integer[] disabledCols;
     private Grid<T> grid;
+	private int keyCode;
+	private boolean isUserOriginated;
     
-    public EditorOpenEvent(Component source, int row, int col, T item) {
+    public EditorOpenEvent(Component source, int row, int col, T item, int keyCode, boolean isUserOriginated) {
         super(source);
         rowIndex = row;
         colIndex = col;
         this.item = item;
-        grid = (Grid<T>) source;
+        this.keyCode = keyCode;
+        this.isUserOriginated = isUserOriginated;
+        grid = (Grid<T>) source;        
     }
 
+    /**
+     * Get key code of the shortcut or key that triggered the opening of the Editor. 
+     * 
+     * @return Key code or -1 if no key event was associated with this opening.
+     * 
+     * @since 2.6.0
+     */
+    public int getKeyCode() {
+        return keyCode;
+    }    
+    
     /**
      * Get index of the row where editor was opened
      * 
@@ -99,5 +114,16 @@ public class EditorOpenEvent<T> extends Component.Event {
      */
 	public T getItem() {
 		return item;
+	}
+
+    /**
+     * Returns true if opening was done via UI, false if opened via editRow method
+     * 
+     * @return boolean value
+     * 
+     * @since 2.6.0
+     */
+	public boolean isUserOriginated() {
+		return isUserOriginated;
 	}
 }

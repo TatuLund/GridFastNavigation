@@ -225,7 +225,7 @@ public class FastNavigation<T> extends AbstractExtension {
             }
 
             @Override
-            public void focusUpdated(int rowIndex, int colIndex) {
+            public void focusUpdated(int rowIndex, int colIndex, boolean isUserOriginated) {
             	T item = getItemAt(rowIndex);
             	int offset = offsetHelper.calculateOffset(g); 
             	colIndex = colIndex - offset; // apply offset based on selection mode
@@ -236,7 +236,7 @@ public class FastNavigation<T> extends AbstractExtension {
                 if (hasCellFocusListener && (rowIndex != lastFocusedRow || colIndex != lastFocusedCol)) {
                     cellFocusListeners.dispatch(new CellFocusEvent<T>(grid, rowIndex, colIndex,
                             lastFocusedRow != rowIndex,
-                            lastFocusedCol != colIndex, item));
+                            lastFocusedCol != colIndex, item, isUserOriginated));
                 }
                 
                 lastFocusedRow = rowIndex;
@@ -244,14 +244,14 @@ public class FastNavigation<T> extends AbstractExtension {
             }
 
             @Override
-            public void editorOpened(int rowIndex, int colIndex, int lockId) {
+            public void editorOpened(int rowIndex, int colIndex, int lockId, int keyCode, boolean isUserOriginated) {
             	T item = getItemAt(rowIndex);
             	int offset = offsetHelper.calculateOffset(grid);
             	previousEditedItem = editedItem;
             	previousEditedRow = editedRow;
             	editedItem = item;
             	editedRow = rowIndex;
-                EditorOpenEvent<T> ev = new EditorOpenEvent<>(grid, rowIndex, colIndex - offset, item);
+                EditorOpenEvent<T> ev = new EditorOpenEvent<>(grid, rowIndex, colIndex - offset, item, keyCode, isUserOriginated);
                 editorOpenListeners.dispatch(ev);
                 // Update disabled columns or readonly fields status if changed dynamically
                 ArrayList<Integer> disabledColumns = new ArrayList<Integer>();

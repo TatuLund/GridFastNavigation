@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.user.client.Event;
 
 public final class Keys {
     private static final Set<Integer> alphaNumSet;
@@ -116,4 +117,15 @@ public final class Keys {
     public static boolean isColumnChangeKey(int keyCode) {
         return colChangeKeys.contains(keyCode);
     }
+
+
+    /**
+     * Test if key event contained a mofifier key (i.e. Ctrl, Shift or Alt)
+     * 
+     * @param event DOM Event
+     * @return true if key event contained modifier key
+     */
+	public static boolean isModifierKey(Event event) {
+		return event.getShiftKey() || event.getCtrlKey() || event.getAltKey();
+	}    
 }

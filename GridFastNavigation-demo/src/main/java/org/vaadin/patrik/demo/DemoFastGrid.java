@@ -58,7 +58,7 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		this.getEditor().setBuffered(false);
 
 		bindColumnsToEditor();
-	
+
 //		nav.editRow(1, 3);
 	}
 
@@ -135,7 +135,8 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 		nav.addCellFocusListener(event -> {
 			int row = event.getRow();
 			int col = event.getColumnIndex();
-			messageLog.writeOutput("Focus moved to cell [" + row + ", " + col + " ]");			
+			boolean userOriginated = event.isUserOriginated();
+			messageLog.writeOutput("Focus moved to cell [" + row + ", " + col + " ]" + " from UI: "+userOriginated);			
 //			if (event.wasRowChanged() && this.getEditor().isOpen()) {
 //				this.getEditor().cancel();
 //				messageLog.writeOutput("Row was changed");
@@ -152,8 +153,10 @@ public class DemoFastGrid extends Grid<DemoColumns> {
 			// Or				
 //			event.disableColumns(1);
             int row = event.getRow();
+			boolean userOriginated = event.isUserOriginated();
+			int keyCode = event.getKeyCode();
 			lastEditedRow = row;
-			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumnIndex());			
+			messageLog.writeOutput("Editor opened on row " + row + " at column " + event.getColumnIndex()+ " keyCode: "+keyCode+" from UI: "+userOriginated);			
 		});
 		messageLog.writeOutput("Added editor open listener");
 

@@ -20,14 +20,16 @@ public class CellFocusEvent<T> extends Component.Event {
     private boolean rowChanged;
     private boolean colChanged;
     private T item;
+    private boolean isUserOriginated;
     
-    public CellFocusEvent(Component source, int row, int col, boolean rowChanged, boolean colChanged, T item) {
+    public CellFocusEvent(Component source, int row, int col, boolean rowChanged, boolean colChanged, T item, boolean isUserOriginated) {
         super(source);
         this.row = row;
         this.col = col;
         this.item = item;
         this.rowChanged = rowChanged;
         this.colChanged = colChanged;
+        this.isUserOriginated = isUserOriginated;
         Grid<T> grid = (Grid<T>) source;
     }
 
@@ -78,4 +80,16 @@ public class CellFocusEvent<T> extends Component.Event {
 		return item;
 	}
 
+    /**
+     * Returns true if focus changed via UI, false if opened via setFocusedCell method
+     * 
+     * @see org.vaadin.patrik.FastNavigation#setFocusedCell(int, int)
+     * 
+     * @return boolean value
+     * 
+     * @since 2.6.0
+     */
+	public boolean isUserOriginated() {
+		return isUserOriginated;
+	}
 }
