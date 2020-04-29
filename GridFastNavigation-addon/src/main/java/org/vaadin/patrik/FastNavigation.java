@@ -1,6 +1,7 @@
 package org.vaadin.patrik;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.vaadin.patrik.events.CellEditEvent;
@@ -192,7 +193,10 @@ public class FastNavigation<T> extends AbstractExtension {
         	private T getItemAt(int rowIndex) {
         		T myBean = null;
         		if (rowIndex >= 0 && g.getDataCommunicator().getDataProviderSize() > 0) {
-        			myBean = g.getDataCommunicator().fetchItemsWithRange(rowIndex, 1).get(0);
+        			List<T> beanList = g.getDataCommunicator().fetchItemsWithRange(rowIndex, 1);
+        			if (!beanList.isEmpty()) {
+        			    myBean = beanList.get(0);
+        			}
         		}
         		return myBean;
         	}

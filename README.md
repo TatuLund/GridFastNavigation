@@ -63,6 +63,14 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.6.1
+- Fixed possible issue when there is empty data set in grid
+
+### Version 2.6.0
+- Do not change row if Alt Shift or Ctrl pressed (see issue #102)
+- Added getKeyCode to EditorOpenEvent (see issue #101)
+- Added isUserOriginated to CellFocusEvent and EditorOpenEvent (see issue #99)
+
 ### Version 2.5.6
 - Fixed column sizing issues in when using Frozen columns.
 
