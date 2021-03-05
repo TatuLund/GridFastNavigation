@@ -63,6 +63,9 @@ Debugging client side code in the GridFastNavigation-demo project:
  
 ## Release notes
 
+### Version 2.6.3
+- Fix editor column resizing in multiselect mode
+
 ### Version 2.6.1
 - Fixed possible issue when there is empty data set in grid
 
