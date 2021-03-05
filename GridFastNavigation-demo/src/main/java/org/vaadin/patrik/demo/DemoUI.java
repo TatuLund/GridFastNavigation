@@ -10,6 +10,7 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.HorizontalLayout;
@@ -33,7 +34,7 @@ public class DemoUI extends UI {
 	protected void init(VaadinRequest vaadinRequest) {
 		final VerticalLayout layout = new VerticalLayout();
 		layout.setSizeFull();
-		
+
 		MessageGrid messageGrid = new MessageGrid();
 		DemoFastGrid demoGrid = new DemoFastGrid(messageGrid);
 			
